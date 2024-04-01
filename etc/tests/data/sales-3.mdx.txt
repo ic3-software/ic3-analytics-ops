@@ -1,0 +1,7 @@
+// pages: #MEASURES
+
+select
+  [Year].[Year].[2010] on 0
+  [Customers].[Geography].[Region] on 1
+  { [Measures].[Amount], [Measures].[Amount MIN], [Measures].[Amount MAX] } on "#MEASURES"
+from [Sales]

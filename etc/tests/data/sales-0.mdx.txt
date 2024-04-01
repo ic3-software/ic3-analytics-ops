@@ -1,0 +1,2 @@
+select TopCount( [Customers].[Geography].[Region], 3, [Measures].[Count] ) on 0
+from [Sales]

@@ -1,0 +1,10 @@
+// NaN, +/-Infinity
+
+with
+  NaN  as J!Double.NaN
+  InfP as J!Double.POSITIVE_INFINITY
+  InfN as J!Double.NEGATIVE_INFINITY
+
+select
+  { NaN, InfP, InfN } on 0
+from [Sales]

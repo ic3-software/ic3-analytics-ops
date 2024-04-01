@@ -1,0 +1,9 @@
+// TIDYPOSTPROCESSOR
+
+select
+  { [Measures].[Amount], [Measures].[Amount MIN], [Measures].[Amount MAX] } on 0
+  [Customers].[Geography].[Region] on 1
+from [Sales]
+
+TIDYPOSTPROCESSOR ADD_TO_RESULT MdxResult()
+TIDYPOSTPROCESSOR MultiLinearRegression(true)

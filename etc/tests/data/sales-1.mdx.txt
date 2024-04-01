@@ -1,0 +1,2 @@
+select from [Sales]
+filterby [Customers].[Geography].[Region].[Europe]

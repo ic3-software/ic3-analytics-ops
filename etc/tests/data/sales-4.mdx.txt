@@ -1,0 +1,3 @@
+// DRILLTHROUGH
+
+drillthrough maxrows 10 select from [Sales]
