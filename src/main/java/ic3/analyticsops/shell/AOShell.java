@@ -5,12 +5,16 @@ import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestContext;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOStringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
 public class AOShell
 {
@@ -22,12 +26,32 @@ public class AOShell
 
         try
         {
-            // ---------------------------------------------------------------------------------------------------------
-            // Very early code demonstrating a test and its various tasks, using the definition from the
-            // /etc/tests folder (current working directory being the root of the project).
-            // ---------------------------------------------------------------------------------------------------------
+            final File props = new File(".env.dev");
 
-            final AOTest test = AOTest.create(new File("etc/tests/smoke.test.json5"));
+            if (props.exists())
+            {
+                final Properties p = new Properties();
+
+                p.putAll(System.getProperties());
+                p.load(new FileReader(props, StandardCharsets.UTF_8));
+
+                System.setProperties(p);
+            }
+
+            final String prop = System.getProperty("analytics.ops.test");
+
+            final File json5;
+
+            if (AOStringUtils.isNotEmpty(prop))
+            {
+                json5 = new File(prop);
+            }
+            else
+            {
+                json5 = new File("etc/tests/smoke.test.json5");
+            }
+
+            final AOTest test = AOTest.create(json5);
 
             final AOTestContext context = new AOTestContext(test);
 
