@@ -140,11 +140,11 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
         out.println(row);
     }
 
-    public void assertEquals(AORestApiTidyTable<?> other)
+    public void assertEquals(AORestApiTidyTable<?> other, double delta)
     {
         assertPropsEquals(other);
-        assertColumnsEquals(other);
-        assertStepSEquals(other);
+        assertColumnsEquals(other, delta);
+        assertStepSEquals(other, delta);
     }
 
     public void assertPropsEquals(AORestApiTidyTable<?> other)
@@ -157,7 +157,7 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
         AOAssertion.assertEquals("paging", withPaging, other.withPaging);
     }
 
-    public void assertColumnsEquals(AORestApiTidyTable<?> other)
+    public void assertColumnsEquals(AORestApiTidyTable<?> other, double delta)
     {
         AOAssertion.assertEquals("column count", getColumCount(), other.getColumCount());
 
@@ -166,11 +166,11 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
             final AORestApiTidyTableColumn column = columns.get(cc);
             final AORestApiTidyTableColumn columnActual = other.columns.get(cc);
 
-            column.assertEquals(columnActual, true);
+            column.assertEquals(columnActual, true, delta);
         }
     }
 
-    public void assertStepSEquals(AORestApiTidyTable<?> other)
+    public void assertStepSEquals(AORestApiTidyTable<?> other, double delta)
     {
         final int stepCount = steps != null ? steps.size() : -1;
         final int stepCountActual = other.steps != null ? other.steps.size() : -1;
@@ -186,7 +186,7 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
                 final AORestApiTidyTable<?> stepTable = entry.getValue();
                 final AORestApiTidyTable<?> stepTableActual = other.steps.get(stepNb);
 
-                stepTable.assertEquals(stepTableActual);
+                stepTable.assertEquals(stepTableActual, delta);
             }
         }
     }

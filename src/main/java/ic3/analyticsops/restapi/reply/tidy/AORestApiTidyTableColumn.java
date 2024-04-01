@@ -30,7 +30,7 @@ public abstract class AORestApiTidyTableColumn
 
     public abstract String prettyPrint(int rowIndex);
 
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
         AOAssertion.assertEquals("column[" + name + "] type", type, other.type);
 

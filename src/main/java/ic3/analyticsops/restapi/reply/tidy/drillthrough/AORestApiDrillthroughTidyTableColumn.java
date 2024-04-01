@@ -82,9 +82,9 @@ public class AORestApiDrillthroughTidyTableColumn extends AORestApiTidyTableColu
     }
 
     @Override
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
-        super.assertEquals(other, valueOnly);
+        super.assertEquals(other, valueOnly, delta);
 
         final AORestApiDrillthroughTidyTable table = getTable();
 
@@ -101,7 +101,7 @@ public class AORestApiDrillthroughTidyTableColumn extends AORestApiTidyTableColu
             final Object value = getValue(rr);
             final Object valueActual = actual.getValue(rr);
 
-            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual);
+            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual, delta);
         }
     }
 }

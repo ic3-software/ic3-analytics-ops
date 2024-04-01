@@ -110,7 +110,7 @@ public class AOMDXesTask extends AOTask
 
                 final AORestApiTidyTable<?> actualResult = assertOnlyDataset(actualReply);
 
-                expectedResult.assertEquals(actualResult);
+                expectedResult.assertEquals(actualResult, delta);
 
                 runCount++;
             }
@@ -139,7 +139,7 @@ public class AOMDXesTask extends AOTask
     public static List<String> getMdx(File container, String pattern, int mdxNb)
             throws IOException
     {
-        final File content = new File(container, pattern + "-" + mdxNb + ".mdx.txt");
+        final File content = new File(container, pattern + "." + mdxNb + ".mdx.txt");
 
         if (!content.exists())
         {
@@ -153,7 +153,7 @@ public class AOMDXesTask extends AOTask
             throws AORestApiErrorException,
                    IOException
     {
-        final String name = pattern + "-" + mdxNb + ".mdx.json";
+        final String name = pattern + "." + mdxNb + ".mdx.json";
 
         File content = new File(container, name + ".zip");
 

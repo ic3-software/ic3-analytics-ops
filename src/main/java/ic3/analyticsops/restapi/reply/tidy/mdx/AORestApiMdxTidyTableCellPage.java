@@ -149,7 +149,7 @@ public class AORestApiMdxTidyTableCellPage
         return foreColors != null && rowIndex < foreColors.size() ? foreColors.get(rowIndex) : null;
     }
 
-    public void assertEquals(String message, AORestApiMdxTidyTableCellPage actual)
+    public void assertEquals(String message, AORestApiMdxTidyTableCellPage actual, double delta)
     {
         AOAssertion.assertEquals(message + " name", name, actual.name);
         AOAssertion.assertEquals(message + " caption", caption, actual.caption);
@@ -167,12 +167,21 @@ public class AORestApiMdxTidyTableCellPage
             final Object value = getValue(rr);
             final Object valueActual = actual.getValue(rr);
 
-            AOAssertion.assertEquals(message + " page[" + name + "] row[" + rr + "] value", value, valueActual);
+            final boolean deltaApplied = AOAssertion.assertEquals(message + " page[" + name + "] row[" + rr + "] value", value, valueActual, delta);
 
-            final Object formattedValue = getFormattedValue(rr);
-            final Object formattedValueActual = actual.getFormattedValue(rr);
+            if (!deltaApplied)
+            {
+                // -----------------------------------------------------------------------------------------------------
+                // See AORestApiMdxTidyTableCellPage as well for same kind of logic.
+                //      should we parse and compare the formatted value ?
+                //          (not sure always possible)
+                // -----------------------------------------------------------------------------------------------------
 
-            AOAssertion.assertEquals(message + " page[" + name + "] row[" + rr + "] formatted-value", formattedValue, formattedValueActual);
+                final Object formattedValue = getFormattedValue(rr);
+                final Object formattedValueActual = actual.getFormattedValue(rr);
+
+                AOAssertion.assertEquals(message + " page[" + name + "] row[" + rr + "] formatted-value", formattedValue, formattedValueActual);
+            }
 
             final String errorCode = getErrorCode(rr);
             final Object errorCodeActual = actual.getErrorCode(rr);

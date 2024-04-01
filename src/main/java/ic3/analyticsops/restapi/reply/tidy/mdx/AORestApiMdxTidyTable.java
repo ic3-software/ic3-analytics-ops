@@ -83,16 +83,16 @@ public class AORestApiMdxTidyTable extends AORestApiTidyTable<AORestApiMdxTidyTa
     }
 
     @Override
-    public void assertEquals(AORestApiTidyTable<?> other)
+    public void assertEquals(AORestApiTidyTable<?> other, double delta)
     {
-        super.assertEquals(other);
+        super.assertEquals(other, delta);
 
         final AORestApiMdxTidyTable actual = (AORestApiMdxTidyTable) other;
 
         AOAssertion.assertEquals("axis count", getAxisCount(), actual.getAxisCount());
     }
 
-    public void assertCellEquals(AORestApiMdxTidyTable other)
+    public void assertCellEquals(AORestApiMdxTidyTable other, double delta)
     {
         assertPropsEquals(other);
 
@@ -108,7 +108,7 @@ public class AORestApiMdxTidyTable extends AORestApiTidyTable<AORestApiMdxTidyTa
             final AORestApiTidyTableColumn column = columns.get(cc);
             final AORestApiTidyTableColumn columnActual = columnsActual.get(cc);
 
-            column.assertEquals(columnActual, true);
+            column.assertEquals(columnActual, true, delta);
         }
     }
 }

@@ -36,7 +36,7 @@ public class AORestApiDrillthroughTidyTable extends AORestApiTidyTable<AORestApi
     }
 
     @Override
-    public void assertColumnsEquals(AORestApiTidyTable<?> other)
+    public void assertColumnsEquals(AORestApiTidyTable<?> other, double delta)
     {
         AOAssertion.assertEquals("column count", getColumCount(), other.getColumCount());
 
@@ -47,7 +47,7 @@ public class AORestApiDrillthroughTidyTable extends AORestApiTidyTable<AORestApi
             // It looks like DRILLTHROUGH does not serialize columns in a determinist order.
             final AORestApiTidyTableColumn columnActual = other.getColumnByName(column.getName());
 
-            column.assertEquals(columnActual, true);
+            column.assertEquals(columnActual, true, delta);
         }
     }
 }

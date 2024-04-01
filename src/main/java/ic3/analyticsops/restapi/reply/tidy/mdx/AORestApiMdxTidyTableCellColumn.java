@@ -292,9 +292,9 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
     }
 
     @Override
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
-        super.assertEquals(other, valueOnly);
+        super.assertEquals(other, valueOnly, delta);
 
         final AORestApiMdxTidyTable table = getTable();
 
@@ -311,12 +311,21 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
             final Object value = getValue(rr);
             final Object valueActual = actual.getValue(rr);
 
-            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual);
+            final boolean deltaApplied = AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual, delta);
 
-            final Object formattedValue = getFormattedValue(rr);
-            final Object formattedValueActual = actual.getFormattedValue(rr);
+            if (!deltaApplied)
+            {
+                // -----------------------------------------------------------------------------------------------------
+                // See AORestApiMdxTidyTableCellPage as well for same kind of logic.
+                //      should we parse and compare the formatted value ?
+                //          (not sure always possible)
+                // -----------------------------------------------------------------------------------------------------
 
-            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] formatted-value", formattedValue, formattedValueActual);
+                final Object formattedValue = getFormattedValue(rr);
+                final Object formattedValueActual = actual.getFormattedValue(rr);
+
+                AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] formatted-value", formattedValue, formattedValueActual);
+            }
 
             final String errorCode = getErrorCode(rr);
             final Object errorCodeActual = actual.getErrorCode(rr);
@@ -358,7 +367,7 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
             final AORestApiMdxTidyTableCellPage page = pages[pp];
             final AORestApiMdxTidyTableCellPage pageActual = actual.pages[pp];
 
-            page.assertEquals("column[" + name + "] page[" + pp + "]", pageActual);
+            page.assertEquals("column[" + name + "] page[" + pp + "]", pageActual, delta);
         }
     }
 }

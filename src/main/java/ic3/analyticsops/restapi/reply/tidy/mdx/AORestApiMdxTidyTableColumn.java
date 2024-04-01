@@ -29,9 +29,9 @@ public abstract class AORestApiMdxTidyTableColumn extends AORestApiTidyTableColu
     @Override
     public abstract String prettyPrint(int rowIndex);
 
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
-        super.assertEquals(other, valueOnly);
+        super.assertEquals(other, valueOnly, delta);
 
         final AORestApiMdxTidyTableColumn actual = (AORestApiMdxTidyTableColumn) other;
 

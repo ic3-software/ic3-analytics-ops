@@ -82,9 +82,9 @@ public class AORestApiFlatTidyTableColumn extends AORestApiTidyTableColumn
     }
 
     @Override
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
-        super.assertEquals(other, valueOnly);
+        super.assertEquals(other, valueOnly, delta);
 
         final AORestApiFlatTidyTable table = getTable();
 
@@ -101,7 +101,7 @@ public class AORestApiFlatTidyTableColumn extends AORestApiTidyTableColumn
             final Object value = getValue(rr);
             final Object valueActual = actual.getValue(rr);
 
-            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual);
+            AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] value", value, valueActual, delta);
         }
     }
 }

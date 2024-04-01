@@ -154,9 +154,9 @@ public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColu
     }
 
     @Override
-    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly)
+    public void assertEquals(AORestApiTidyTableColumn other, boolean valueOnly, double delta)
     {
-        super.assertEquals(other, valueOnly);
+        super.assertEquals(other, valueOnly, delta);
 
         final AORestApiMdxTidyTableMemberColumn actual = (AORestApiMdxTidyTableMemberColumn) other;
 

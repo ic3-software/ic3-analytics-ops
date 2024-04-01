@@ -127,7 +127,7 @@ public class AOExecuteMdxAssertion extends AOAssertion
 
             );
 
-            actualResult.assertEquals(assertOnlyDataset(reply));
+            actualResult.assertEquals(assertOnlyDataset(reply), 0);
         }
     }
 
@@ -149,7 +149,7 @@ public class AOExecuteMdxAssertion extends AOAssertion
 
             );
 
-            actualResult.assertCellEquals(assertOnlyDataset(reply));
+            actualResult.assertCellEquals(assertOnlyDataset(reply), 0);
         }
     }
 

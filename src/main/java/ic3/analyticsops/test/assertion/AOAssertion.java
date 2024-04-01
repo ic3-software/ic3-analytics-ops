@@ -34,16 +34,79 @@ public abstract class AOAssertion
     {
         if (expected != null || actual != null)
         {
-            if (expected == null || !equals(expected, actual))
+            if (expected == null || !equals(expected, actual, 0, null))
             {
                 failNotEquals(message, expected, actual);
             }
         }
     }
 
-    private static boolean equals(Object expected, @Nullable Object actual)
+    public static boolean assertEquals(String message, @Nullable Object expected, @Nullable Object actual, double delta)
     {
+        final boolean[] deltaApplied = delta > 0 ? new boolean[1] : null;
+
+        if (expected != null || actual != null)
+        {
+            if (expected == null || !equals(expected, actual, delta, deltaApplied))
+            {
+                failNotEquals(message, expected, actual);
+            }
+        }
+
+        return deltaApplied != null && deltaApplied[0];
+    }
+
+    public static boolean equals(Object expected, @Nullable Object actual, double delta, @Nullable boolean[] deltaApplied)
+    {
+        if (expected instanceof Double && actual instanceof Double)
+        {
+            return equals((double) expected, (double) actual, delta, deltaApplied);
+        }
+        else if (expected instanceof Float && actual instanceof Float)
+        {
+            return equals((float) expected, (float) actual, delta, deltaApplied);
+        }
         return Objects.equals(expected, actual);
+    }
+
+    public static boolean equals(double expected, double actual, double delta, @Nullable boolean[] deltaApplied)
+    {
+        if (Double.compare(expected, actual) != 0)
+        {
+            if (Math.abs(expected - actual) <= delta)
+            {
+                if (delta > 0)
+                {
+                    deltaApplied[0] = true;
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean equals(float expected, float actual, double delta, @Nullable boolean[] deltaApplied)
+    {
+        if (Float.compare(expected, actual) != 0)
+        {
+            if (Math.abs(expected - actual) <= delta)
+            {
+                if (delta > 0)
+                {
+                    deltaApplied[0] = true;
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String format(String message, @Nullable Object expected, @Nullable Object actual)

@@ -76,7 +76,7 @@ public class AOGenerateMDXesTask extends AOTask
 
             final String json = reply.json;
 
-            final File mdx = new File(container, pattern + "-" + ii + ".mdx.txt");
+            final File mdx = new File(container, pattern + "." + ii + ".mdx.txt");
 
             try
             {
@@ -87,7 +87,7 @@ public class AOGenerateMDXesTask extends AOTask
                 throw new AORestApiException("could not write the MDX[" + ii + "] statement " + mdx.getAbsolutePath());
             }
 
-            final File result = new File(container, pattern + "-" + ii + ".mdx.json.zip");
+            final File result = new File(container, pattern + "." + ii + ".mdx.json.zip");
 
             try (final ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(result))))
             {
@@ -166,7 +166,7 @@ public class AOGenerateMDXesTask extends AOTask
 
                 final String json = reply.json;
 
-                final File result = new File(container, pattern + "-" + mdxNb + ".mdx.json.zip");
+                final File result = new File(container, pattern + "." + mdxNb + ".mdx.json.zip");
 
                 try (final ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(result))))
                 {
