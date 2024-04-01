@@ -59,6 +59,9 @@ public class AOTest
         return tst;
     }
 
+    /**
+     * Defaulted to the parent folder of the JSON5 test configuration.
+     */
     public File getMDXesDataFolder(String data)
     {
         return new File(json.getParentFile(), data);

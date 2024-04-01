@@ -73,7 +73,7 @@ public class AOMDXesTask extends AOTask
             }
             catch (IOException ex)
             {
-                throw new AORestApiException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern, ex);
+                throw new AORestApiException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
             }
 
             if (!ignore)
@@ -88,12 +88,12 @@ public class AOMDXesTask extends AOTask
 
                     if (expectedReply == null)
                     {
-                        throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern);
+                        throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb);
                     }
                 }
                 catch (IOException ex)
                 {
-                    throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern, ex);
+                    throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
                 }
 
                 final AORestApiTidyTable<?> expectedResult = assertOnlyDataset(expectedReply);
@@ -136,7 +136,7 @@ public class AOMDXesTask extends AOTask
         return result.results.getFirst().dataSet;
     }
 
-    private static List<String> getMdx(File container, String pattern, int mdxNb)
+    public static List<String> getMdx(File container, String pattern, int mdxNb)
             throws IOException
     {
         final File content = new File(container, pattern + "-" + mdxNb + ".mdx.txt");
@@ -149,7 +149,7 @@ public class AOMDXesTask extends AOTask
         return Files.readAllLines(content.toPath(), StandardCharsets.UTF_8);
     }
 
-    private static AORestApiMdxScriptResult getResult(File container, String pattern, int mdxNb)
+    public static AORestApiMdxScriptResult getResult(File container, String pattern, int mdxNb)
             throws AORestApiErrorException,
                    IOException
     {
