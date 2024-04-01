@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "ic3-software"
-version = "0.1"
+version = "1.1"
 
 java {
     toolchain {
@@ -49,6 +49,8 @@ tasks.test {
 
 tasks.register("kit-clean") {
 
+    group = "kit"
+
     dependsOn(
             "clean"
     )
@@ -62,6 +64,8 @@ tasks.register("kit-clean") {
 }
 
 tasks.register("kit-install") {
+
+    group = "kit"
 
     dependsOn(
             "installDist"
