@@ -23,6 +23,7 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
     static
     {
         classes.put(AOTaskID.ClearResultCache, AOClearResultCacheTask.class);
+        classes.put(AOTaskID.DeleteSchemaBackup, AODeleteSchemaBackupTask.class);
         classes.put(AOTaskID.GenerateMDXes, AOGenerateMDXesTask.class);
         classes.put(AOTaskID.LoadedSchemas, AOLoadedSchemasTask.class);
         classes.put(AOTaskID.LoadSchema, AOLoadSchemaTask.class);

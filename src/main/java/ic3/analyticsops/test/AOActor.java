@@ -55,6 +55,8 @@ public class AOActor
     {
         if (tasks != null)
         {
+            context.clearTaskProperties();
+
             for (AOTask<?> task : tasks)
             {
                 if (task != null /* trailing comma in JSON5 [] */)

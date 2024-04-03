@@ -47,6 +47,7 @@ about their configuration and assertions.
 
 - `LoadSchema`: fully (or incrementally) load a schema.
 - `RestoreSchemaBackup`: load a schema by restoring a backup.
+- `DeleteSchemaBackup`: delete a backup.
 - `RestoreSchemaSnapshot`: load a schema by restoring a snapshot.
 - `UnloadSchema`: unload a schema.
 

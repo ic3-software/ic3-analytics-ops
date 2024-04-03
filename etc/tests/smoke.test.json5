@@ -65,7 +65,7 @@
         {
           action: "RestoreSchemaBackup",
           schemaName: "Sales",
-          timestamp: "2024-03-26 06-51-46 044 UTC"
+          timestamp: "2024-04-03 12-56-34 517 UTC"
           // By default, assert the schema is being loaded.
         },
         {

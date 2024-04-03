@@ -10,6 +10,9 @@ public class AORestApiSchemaLifeCycle
 
     public AORestApiSchemaLoadStatus status;
 
+    /**
+     * E.g., the generated backup timestamp.
+     */
     @Nullable
     public String info;
 

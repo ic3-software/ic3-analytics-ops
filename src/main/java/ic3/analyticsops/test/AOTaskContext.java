@@ -48,6 +48,16 @@ public class AOTaskContext
         return context.createBrowserSession(browserContext);
     }
 
+    public void setTaskProperty(String name, String value)
+    {
+        context.setTaskProperty(name, value);
+    }
+
+    public String getTaskProperty(String name, String defaultValue)
+    {
+        return context.getTaskProperty(name, defaultValue);
+    }
+
     /**
      * Blocking call.
      */
@@ -68,4 +78,5 @@ public class AOTaskContext
                 .withJson(true)
         );
     }
+
 }

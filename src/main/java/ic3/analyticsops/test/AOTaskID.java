@@ -3,6 +3,7 @@ package ic3.analyticsops.test;
 public enum AOTaskID
 {
     ClearResultCache,
+    DeleteSchemaBackup,
     GenerateMDXes,
     LoadSchema,
     LoadedSchemas,

@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import ic3.analyticsops.restapi.client.AORestApiClient;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -19,6 +21,8 @@ import java.util.regex.Pattern;
 
 public class AOTest
 {
+    public static final Logger LOGGER = LogManager.getLogger();
+
     private transient File json;
 
     private String name;
@@ -37,20 +41,13 @@ public class AOTest
 
     private List<AOActor> actors;
 
-    public static AOTest create(File json)
-            throws IOException
+    public static AOTest create(File json) throws IOException
     {
-        final List<String> lines = processSystemProperties(
-                Files.readAllLines(json.toPath(), StandardCharsets.UTF_8)
-        );
+        final List<String> lines = processSystemProperties(Files.readAllLines(json.toPath(), StandardCharsets.UTF_8));
 
         final String content = String.join("\n", lines);
 
-        final Gson gson = new GsonBuilder()
-                .setLenient()
-                .serializeSpecialFloatingPointValues()
-                .registerTypeAdapter(AOTask.class, new AOTaskDeserializer())
-                .create();
+        final Gson gson = new GsonBuilder().setLenient().serializeSpecialFloatingPointValues().registerTypeAdapter(AOTask.class, new AOTaskDeserializer()).create();
 
         final AOTest tst = gson.fromJson(content, AOTest.class);
 
@@ -67,9 +64,7 @@ public class AOTest
         return new File(json.getParentFile(), data);
     }
 
-    public void run(AOTestContext context)
-            throws AORestApiException,
-                   AOChromeException
+    public void run(AOTestContext context) throws AORestApiException, AOChromeException
     {
         if (actors != null)
         {

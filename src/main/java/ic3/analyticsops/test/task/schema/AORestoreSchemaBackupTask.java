@@ -30,7 +30,8 @@ public class AORestoreSchemaBackupTask extends AOTask
 
                 new AORestApiRestoreSchemaBackupRequest()
                         .schemaName(schemaName)
-                        .timestamp(timestamp)
+                        // e.g., timestamp: "${LoadSchema.Sales (LiveDemo).info}" to retrieve previous generated backup
+                        .timestamp(context.getTaskProperty(timestamp, timestamp))
                         .mode(mode != null ? mode : AORestApiRestoreSchemaBackupMode.FULL)
 
         );

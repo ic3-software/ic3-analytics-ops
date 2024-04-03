@@ -41,6 +41,11 @@ public class AOLoadSchemaTask extends AOTask
 
         AOAssertion.assertEquals("load-schema-status", AORestApiSchemaLoadStatus.LOADED, actualStatus);
         AOAssertion.assertNull("load-schema-error", reply.errors);
+
+        if (forceBackup)
+        {
+            context.setTaskProperty("${LoadSchema." + reply.schemaName + ".info}", reply.info);
+        }
     }
 
 }
