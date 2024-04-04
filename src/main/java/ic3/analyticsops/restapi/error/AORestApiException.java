@@ -1,6 +1,8 @@
 package ic3.analyticsops.restapi.error;
 
-public class AORestApiException extends Exception
+import ic3.analyticsops.common.AOException;
+
+public class AORestApiException extends AOException
 {
     public AORestApiException(String message)
     {

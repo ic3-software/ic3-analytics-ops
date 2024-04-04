@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTaskID;
 
 import java.lang.reflect.Type;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public class AOAssertionDeserializer implements JsonDeserializer<AOAssertion>
 {
-    private static final Map<AOTaskID, Class<?>> classes = new HashMap<>();
+    private static final Map<AOTaskID, Class<? extends AOAssertion>> classes = new HashMap<>();
 
     static
     {
@@ -32,7 +33,7 @@ public class AOAssertionDeserializer implements JsonDeserializer<AOAssertion>
     public AOAssertion deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context)
             throws JsonParseException
     {
-        final Class<?> clazz = classes.get(id);
+        final Class<? extends AOAssertion> clazz = classes.get(id);
 
         AOAssertion assertion = null;
 

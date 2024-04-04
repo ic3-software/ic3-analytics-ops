@@ -1,8 +1,9 @@
 package ic3.analyticsops.test.task.reporting;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
+import ic3.analyticsops.test.AOTestValidationException;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
 import org.apache.logging.log4j.LogManager;
@@ -16,10 +17,27 @@ public class AOOpenReportTask extends AOTask
 {
     public static final Logger LOGGER = LogManager.getLogger();
 
-    private String reportPath;
+    private final String reportPath;
 
     @Nullable
-    private Integer timeoutS;
+    private final Integer timeoutS;
+
+    protected AOOpenReportTask()
+    {
+        // JSON deserialization
+
+        this.reportPath = null;
+        this.timeoutS = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "reportPath", reportPath);
+    }
 
     @Override
     public String getKind()
@@ -27,9 +45,14 @@ public class AOOpenReportTask extends AOTask
         return "OpenReport";
     }
 
+    @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
     public void run(AOTaskContext context)
-            throws AORestApiException,
-                   AOChromeException
+            throws AOException
     {
         final String restApiURL = context.getRestApiURL();
 

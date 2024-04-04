@@ -1,7 +1,7 @@
 package ic3.analyticsops.restapi.reply.tidy;
 
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinterHeader;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOAssertion;
 
 public abstract class AORestApiTidyTableColumn
 {

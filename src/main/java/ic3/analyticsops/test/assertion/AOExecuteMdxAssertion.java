@@ -8,7 +8,9 @@ import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTable;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellColumn;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellError;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTaskContext;
+import ic3.analyticsops.test.AOTestValidationException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -16,16 +18,57 @@ import java.util.List;
 public class AOExecuteMdxAssertion extends AOAssertion
 {
     @Nullable
-    private Equals equals;
+    private final Equals equals;
 
     @Nullable
-    private CellEquals cellEquals;
+    private final CellEquals cellEquals;
 
     @Nullable
-    private StatementOnError statementOnError;
+    private final StatementOnError statementOnError;
 
     @Nullable
-    private CellOnError cellOnError;
+    private final CellOnError cellOnError;
+
+    protected AOExecuteMdxAssertion()
+    {
+        // JSON deserialization
+
+        this.equals = null;
+        this.cellEquals = null;
+        this.statementOnError = null;
+        this.cellOnError = null;
+    }
+
+    @Override
+    public void validate()
+            throws AOTestValidationException
+    {
+        super.validate();
+
+        validateNonEmptyFields(validateFieldPathPrefix() + "equals|cellEquals|statementOnError|cellOnError",
+                equals,
+                cellEquals,
+                statementOnError,
+                cellOnError
+        );
+
+        if (equals != null)
+        {
+            validateNonEmptyField(validateFieldPathPrefix() + "equals.statement", equals.statement);
+        }
+        else if (cellEquals != null)
+        {
+            validateNonEmptyField(validateFieldPathPrefix() + "cellEquals.statement", cellEquals.statement);
+        }
+        else if (statementOnError != null)
+        {
+            validateNonEmptyField(validateFieldPathPrefix() + "statementOnError.errorCode", statementOnError.errorCode);
+        }
+        else if (cellOnError != null)
+        {
+            validateNonEmptyField(validateFieldPathPrefix() + "cellOnError.errorCode", cellOnError.errorCode);
+        }
+    }
 
     public void assertOk(AOTaskContext context, String schema, AORestApiMdxScriptResult actualResult)
             throws AORestApiException
@@ -114,7 +157,14 @@ public class AOExecuteMdxAssertion extends AOAssertion
      */
     static class Equals
     {
-        private String statement;
+        private final String statement;
+
+        protected Equals()
+        {
+            // JSON deserialization
+
+            this.statement = null;
+        }
 
         public void assertOk(AOTaskContext context, String schema, AORestApiMdxTidyTable actualResult)
                 throws AORestApiException
@@ -136,7 +186,14 @@ public class AOExecuteMdxAssertion extends AOAssertion
      */
     static class CellEquals
     {
-        private String statement;
+        private final String statement;
+
+        protected CellEquals()
+        {
+            // JSON deserialization
+
+            this.statement = null;
+        }
 
         public void assertOk(AOTaskContext context, String schema, AORestApiMdxTidyTable actualResult)
                 throws AORestApiException
@@ -158,7 +215,14 @@ public class AOExecuteMdxAssertion extends AOAssertion
      */
     static class StatementOnError
     {
-        private String errorCode;
+        private final String errorCode;
+
+        protected StatementOnError()
+        {
+            // JSON deserialization
+
+            this.errorCode = null;
+        }
 
         public void assertOk(AOTaskContext context, AORestApiMdxError actualResult)
         {
@@ -171,7 +235,14 @@ public class AOExecuteMdxAssertion extends AOAssertion
      */
     static class CellOnError
     {
-        private String errorCode;
+        private final String errorCode;
+
+        protected CellOnError()
+        {
+            // JSON deserialization
+
+            this.errorCode = null;
+        }
 
         public void assertOk(AOTaskContext context, AORestApiMdxError actualResult)
         {

@@ -1,17 +1,42 @@
 package ic3.analyticsops.test.task.schema;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.AORestApiDeleted;
 import ic3.analyticsops.restapi.request.AORestApiDeleteSchemaBackupRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
 
 public class AODeleteSchemaBackupTask extends AOTask
 {
-    private String schemaName;
+    private final String schemaName;
 
-    private String timestamp;
+    private final String timestamp;
+
+    public AODeleteSchemaBackupTask()
+    {
+        // JSON deserialization
+
+        this.schemaName = null;
+        this.timestamp = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schemaName", schemaName);
+        validateNonEmptyField(validateFieldPathPrefix() + "timestamp", timestamp);
+    }
+
+    @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
 
     @Override
     public String getKind()
@@ -20,7 +45,7 @@ public class AODeleteSchemaBackupTask extends AOTask
     }
 
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiDeleted reply = context.sendRequest(
 

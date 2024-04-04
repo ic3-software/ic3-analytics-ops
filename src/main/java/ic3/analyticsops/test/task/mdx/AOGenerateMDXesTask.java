@@ -1,10 +1,12 @@
 package ic3.analyticsops.test.task.mdx;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
+import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -18,11 +20,31 @@ import java.util.zip.ZipOutputStream;
 
 public class AOGenerateMDXesTask extends AOTask
 {
-    private String schema;
+    private final String schema;
 
-    private String data;
+    private final String data;
 
-    private List<String> statements;
+    @Nullable
+    private final List<String> statements;
+
+    protected AOGenerateMDXesTask()
+    {
+        // JSON deserialization
+
+        this.schema = null;
+        this.data = null;
+        this.statements = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schema", schema);
+        validateNonEmptyField(validateFieldPathPrefix() + "data", data);
+    }
 
     @Override
     public String getKind()
@@ -31,8 +53,14 @@ public class AOGenerateMDXesTask extends AOTask
     }
 
     @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
+    @Override
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         if (statements != null)
         {
@@ -45,7 +73,7 @@ public class AOGenerateMDXesTask extends AOTask
     }
 
     protected void runWithStatements(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final File data = context.getMDXesDataFolder(this.data);
 
@@ -54,12 +82,12 @@ public class AOGenerateMDXesTask extends AOTask
 
         if (container.exists())
         {
-            throw new AORestApiException("existing data folder (remove first) " + container.getAbsolutePath());
+            throw new AOException("existing data folder (remove first) " + container.getAbsolutePath());
         }
 
         if (!container.mkdirs())
         {
-            throw new AORestApiException("could not created the data folder " + container.getAbsolutePath());
+            throw new AOException("could not created the data folder " + container.getAbsolutePath());
         }
 
         for (int ii = 0; ii < statements.size(); ii++)
@@ -84,7 +112,7 @@ public class AOGenerateMDXesTask extends AOTask
             }
             catch (IOException ex)
             {
-                throw new AORestApiException("could not write the MDX[" + ii + "] statement " + mdx.getAbsolutePath());
+                throw new AOException("could not write the MDX[" + ii + "] statement " + mdx.getAbsolutePath());
             }
 
             final File result = new File(container, pattern + "." + ii + ".mdx.json.zip");
@@ -98,7 +126,7 @@ public class AOGenerateMDXesTask extends AOTask
             }
             catch (IOException ex)
             {
-                throw new AORestApiException("could not write the MDX[" + ii + "] result " + result.getAbsolutePath());
+                throw new AOException("could not write the MDX[" + ii + "] result " + result.getAbsolutePath());
             }
         }
     }
@@ -107,7 +135,7 @@ public class AOGenerateMDXesTask extends AOTask
      * NO statements defined : (re-)generate the result files from existing input files.
      */
     protected void runWithoutStatements(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final File data = context.getMDXesDataFolder(this.data);
 
@@ -116,7 +144,7 @@ public class AOGenerateMDXesTask extends AOTask
 
         if (!container.exists())
         {
-            throw new AORestApiException("missing data folder " + container.getAbsolutePath());
+            throw new AOException("missing data folder " + container.getAbsolutePath());
         }
 
         // Similarly to the MDXes task, locate existing MDX input files.
@@ -151,7 +179,7 @@ public class AOGenerateMDXesTask extends AOTask
             }
             catch (IOException ex)
             {
-                throw new AORestApiException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
+                throw new AOException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
             }
 
             if (!ignore)
@@ -177,7 +205,7 @@ public class AOGenerateMDXesTask extends AOTask
                 }
                 catch (IOException ex)
                 {
-                    throw new AORestApiException("could not write the MDX[" + mdxNb + "] result " + result.getAbsolutePath());
+                    throw new AOException("could not write the MDX[" + mdxNb + "] result " + result.getAbsolutePath());
                 }
             }
 

@@ -2,6 +2,8 @@ package ic3.analyticsops.test.assertion;
 
 import com.vdurmont.semver4j.Semver;
 import ic3.analyticsops.restapi.reply.table.AORestApiServerStatusTable;
+import ic3.analyticsops.test.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
 import org.jetbrains.annotations.Nullable;
 
 public class AOServerStatusAssertion extends AOAssertion
@@ -10,19 +12,43 @@ public class AOServerStatusAssertion extends AOAssertion
      * Full version string (e.g., with timestamp).
      */
     @Nullable
-    private String serverVersionEx;
+    private final String serverVersionEx;
 
     @Nullable
-    private String serverVersion;
+    private final String serverVersion;
 
     /**
      * Full version string (e.g., with timestamp).
      */
     @Nullable
-    private String dashboardsVersionEx;
+    private final String dashboardsVersionEx;
 
     @Nullable
-    private String dashboardsVersion;
+    private final String dashboardsVersion;
+
+    protected AOServerStatusAssertion()
+    {
+        // JSON deserialization
+
+        this.serverVersionEx = null;
+        this.serverVersion = null;
+        this.dashboardsVersionEx = null;
+        this.dashboardsVersion = null;
+    }
+
+    @Override
+    public void validate()
+            throws AOTestValidationException
+    {
+        super.validate();
+
+        validateNonEmptyFields(validateFieldPathPrefix() + "serverVersionEx|serverVersion|dashboardsVersionEx|dashboardsVersion",
+                serverVersionEx,
+                serverVersion,
+                dashboardsVersionEx,
+                dashboardsVersion
+        );
+    }
 
     public void assertOk(AORestApiServerStatusTable actualStatus)
     {

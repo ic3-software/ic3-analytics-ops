@@ -1,19 +1,38 @@
 package ic3.analyticsops.test.task.mdx;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
+import ic3.analyticsops.test.AOTestValidationException;
 import ic3.analyticsops.test.assertion.AOExecuteMdxAssertion;
 
 import java.util.List;
 
 public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
 {
-    private String schema;
+    private final String schema;
 
-    private String statement;
+    private final String statement;
+
+    protected AOExecuteMdxTask()
+    {
+        // JSON deserialization
+
+        this.schema = null;
+        this.statement = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schema", schema);
+        validateNonEmptyField(validateFieldPathPrefix() + "statement", statement);
+    }
 
     @Override
     public String getKind()
@@ -22,8 +41,14 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
     }
 
     @Override
+    public boolean withAssertions()
+    {
+        return true;
+    }
+
+    @Override
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiMdxScriptResult reply = context.sendRequest(
 
@@ -35,12 +60,9 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
 
         final List<AOExecuteMdxAssertion> assertions = assertions();
 
-        if (assertions != null)
+        for (AOExecuteMdxAssertion assertion : assertions /* validated by now */)
         {
-            for (AOExecuteMdxAssertion assertion : assertions)
-            {
-                assertion.assertOk(context, schema, reply);
-            }
+            assertion.assertOk(context, schema, reply);
         }
     }
 }

@@ -1,22 +1,42 @@
 package ic3.analyticsops.test.task.schema;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLifeCycle;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLoadStatus;
 import ic3.analyticsops.restapi.request.AORestApiLoadSchemaRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
 
 public class AOLoadSchemaTask extends AOTask
 {
-    private String schemaFile;
+    private final String schemaFile;
 
-    private boolean incrLoad;
+    private final boolean incrLoad;
 
-    private boolean keepMdxResultCache;
+    private final boolean keepMdxResultCache;
 
-    private boolean forceBackup;
+    private final boolean forceBackup;
+
+    protected AOLoadSchemaTask()
+    {
+        // JSON deserialization
+
+        this.schemaFile = null;
+        this.incrLoad = false;
+        this.keepMdxResultCache = false;
+        this.forceBackup = false;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schemaFile", schemaFile);
+    }
 
     @Override
     public String getKind()
@@ -24,8 +44,14 @@ public class AOLoadSchemaTask extends AOTask
         return "LoadSchema";
     }
 
+    @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiSchemaLifeCycle reply = context.sendRequest(
 

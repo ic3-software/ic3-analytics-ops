@@ -7,14 +7,13 @@ import io.webfolder.cdp.channel.Connection;
 import io.webfolder.cdp.channel.JreWebSocketFactory;
 import io.webfolder.cdp.channel.WebSocketConnection;
 import io.webfolder.cdp.exception.CdpException;
-import io.webfolder.cdp.logger.CdpLogger;
-import io.webfolder.cdp.logger.CdpLoggerFactory;
 import io.webfolder.cdp.process.CdpProcess;
 import io.webfolder.cdp.session.SessionFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -39,11 +38,6 @@ public class AOChromeLauncher extends Launcher
      */
     private final ChannelFactory channelFactory;
 
-    /**
-     * Reference to our parent log (private).
-     */
-    private final CdpLogger log;
-
     private String chromePath = "";
 
     @Nullable
@@ -55,7 +49,6 @@ public class AOChromeLauncher extends Launcher
 
         this.options = options;
         this.channelFactory = webSocketFactory;
-        this.log = new CdpLoggerFactory(options).getLogger("cdp4j.launcher");
     }
 
     public static ChannelFactory createChannelFactory()
@@ -102,7 +95,7 @@ public class AOChromeLauncher extends Launcher
         ProcessBuilder builder = new ProcessBuilder(arguments);
         builder.environment().put("CDP4J_ID", cdp4jId);
 
-        log.info("launcher: {}", "ProcessBuilder:arguments:" + arguments);
+        AOChromeProxy.LOGGER.debug("[chrome] ProcessBuilder:arguments:{}", arguments);
 
         try
         {
@@ -114,7 +107,7 @@ public class AOChromeLauncher extends Launcher
                 {
                     final String line = scanner.nextLine().trim();
 
-                    log.info("launcher: {}", "ProcessBuilder:stderr:" + line);
+                    AOChromeProxy.LOGGER.debug("[chrome] ProcessBuilder:stderr:{}", line);
 
                     if (line.isEmpty())
                     {
@@ -146,13 +139,13 @@ public class AOChromeLauncher extends Launcher
 
             options.processManager().setProcess(new CdpProcess(process, cdp4jId));
 
-            final URL url = new URL(connection.getUrl().replace("ws://", "http://"));
-            log.info("DevTools remote debugging URL: http://{}:{}", url.getHost(), url.getPort());
+            final URI url = new URI(connection.getUrl().replace("ws://", "http://"));
+            AOChromeProxy.LOGGER.debug("[chrome] DevTools remote debugging URL: http://{}:{}", url.getHost(), url.getPort());
 
             return new SessionFactory(options, channelFactory, connection);
 
         }
-        catch (IOException e)
+        catch (URISyntaxException | IOException e)
         {
             throw new CdpException(e);
         }

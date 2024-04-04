@@ -1,18 +1,35 @@
 package ic3.analyticsops.test.task.schema;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaStatus;
 import ic3.analyticsops.restapi.reply.table.AORestApiSchemaInfoTable;
 import ic3.analyticsops.restapi.request.AORestApiSchemaInfoRequest;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
+import ic3.analyticsops.test.AOTestValidationException;
 import ic3.analyticsops.test.assertion.AOSchemaInfoAssertion;
 
 import java.util.List;
 
 public class AOSchemaInfoTask extends AOTask<AOSchemaInfoAssertion>
 {
-    private String schemaFile;
+    private final String schemaFile;
+
+    protected AOSchemaInfoTask()
+    {
+        // JSON deserialization
+
+        this.schemaFile = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schemaFile", schemaFile);
+    }
 
     @Override
     public String getKind()
@@ -21,8 +38,14 @@ public class AOSchemaInfoTask extends AOTask<AOSchemaInfoAssertion>
     }
 
     @Override
+    public boolean withAssertions()
+    {
+        return true;
+    }
+
+    @Override
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiSchemaInfoTable reply = context.sendRequest(
 
@@ -37,12 +60,9 @@ public class AOSchemaInfoTask extends AOTask<AOSchemaInfoAssertion>
 
         final List<AOSchemaInfoAssertion> assertions = assertions();
 
-        if (assertions != null)
+        for (AOSchemaInfoAssertion assertion : assertions /* validated by now */)
         {
-            for (AOSchemaInfoAssertion assertion : assertions)
-            {
-                assertion.assertOk(actualStatus);
-            }
+            assertion.assertOk(actualStatus);
         }
     }
 }

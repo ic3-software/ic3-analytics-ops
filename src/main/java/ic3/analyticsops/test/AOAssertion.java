@@ -1,11 +1,48 @@
-package ic3.analyticsops.test.assertion;
+package ic3.analyticsops.test;
 
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class AOAssertion
+public abstract class AOAssertion extends AOSerializable
 {
+    /**
+     * Final semantic: dunno how to set with JSON deserialization.
+     */
+    protected transient AOTask<?> jsonParent;
+
+    /**
+     * Final semantic: dunno how to set with JSON deserialization.
+     */
+    protected transient int jsonAssertionNb;
+
+    protected AOAssertion()
+    {
+        // JSON deserialization
+    }
+
+    /**
+     * Called once deserialized to create some backlinks and array information.
+     */
+    public void onFromJson(AOTask<?> jsonParent, int jsonAssertionNb)
+    {
+        this.jsonParent = jsonParent;
+        this.jsonAssertionNb = jsonAssertionNb;
+    }
+
+    /**
+     * Called once deserialized (after onFromJson) to ensure the JSON5 is valid.
+     */
+    public void validate()
+            throws AOTestValidationException
+    {
+    }
+
+    public String validateFieldPathPrefix()
+    {
+        return "actors[" + jsonParent.jsonParentActor.jsonActorNb + "].tasks[" + jsonParent.jsonTaskNb + "].assertions[" + jsonAssertionNb + "].";
+    }
+
     public static void assertTrue(String message, boolean value)
     {
         if (!value)

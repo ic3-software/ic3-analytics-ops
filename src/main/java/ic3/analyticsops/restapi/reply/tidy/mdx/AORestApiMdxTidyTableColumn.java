@@ -2,7 +2,7 @@ package ic3.analyticsops.restapi.reply.tidy.mdx;
 
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumn;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableEntityType;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOAssertion;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AORestApiMdxTidyTableColumn extends AORestApiTidyTableColumn

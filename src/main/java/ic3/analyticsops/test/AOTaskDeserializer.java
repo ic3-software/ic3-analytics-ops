@@ -1,7 +1,6 @@
 package ic3.analyticsops.test;
 
 import com.google.gson.*;
-import ic3.analyticsops.test.assertion.AOAssertion;
 import ic3.analyticsops.test.assertion.AOAssertionDeserializer;
 import ic3.analyticsops.test.task.mdx.AOExecuteMdxTask;
 import ic3.analyticsops.test.task.mdx.AOGenerateMDXesTask;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 public class AOTaskDeserializer implements JsonDeserializer<AOTask>
 {
-    private static final Map<AOTaskID, Class<?>> classes = new HashMap<>();
+    private static final Map<AOTaskID, Class<? extends AOTask>> classes = new HashMap<>();
 
     static
     {
@@ -39,12 +38,12 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
     }
 
     @Override
-    public AOTask deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context)
+    public AOTask<?> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context)
             throws JsonParseException
     {
         final JsonObject obj = jsonElement.getAsJsonObject();
         final AOTaskID id = AOTaskID.valueOf(obj.get("action").getAsString());
-        final Class<?> clazz = classes.get(id);
+        final Class<? extends AOTask> clazz = classes.get(id);
 
         final Gson gson = new GsonBuilder()
                 .setLenient()
@@ -52,8 +51,8 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
                 .registerTypeAdapter(AOAssertion.class, new AOAssertionDeserializer(id))
                 .create();
 
-        final Object task = gson.fromJson(jsonElement, clazz);
+        final AOTask<?> task = gson.fromJson(jsonElement, clazz);
 
-        return (AOTask) task;
+        return task;
     }
 }

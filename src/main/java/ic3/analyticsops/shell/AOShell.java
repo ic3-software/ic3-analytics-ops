@@ -1,9 +1,8 @@
 package ic3.analyticsops.shell;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestContext;
-import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import ic3.analyticsops.utils.AOStringUtils;
 import org.apache.logging.log4j.Level;
@@ -51,7 +50,11 @@ public class AOShell
                 json5 = new File("etc/tests/smoke.test.json5");
             }
 
+            LOGGER.info("Running test : {}", json5.getAbsolutePath());
+            
             final AOTest test = AOTest.create(json5);
+
+            test.validate() /* ensure as much as possible its JSON definition was valid */;
 
             final AOTestContext context = new AOTestContext(test);
 
@@ -66,7 +69,7 @@ public class AOShell
 
             System.exit(0);
         }
-        catch (AORestApiException | AOChromeException | IOException ex)
+        catch (AOException | IOException ex)
         {
             LOGGER.error("failed", ex);
 

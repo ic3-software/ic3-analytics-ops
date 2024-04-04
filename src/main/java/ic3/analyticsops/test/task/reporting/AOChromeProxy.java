@@ -439,7 +439,7 @@ public class AOChromeProxy
             LOGGER.warn("[chrome] shutdown error: closing the session-factory", ex);
         }
 
-        LOGGER.info("[chrome] shutdown: killing the Chrome process [" + pid() + "]");
+        LOGGER.info("[chrome] shutdown: killing the Chrome process [{}]", pid());
 
         try
         {
@@ -467,7 +467,7 @@ public class AOChromeProxy
             {
                 final Path userDataDir = opts.userDataDir();
 
-                LOGGER.info("[chrome] shutdown: delete the user-data-dir: " + userDataDir);
+                LOGGER.info("[chrome] shutdown: delete the user-data-dir: {}", userDataDir);
 
                 FileUtils.deleteQuietly(userDataDir.toFile());
             }

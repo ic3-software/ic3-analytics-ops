@@ -1,21 +1,43 @@
 package ic3.analyticsops.test.task.schema;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.schema.AORestApiRestoreSchemaBackupMode;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLifeCycle;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLoadStatus;
 import ic3.analyticsops.restapi.request.AORestApiRestoreSchemaBackupRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 public class AORestoreSchemaBackupTask extends AOTask
 {
-    private String schemaName;
+    private final String schemaName;
 
-    private String timestamp;
+    private final String timestamp;
 
-    private AORestApiRestoreSchemaBackupMode mode;
+    @Nullable
+    private final AORestApiRestoreSchemaBackupMode mode;
+
+    protected AORestoreSchemaBackupTask()
+    {
+        // JSON deserialization
+
+        this.schemaName = null;
+        this.timestamp = null;
+        this.mode = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schemaName", schemaName);
+        validateNonEmptyField(validateFieldPathPrefix() + "timestamp", timestamp);
+    }
 
     @Override
     public String getKind()
@@ -23,8 +45,14 @@ public class AORestoreSchemaBackupTask extends AOTask
         return "RestoreSchemaBackup";
     }
 
+    @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiSchemaLifeCycle reply = context.sendRequest(
 

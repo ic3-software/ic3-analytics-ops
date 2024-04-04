@@ -1,28 +1,49 @@
 package ic3.analyticsops.test.task.reporting;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.print.AORestApiPrintedReport;
 import ic3.analyticsops.restapi.request.AORestApiPrintReportRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
 import org.jetbrains.annotations.Nullable;
 
 public class AOPrintReportTask extends AOTask
 {
-    private String reportPath;
+    private final String reportPath;
 
     @Nullable
-    private Boolean withPDF;
+    private final Boolean withPDF;
 
     @Nullable
-    private String pageSize;
+    private final String pageSize;
 
     @Nullable
-    private String pageOrientation;
+    private final String pageOrientation;
 
     @Nullable
-    private Integer timeoutS;
+    private final Integer timeoutS;
+
+    protected AOPrintReportTask()
+    {
+        // JSON deserialization
+
+        this.reportPath = null;
+        this.withPDF = null;
+        this.pageSize = null;
+        this.pageOrientation = null;
+        this.timeoutS = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "reportPath", reportPath);
+    }
 
     @Override
     public String getKind()
@@ -30,8 +51,14 @@ public class AOPrintReportTask extends AOTask
         return "PrintReport";
     }
 
+    @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final AORestApiPrintedReport reply = context.sendRequest(
 

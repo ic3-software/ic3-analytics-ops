@@ -1,6 +1,6 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.restapi.error.AORestApiException;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import io.webfolder.cdp.session.Session;
@@ -47,8 +47,7 @@ public class AOTestContext
     }
 
     public void run()
-            throws AORestApiException,
-                   AOChromeException
+            throws AOException
     {
         test.run(this);
     }

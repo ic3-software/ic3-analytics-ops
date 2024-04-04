@@ -1,6 +1,8 @@
 package ic3.analyticsops.test.task.reporting;
 
-public class AOChromeException extends Exception
+import ic3.analyticsops.common.AOException;
+
+public class AOChromeException extends AOException
 {
     public AOChromeException(String message)
     {

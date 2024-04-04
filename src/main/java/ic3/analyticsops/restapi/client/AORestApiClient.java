@@ -164,7 +164,7 @@ public class AORestApiClient
 
             final String json = new String(bytes, StandardCharsets.UTF_8);
 
-            LOGGER.info("-- JSON [" + bytes.length + "] ------------ ");
+            LOGGER.info("-- JSON [{}] ------------ ", bytes.length);
             LOGGER.info(json);
 
             return new ByteArrayInputStream(bytes);

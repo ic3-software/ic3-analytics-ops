@@ -1,14 +1,15 @@
 package ic3.analyticsops.test.task.mdx;
 
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.client.AORestApiClient;
 import ic3.analyticsops.restapi.error.AORestApiErrorException;
-import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTable;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
+import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOTestValidationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -18,9 +19,27 @@ import java.util.zip.ZipInputStream;
 
 public class AOMDXesTask extends AOTask
 {
-    private String schema;
+    private final String schema;
 
-    private String data;
+    private final String data;
+
+    protected AOMDXesTask()
+    {
+        // JSON deserialization
+
+        this.schema = null;
+        this.data = null;
+    }
+
+    @Override
+    public void validateProps()
+            throws AOTestValidationException
+    {
+        super.validateProps();
+
+        validateNonEmptyField(validateFieldPathPrefix() + "schema", schema);
+        validateNonEmptyField(validateFieldPathPrefix() + "data", data);
+    }
 
     @Override
     public String getKind()
@@ -29,8 +48,14 @@ public class AOMDXesTask extends AOTask
     }
 
     @Override
+    public boolean withAssertions()
+    {
+        return false;
+    }
+
+    @Override
     public void run(AOTaskContext context)
-            throws AORestApiException
+            throws AOException
     {
         final File data = context.getMDXesDataFolder(this.data);
 
@@ -73,7 +98,7 @@ public class AOMDXesTask extends AOTask
             }
             catch (IOException ex)
             {
-                throw new AORestApiException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
+                throw new AOException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
             }
 
             if (!ignore)
@@ -88,12 +113,12 @@ public class AOMDXesTask extends AOTask
 
                     if (expectedReply == null)
                     {
-                        throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb);
+                        throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb);
                     }
                 }
                 catch (IOException ex)
                 {
-                    throw new AORestApiException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
+                    throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
                 }
 
                 final AORestApiTidyTable<?> expectedResult = assertOnlyDataset(expectedReply);
@@ -120,7 +145,7 @@ public class AOMDXesTask extends AOTask
 
         if (runCount == 0)
         {
-            throw new AORestApiException("no run for MDX for data " + container.getAbsolutePath() + "/" + pattern);
+            throw new AOException("no run for MDX for data " + container.getAbsolutePath() + "/" + pattern);
         }
     }
 

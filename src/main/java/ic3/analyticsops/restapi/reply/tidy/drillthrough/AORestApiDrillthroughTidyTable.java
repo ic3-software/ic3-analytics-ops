@@ -3,7 +3,7 @@ package ic3.analyticsops.restapi.reply.tidy.drillthrough;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTable;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumn;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinterHeader;
-import ic3.analyticsops.test.assertion.AOAssertion;
+import ic3.analyticsops.test.AOAssertion;
 
 import java.io.PrintStream;
 

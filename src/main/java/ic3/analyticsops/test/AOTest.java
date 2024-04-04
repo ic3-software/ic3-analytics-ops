@@ -2,9 +2,8 @@ package ic3.analyticsops.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.client.AORestApiClient;
-import ic3.analyticsops.restapi.error.AORestApiException;
-import ic3.analyticsops.test.task.reporting.AOChromeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -19,41 +18,130 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AOTest
+public class AOTest extends AOSerializable
 {
     public static final Logger LOGGER = LogManager.getLogger();
 
-    private transient File json;
+    protected transient final File json;
 
-    private String name;
-
-    /**
-     * Possibly defined in each actor.
-     */
-    @Nullable
-    private String restApiURL;
+    private final String name;
 
     /**
      * Possibly defined in each actor.
      */
     @Nullable
-    private AOAuthenticator authenticator;
+    private final String restApiURL;
 
-    private List<AOActor> actors;
+    /**
+     * Possibly defined in each actor.
+     */
+    @Nullable
+    private final AOAuthenticator authenticator;
 
-    public static AOTest create(File json) throws IOException
+    private final List<AOActor> actors;
+
+    protected AOTest(File json)
+    {
+        this.json = json;
+
+        // JSON deserialization
+
+        this.name = null;
+        this.restApiURL = null;
+        this.authenticator = null;
+        this.actors = null;
+    }
+
+    public static AOTest create(File json)
+            throws IOException
     {
         final List<String> lines = processSystemProperties(Files.readAllLines(json.toPath(), StandardCharsets.UTF_8));
 
         final String content = String.join("\n", lines);
 
-        final Gson gson = new GsonBuilder().setLenient().serializeSpecialFloatingPointValues().registerTypeAdapter(AOTask.class, new AOTaskDeserializer()).create();
+        final Gson gson = new GsonBuilder()
+                .setLenient()
+                .serializeSpecialFloatingPointValues()
+                .registerTypeAdapter(AOTest.class, new AOTestDeserializer(json))
+                .create();
 
         final AOTest tst = gson.fromJson(content, AOTest.class);
 
-        tst.json = json;
-
         return tst;
+    }
+
+    /**
+     * Called once deserialized to create some backlinks and array information.
+     */
+    public void onFromJson()
+    {
+        if (actors != null)
+        {
+            if (!actors.isEmpty() && actors.getLast() == null)
+            {
+                actors.removeLast() /* trailing comma in JSON5 [] */;
+            }
+
+            for (int aa = 0; aa < actors.size(); aa++)
+            {
+                final AOActor actor = actors.get(aa);
+                actor.onFromJson(this, aa);
+            }
+        }
+    }
+
+    /**
+     * Called once deserialized (after onFromJson) to ensure the JSON5 is valid.
+     */
+    public void validate()
+            throws AOTestValidationException
+    {
+        validateNonEmptyField("name", name);
+
+        validateActors();
+    }
+
+    public void validateActors()
+            throws AOTestValidationException
+    {
+        validateNonEmptyField("actors", actors);
+
+        int active = 0;
+
+        for (AOActor actor : actors)
+        {
+            if (actor.isActive())
+            {
+                active++;
+            }
+        }
+
+        // Guess it makes no sense to run a test wo/ any active actor : let's throw an error right now.
+
+        if (active == 0)
+        {
+            throw new AOTestValidationException("the JSON field 'actors' has no active actor");
+        }
+
+        for (AOActor actor : actors)
+        {
+            if (actor.isActive())
+            {
+                actor.validate();
+            }
+        }
+    }
+
+    @Nullable
+    public String getRestApiURL()
+    {
+        return restApiURL;
+    }
+
+    @Nullable
+    public AOAuthenticator getAuthenticator()
+    {
+        return authenticator;
     }
 
     /**
@@ -64,36 +152,23 @@ public class AOTest
         return new File(json.getParentFile(), data);
     }
 
-    public void run(AOTestContext context) throws AORestApiException, AOChromeException
+    public void run(AOTestContext context)
+            throws AOException
     {
-        if (actors != null)
+        for (AOActor actor : actors /* validated by now */)
         {
-            for (AOActor actor : actors)
+            if (!actor.isActive())
             {
-                if (!actor.isActive())
-                {
-                    continue;
-                }
-
-                final String restApiURL = actor.getRestApiURL(this.restApiURL);
-
-                if (restApiURL == null)
-                {
-                    throw new AORestApiException("missing restApiURL from test/actor");
-                }
-
-                final AOAuthenticator authenticator = actor.getAuthenticator(this.authenticator);
-
-                if (authenticator == null)
-                {
-                    throw new AORestApiException("missing authenticator from test/actor");
-                }
-
-                final AORestApiClient client = new AORestApiClient(restApiURL, authenticator);
-                final AOActorContext aContext = new AOActorContext(context, client);
-
-                actor.run(aContext);
+                continue;
             }
+
+            final String restApiURL = actor.getRestApiURL(this.restApiURL);
+            final AOAuthenticator authenticator = actor.getAuthenticator(this.authenticator);
+
+            final AORestApiClient client = new AORestApiClient(restApiURL, authenticator);
+            final AOActorContext aContext = new AOActorContext(context, client);
+
+            actor.run(aContext);
         }
     }
 
