@@ -1,12 +1,13 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,9 +29,9 @@ public class AOTestContext
     }
 
     @Nullable
-    public Long getDurationS()
+    public Duration getDuration()
     {
-        return test.getDurationS();
+        return test.getDuration();
     }
 
     public File getMDXesDataFolder(String data)
@@ -99,7 +100,7 @@ public class AOTestContext
         }
         catch (Exception ex)
         {
-            AOLoggers.SHELL.warn("[shell] shutdown on error", ex);
+            AOLog4jUtils.SHELL.warn("[shell] shutdown on error", ex);
         }
     }
 }

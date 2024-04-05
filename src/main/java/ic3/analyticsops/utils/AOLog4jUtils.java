@@ -1,6 +1,8 @@
 package ic3.analyticsops.utils;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
@@ -10,6 +12,18 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 public abstract class AOLog4jUtils
 {
+    public static final Logger SHELL = LogManager.getLogger("AnalyticsOps.Shell");
+
+    public static final Logger CHROME = LogManager.getLogger("AnalyticsOps.Chrome");
+
+    public static final Logger TEST = LogManager.getLogger("AnalyticsOps.Test");
+
+    public static final Logger ACTOR = LogManager.getLogger("AnalyticsOps.Actor");
+
+    public static final Logger DUMP_JSON = LogManager.getLogger("AnalyticsOps.DumpJson");
+
+    public static final Logger PRETTY_PRINT = LogManager.getLogger("AnalyticsOps.PrettyPrint");
+
     private AOLog4jUtils()
     {
     }

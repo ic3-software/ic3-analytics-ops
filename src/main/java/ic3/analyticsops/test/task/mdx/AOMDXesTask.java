@@ -1,6 +1,7 @@
 package ic3.analyticsops.test.task.mdx;
 
 import ic3.analyticsops.common.AOException;
+import ic3.analyticsops.common.AOPause;
 import ic3.analyticsops.restapi.client.AORestApiClient;
 import ic3.analyticsops.restapi.error.AORestApiErrorException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
@@ -10,6 +11,7 @@ import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -23,12 +25,19 @@ public class AOMDXesTask extends AOTask
 
     private final String data;
 
+    /**
+     * An optional pause applied after the processing of each MDX statement.
+     */
+    @Nullable
+    private final AOPause pauses;
+
     protected AOMDXesTask()
     {
         // JSON deserialization
 
         this.schema = null;
         this.data = null;
+        this.pauses = null;
     }
 
     @Override
@@ -136,6 +145,19 @@ public class AOMDXesTask extends AOTask
                 final AORestApiTidyTable<?> actualResult = assertOnlyDataset(actualReply);
 
                 expectedResult.assertEquals(actualResult, delta);
+
+                final Long pauseMS = pauses != null ? pauses.pauseMS() : null;
+
+                if (pauseMS != null)
+                {
+                    try
+                    {
+                        Thread.sleep(pauseMS);
+                    }
+                    catch (InterruptedException ignored)
+                    {
+                    }
+                }
 
                 runCount++;
             }

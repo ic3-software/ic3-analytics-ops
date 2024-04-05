@@ -1,6 +1,6 @@
 package ic3.analyticsops.test.task.reporting;
 
-import ic3.analyticsops.common.AOLoggers;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import ic3.analyticsops.utils.AOStringUtils;
 import io.webfolder.cdp.Constant;
 import io.webfolder.cdp.Options;
@@ -157,18 +157,18 @@ public class AOChromeProxy
 
         if (sf == null)
         {
-            AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: the session-factory is null");
+            AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: the session-factory is null");
         }
         else if (sf.closed())
         {
-            AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: the sessionFactory is closed");
+            AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: the sessionFactory is closed");
 
             sf = null;
         }
 
         if (sf == null)
         {
-            AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome");
+            AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome");
 
             try
             {
@@ -176,12 +176,12 @@ public class AOChromeProxy
 
                 sf = sessionFactory;
 
-                AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: Chrome restarted [SF:{}]", sf != null);
+                AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: Chrome restarted [SF:{}]", sf != null);
 
             }
             catch (AOChromeException ex)
             {
-                AOLoggers.CHROME.error("[chrome] getOrCreateSessionFactory: failed to restart Chrome", ex);
+                AOLog4jUtils.CHROME.error("[chrome] getOrCreateSessionFactory: failed to restart Chrome", ex);
 
                 sf = null;
             }
@@ -203,14 +203,14 @@ public class AOChromeProxy
 
                 if (forced || sf == null || sf.closed())
                 {
-                    AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: still required [forced:{}]", forced);
+                    AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: still required [forced:{}]", forced);
 
                     shutdown();
                     setupAndLaunch();
                 }
                 else
                 {
-                    AOLoggers.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: not required");
+                    AOLog4jUtils.CHROME.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: not required");
                 }
             }
             finally
@@ -226,32 +226,32 @@ public class AOChromeProxy
     public void setupAndLaunch()
             throws AOChromeException
     {
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome] Chrome|Chromium headless setup (and launch)");
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome]                       OS : " + Constant.OS_NAME);
-        AOLoggers.CHROME.debug("[chrome]                    Linux : " + Constant.LINUX);
-        AOLoggers.CHROME.debug("[chrome]                  Windows : " + Constant.WINDOWS);
-        AOLoggers.CHROME.debug("[chrome]                      OSX : " + Constant.OSX);
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome]   ICCUBE_NO_SAFE_PROCESS : " + System.getenv("ICCUBE_NO_SAFE_PROCESS"));
-        AOLoggers.CHROME.debug("[chrome] ICCUBE_CHROME_NO_SANDBOX : " + System.getenv("ICCUBE_CHROME_NO_SANDBOX"));
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome]          reading timeout : " + getReadingTimeoutMS() + "ms");
-        AOLoggers.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] Chrome|Chromium headless setup (and launch)");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome]                       OS : " + Constant.OS_NAME);
+        AOLog4jUtils.CHROME.debug("[chrome]                    Linux : " + Constant.LINUX);
+        AOLog4jUtils.CHROME.debug("[chrome]                  Windows : " + Constant.WINDOWS);
+        AOLog4jUtils.CHROME.debug("[chrome]                      OSX : " + Constant.OSX);
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome]   ICCUBE_NO_SAFE_PROCESS : " + System.getenv("ICCUBE_NO_SAFE_PROCESS"));
+        AOLog4jUtils.CHROME.debug("[chrome] ICCUBE_CHROME_NO_SANDBOX : " + System.getenv("ICCUBE_CHROME_NO_SANDBOX"));
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome]          reading timeout : " + getReadingTimeoutMS() + "ms");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
 
         options = setupOptions();
 
-        AOLoggers.CHROME.debug("[chrome] Chrome|Chromium options");
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome] --user-data-dir=" + options.userDataDir());
+        AOLog4jUtils.CHROME.debug("[chrome] Chrome|Chromium options");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] --user-data-dir=" + options.userDataDir());
 
         for (String argument : options.arguments())
         {
-            AOLoggers.CHROME.debug("[chrome] " + argument);
+            AOLog4jUtils.CHROME.debug("[chrome] " + argument);
         }
 
-        AOLoggers.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
 
         webSocketFactory = AOChromeLauncher.createChannelFactory();
 
@@ -262,8 +262,8 @@ public class AOChromeProxy
             throw new AOChromeException("Chrome is not installed");
         }
 
-        AOLoggers.CHROME.debug("[chrome]          chrome : " + launcher.getChromePath());
-        AOLoggers.CHROME.debug("[chrome]       listening : " + launcher.getListening());
+        AOLog4jUtils.CHROME.debug("[chrome]          chrome : " + launcher.getChromePath());
+        AOLog4jUtils.CHROME.debug("[chrome]       listening : " + launcher.getListening());
 
         launchChrome();
     }
@@ -325,9 +325,9 @@ public class AOChromeProxy
 
     public void launchChrome()
     {
-        AOLoggers.CHROME.debug("[chrome] ");
-        AOLoggers.CHROME.debug("[chrome] Starting Chrome|Chromium");
-        AOLoggers.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
+        AOLog4jUtils.CHROME.debug("[chrome] Starting Chrome|Chromium");
+        AOLog4jUtils.CHROME.debug("[chrome] ");
 
         try
         {
@@ -340,31 +340,31 @@ public class AOChromeProxy
                 final ProcessManager manager = options.processManager();
                 final String pid = pid();
 
-                AOLoggers.CHROME.debug("[chrome] process manager : {}", manager);
-                AOLoggers.CHROME.debug("[chrome] process ID      : {}", pid);
+                AOLog4jUtils.CHROME.debug("[chrome] process manager : {}", manager);
+                AOLog4jUtils.CHROME.debug("[chrome] process ID      : {}", pid);
 
-                AOLoggers.CHROME.debug("[chrome] ");
-                AOLoggers.CHROME.debug("[chrome] Chrome|Chromium has been started");
-                AOLoggers.CHROME.debug("[chrome] ");
+                AOLog4jUtils.CHROME.debug("[chrome] ");
+                AOLog4jUtils.CHROME.debug("[chrome] Chrome|Chromium has been started");
+                AOLog4jUtils.CHROME.debug("[chrome] ");
 
                 final GetVersionResult v = (version = extractChromeVersion());
 
                 if (v != null)
                 {
-                    AOLoggers.CHROME.debug("[chrome] ");
-                    AOLoggers.CHROME.debug("[chrome] Chrome|Chromium information");
-                    AOLoggers.CHROME.debug("[chrome]               product : {}", v.getProduct());
-                    AOLoggers.CHROME.debug("[chrome]              revision : {}", v.getRevision());
-                    AOLoggers.CHROME.debug("[chrome]            user agent : {}", v.getUserAgent());
-                    AOLoggers.CHROME.debug("[chrome]      protocol version : {}", v.getProtocolVersion());
-                    AOLoggers.CHROME.debug("[chrome]            JS version : {}", v.getJsVersion());
-                    AOLoggers.CHROME.debug("[chrome] ");
+                    AOLog4jUtils.CHROME.debug("[chrome] ");
+                    AOLog4jUtils.CHROME.debug("[chrome] Chrome|Chromium information");
+                    AOLog4jUtils.CHROME.debug("[chrome]               product : {}", v.getProduct());
+                    AOLog4jUtils.CHROME.debug("[chrome]              revision : {}", v.getRevision());
+                    AOLog4jUtils.CHROME.debug("[chrome]            user agent : {}", v.getUserAgent());
+                    AOLog4jUtils.CHROME.debug("[chrome]      protocol version : {}", v.getProtocolVersion());
+                    AOLog4jUtils.CHROME.debug("[chrome]            JS version : {}", v.getJsVersion());
+                    AOLog4jUtils.CHROME.debug("[chrome] ");
                 }
             }
         }
         catch (CdpException ex)
         {
-            AOLoggers.CHROME.error("[chrome] could not start Chrome", ex);
+            AOLog4jUtils.CHROME.error("[chrome] could not start Chrome", ex);
         }
     }
 
@@ -377,7 +377,7 @@ public class AOChromeProxy
         }
         catch (Exception exception)
         {
-            AOLoggers.CHROME.debug("[chrome] could not get Chrome|Chromium version", exception);
+            AOLog4jUtils.CHROME.debug("[chrome] could not get Chrome|Chromium version", exception);
             return null;
         }
     }
@@ -418,7 +418,7 @@ public class AOChromeProxy
             return;
         }
 
-        AOLoggers.CHROME.debug("[chrome] shutdown: closing the session-factory");
+        AOLog4jUtils.CHROME.debug("[chrome] shutdown: closing the session-factory");
 
         try
         {
@@ -433,10 +433,10 @@ public class AOChromeProxy
         }
         catch (RuntimeException ex)
         {
-            AOLoggers.CHROME.warn("[chrome] shutdown error: closing the session-factory", ex);
+            AOLog4jUtils.CHROME.warn("[chrome] shutdown error: closing the session-factory", ex);
         }
 
-        AOLoggers.CHROME.debug("[chrome] shutdown: killing the Chrome process [{}]", pid());
+        AOLog4jUtils.CHROME.debug("[chrome] shutdown: killing the Chrome process [{}]", pid());
 
         try
         {
@@ -451,10 +451,10 @@ public class AOChromeProxy
         }
         catch (RuntimeException ex)
         {
-            AOLoggers.CHROME.warn("[chrome] shutdown error: killing the Chrome process", ex);
+            AOLog4jUtils.CHROME.warn("[chrome] shutdown error: killing the Chrome process", ex);
         }
 
-        AOLoggers.CHROME.debug("[chrome] shutdown: delete the user-data-dir");
+        AOLog4jUtils.CHROME.debug("[chrome] shutdown: delete the user-data-dir");
 
         try
         {
@@ -464,17 +464,17 @@ public class AOChromeProxy
             {
                 final Path userDataDir = opts.userDataDir();
 
-                AOLoggers.CHROME.debug("[chrome] shutdown: delete the user-data-dir: {}", userDataDir);
+                AOLog4jUtils.CHROME.debug("[chrome] shutdown: delete the user-data-dir: {}", userDataDir);
 
                 FileUtils.deleteQuietly(userDataDir.toFile());
             }
         }
         catch (RuntimeException ex)
         {
-            AOLoggers.CHROME.warn("[chrome] shutdown error: deleting the user-data-dir", ex);
+            AOLog4jUtils.CHROME.warn("[chrome] shutdown error: deleting the user-data-dir", ex);
         }
 
-        AOLoggers.CHROME.debug("[chrome] shutdown: done");
+        AOLog4jUtils.CHROME.debug("[chrome] shutdown: done");
     }
 
     @Nullable
@@ -484,7 +484,7 @@ public class AOChromeProxy
 
         if (opts == null)
         {
-            AOLoggers.CHROME.debug("[chrome] could not retrieve the PID (no options)");
+            AOLog4jUtils.CHROME.debug("[chrome] could not retrieve the PID (no options)");
             return null;
         }
 
@@ -492,7 +492,7 @@ public class AOChromeProxy
 
         if (manager == null)
         {
-            AOLoggers.CHROME.debug("[chrome] could not retrieve the PID (no process manager)");
+            AOLog4jUtils.CHROME.debug("[chrome] could not retrieve the PID (no process manager)");
             return null;
         }
 
@@ -508,7 +508,7 @@ public class AOChromeProxy
             }
             catch (Exception ex)
             {
-                AOLoggers.CHROME.debug("[chrome] could not retrieve the PID", ex);
+                AOLog4jUtils.CHROME.debug("[chrome] could not retrieve the PID", ex);
                 return null;
             }
         }
@@ -524,7 +524,7 @@ public class AOChromeProxy
         }
         catch (Exception ex)
         {
-            AOLoggers.CHROME.debug("[chrome] could not retrieve the PID", ex);
+            AOLog4jUtils.CHROME.debug("[chrome] could not retrieve the PID", ex);
             return null;
         }
     }

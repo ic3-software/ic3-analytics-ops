@@ -1,8 +1,9 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.common.AOLoggers;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
 
 public class AOActor extends AOSerializable
@@ -159,16 +160,16 @@ public class AOActor extends AOSerializable
      */
     public void run(AOActorContext context)
     {
-        final Long durationS = context.getDurationS();
-        final Long expiryMS = durationS != null ? System.currentTimeMillis() + durationS * 1_000 : null;
+        final Duration duration = context.getDuration();
+        final Long expiryMS = duration != null ? System.currentTimeMillis() + duration.toMillis() : null;
 
-        if (durationS != null)
+        if (duration != null)
         {
-            AOLoggers.ACTOR.info("[actor] '{}' run for {} seconds", name, durationS);
+            AOLog4jUtils.ACTOR.info("[actor] '{}' run for {}", name, duration);
         }
         else
         {
-            AOLoggers.ACTOR.info("[actor] '{}' run once", name);
+            AOLog4jUtils.ACTOR.info("[actor] '{}' run once", name);
         }
 
         try
@@ -177,7 +178,7 @@ public class AOActor extends AOSerializable
         }
         catch (Throwable ex)
         {
-            AOLoggers.ACTOR.error("[actor] '{}' run on-error", name);
+            AOLog4jUtils.ACTOR.error("[actor] '{}' run on-error", name);
 
             context.onActorError(ex);
             context.onActorCompleted();
@@ -186,7 +187,7 @@ public class AOActor extends AOSerializable
 
     protected void run(AOActorContext context, @Nullable Long expiryMS)
     {
-        AOLoggers.ACTOR.info("[actor] '{}' run started", name);
+        AOLog4jUtils.ACTOR.info("[actor] '{}' run started", name);
 
         do
         {
@@ -207,11 +208,24 @@ public class AOActor extends AOSerializable
                     {
                         task.run(tContext);
 
-                        AOLoggers.ACTOR.debug("[actor] '{}.{}' ✓", name, task.getName());
+                        AOLog4jUtils.ACTOR.debug("[actor] '{}.{}' ✓", name, task.getName());
+
+                        final Long pauseMS = task.getPauseMS();
+
+                        if (pauseMS != null)
+                        {
+                            try
+                            {
+                                Thread.sleep(pauseMS);
+                            }
+                            catch (InterruptedException ignored)
+                            {
+                            }
+                        }
                     }
                     catch (Throwable /* AssertionError */ ex)
                     {
-                        AOLoggers.ACTOR.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
+                        AOLog4jUtils.ACTOR.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
 
                         context.onActorTaskError(task, ex);
 
@@ -221,14 +235,14 @@ public class AOActor extends AOSerializable
             }
             catch (Throwable ex)
             {
-                AOLoggers.ACTOR.error("[actor] '{}' run on-tasks-error", name, ex);
+                AOLog4jUtils.ACTOR.error("[actor] '{}' run on-tasks-error", name, ex);
 
                 context.onActorTasksError(ex);
             }
         }
         while (expiryMS != null /* single run */ && System.currentTimeMillis() < expiryMS && !context.isOnError());
 
-        AOLoggers.ACTOR.info("[actor] '{}' run completed", name);
+        AOLog4jUtils.ACTOR.info("[actor] '{}' run completed", name);
 
         context.onActorCompleted();
     }

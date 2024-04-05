@@ -1,10 +1,10 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.restapi.client.AORestApiClientOptions;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.request.AORestApiRequest;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
 
 import java.io.ByteArrayOutputStream;
@@ -105,11 +105,11 @@ public class AOTaskContext
 
             prettyPrint.invoke(reply, ps);
 
-            AOLoggers.PRETTY_PRINT.warn("[pretty-print] {}\n{}", reply.getClass().getSimpleName(), out.toString(StandardCharsets.UTF_8));
+            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] {}\n{}", reply.getClass().getSimpleName(), out.toString(StandardCharsets.UTF_8));
         }
         catch (Exception ex)
         {
-            AOLoggers.PRETTY_PRINT.warn("[pretty-print] pretty-print missing for class : {}", reply.getClass().getSimpleName());
+            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] pretty-print missing for class : {}", reply.getClass().getSimpleName());
         }
 
         return reply;

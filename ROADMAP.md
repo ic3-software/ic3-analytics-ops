@@ -8,6 +8,8 @@ initiative so feel free to comment and ask for new features.
 - Task : OpenReport : add support for Chromium.
 - Authentication : add support for HTTP headers (embedded scenario) + OpenReport improvements.
 - Docker : deploy and run anywhere the shell.
-- Stress Tests : improve actor for implementing stress-testing like scenario.
+- Stress Tests : improve actor for implementing stress-testing like scenario
+  - duplicate actor easily
+  - timing assertion
 
 _

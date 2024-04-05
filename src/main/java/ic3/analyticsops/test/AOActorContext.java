@@ -9,6 +9,7 @@ import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,9 +58,9 @@ public class AOActorContext
     }
 
     @Nullable
-    public Long getDurationS()
+    public Duration getDuration()
     {
-        return context.getDurationS();
+        return context.getDuration();
     }
 
     public File getMDXesDataFolder(String data)

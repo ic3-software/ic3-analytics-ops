@@ -1,6 +1,5 @@
 package ic3.analyticsops.shell;
 
-import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestContext;
 import ic3.analyticsops.utils.AOLog4jUtils;
@@ -35,7 +34,7 @@ public class AOShell
         }
         catch (Exception ex)
         {
-            AOLoggers.SHELL.error("[shell] could not setup the system properties : exit(-1)", ex);
+            AOLog4jUtils.SHELL.error("[shell] could not setup the system properties : exit(-1)", ex);
             System.exit(-1);
         }
 
@@ -43,7 +42,7 @@ public class AOShell
 
         if (test == null)
         {
-            AOLoggers.SHELL.error("[shell] could not setup the test : exit(-1)");
+            AOLog4jUtils.SHELL.error("[shell] could not setup the test : exit(-1)");
             System.exit(-1);
         }
 
@@ -55,7 +54,7 @@ public class AOShell
         }
         catch (InterruptedException ex /* dunno yet */)
         {
-            AOLoggers.SHELL.error("[shell] test interrupted : exit(-1)", ex);
+            AOLog4jUtils.SHELL.error("[shell] test interrupted : exit(-1)", ex);
 
             context.onTestInterrupted(ex);
         }
@@ -66,12 +65,12 @@ public class AOShell
 
         if (context.isOnError())
         {
-            AOLoggers.SHELL.error("[shell] test completed on error : exit(-1)");
+            AOLog4jUtils.SHELL.error("[shell] test completed on error : exit(-1)");
             System.exit(-1);
         }
         else
         {
-            AOLoggers.SHELL.info("[shell] test completed successfully : exit(0)");
+            AOLog4jUtils.SHELL.info("[shell] test completed successfully : exit(0)");
             System.exit(0);
         }
     }
@@ -94,7 +93,7 @@ public class AOShell
                 json5 = new File("etc/tests/smoke.test.json5");
             }
 
-            AOLoggers.SHELL.info("[shell] JSON configuration : {}", json5.getAbsolutePath());
+            AOLog4jUtils.SHELL.info("[shell] JSON configuration : {}", json5.getAbsolutePath());
 
             final AOTest test = AOTest.create(json5);
 
@@ -104,7 +103,7 @@ public class AOShell
         }
         catch (Exception ex)
         {
-            AOLoggers.SHELL.error("[shell] could not create and validate the test", ex);
+            AOLog4jUtils.SHELL.error("[shell] could not create and validate the test", ex);
             return null;
         }
     }

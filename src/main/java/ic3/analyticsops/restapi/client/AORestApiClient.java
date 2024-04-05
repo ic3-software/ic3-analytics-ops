@@ -2,7 +2,6 @@ package ic3.analyticsops.restapi.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.restapi.error.AORestApiErrorException;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.error.AORestApiHttpException;
@@ -11,6 +10,7 @@ import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiReplyDeserializer;
 import ic3.analyticsops.restapi.request.AORestApiRequest;
 import ic3.analyticsops.test.AOAuthenticator;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -161,7 +161,7 @@ public class AORestApiClient
 
             final String json = new String(bytes, StandardCharsets.UTF_8);
 
-            AOLoggers.DUMP_JSON.warn("[dump-json] [{}] [{}]", bytes.length, json);
+            AOLog4jUtils.DUMP_JSON.warn("[dump-json] [{}] [{}]", bytes.length, json);
 
             return new ByteArrayInputStream(bytes);
         }

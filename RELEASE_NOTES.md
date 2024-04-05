@@ -20,6 +20,12 @@
 
 - Added `dumpJson` and `dumpResult` configuration (overriding actor's values).
 
+- Added `pause` configuration to wait (possibly randomly) after the execution of a task.
+
+`Task:MDXes`
+
+- Added `pauses` configuration to wait (possibly randomly) after the execution of each MDX statement.
+
 ## 1.0
 
 `General`

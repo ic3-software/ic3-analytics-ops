@@ -2,8 +2,8 @@ package ic3.analyticsops.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.restapi.client.AORestApiClient;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -162,9 +162,9 @@ public class AOTest extends AOSerializable
     }
 
     @Nullable
-    public Long getDurationS()
+    public Duration getDuration()
     {
-        return duration != null ? duration.toSeconds() : null;
+        return duration;
     }
 
     public List<AOActor> activeActors()
@@ -178,15 +178,15 @@ public class AOTest extends AOSerializable
     public void run(AOTestContext context)
             throws InterruptedException
     {
-        final Long durationS = getDurationS();
+        final Duration duration = getDuration();
 
-        if (durationS != null)
+        if (duration != null)
         {
-            AOLoggers.TEST.info("[test] duration : {} seconds", durationS);
+            AOLog4jUtils.TEST.info("[test] duration : {}", duration);
         }
         else
         {
-            AOLoggers.TEST.info("[test] duration : once");
+            AOLog4jUtils.TEST.info("[test] duration : once");
         }
 
         final List<AOActor> activeActors = activeActors();
@@ -202,11 +202,11 @@ public class AOTest extends AOSerializable
             actor.run(aContext) /* in its own thread of control */;
         }
 
-        AOLoggers.TEST.info("[test] waiting for {} actors", activeActors.size());
+        AOLog4jUtils.TEST.info("[test] waiting for {} actors", activeActors.size());
 
         context.waitForCompletion();
 
-        AOLoggers.TEST.info("[test] waiting for {} actors done", activeActors.size());
+        AOLog4jUtils.TEST.info("[test] waiting for {} actors done", activeActors.size());
     }
 
     /**

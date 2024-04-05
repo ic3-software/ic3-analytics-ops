@@ -1,6 +1,8 @@
 package ic3.analyticsops.test;
 
 import com.google.gson.*;
+import ic3.analyticsops.common.AOPause;
+import ic3.analyticsops.gson.AOPauseTypeAdapter;
 import ic3.analyticsops.test.assertion.AOAssertionDeserializer;
 import ic3.analyticsops.test.task.mdx.AOExecuteMdxTask;
 import ic3.analyticsops.test.task.mdx.AOGenerateMDXesTask;
@@ -48,6 +50,7 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
         final Gson gson = new GsonBuilder()
                 .setLenient()
                 .serializeSpecialFloatingPointValues()
+                .registerTypeAdapter(AOPause.class, new AOPauseTypeAdapter())
                 .registerTypeAdapter(AOAssertion.class, new AOAssertionDeserializer(id))
                 .create();
 

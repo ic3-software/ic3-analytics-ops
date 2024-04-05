@@ -1,6 +1,7 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.common.AOException;
+import ic3.analyticsops.common.AOPause;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -34,6 +35,12 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     private final Boolean dumpResult;
 
     /**
+     * An optional pause applied after the processing of the task.
+     */
+    @Nullable
+    private final AOPause pause;
+
+    /**
      * Dunno but GSON does not like the generic declaration.
      */
     @Nullable
@@ -46,6 +53,7 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         this.name = null;
         this.dumpJson = null;
         this.dumpResult = null;
+        this.pause = null;
         this.assertions = null;
     }
 
@@ -118,11 +126,6 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
 
     public abstract String getKind();
 
-    /**
-     * Requires some assertions being defined in the task definition (JSON5).
-     */
-    public abstract boolean withAssertions();
-
     public boolean isDumpJson()
     {
         return dumpJson != null ? dumpJson : jsonParentActor.isDumpJson();
@@ -132,6 +135,17 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     {
         return dumpResult != null ? dumpResult : jsonParentActor.isDumpResult();
     }
+
+    @Nullable
+    public Long getPauseMS()
+    {
+        return pause != null ? pause.pauseMS() : null;
+    }
+
+    /**
+     * Requires some assertions being defined in the task definition (JSON5).
+     */
+    public abstract boolean withAssertions();
 
     protected List<ASSERTION> assertions()
     {
