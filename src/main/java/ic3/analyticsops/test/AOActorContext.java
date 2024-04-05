@@ -56,6 +56,12 @@ public class AOActorContext
         return client.getRestApiURL();
     }
 
+    @Nullable
+    public Long getDurationS()
+    {
+        return context.getDurationS();
+    }
+
     public File getMDXesDataFolder(String data)
     {
         return context.getMDXesDataFolder(data);
@@ -103,17 +109,22 @@ public class AOActorContext
         return client.sendRequest(request, options);
     }
 
-    public void onActorError(Exception ex)
+    public boolean isOnError()
+    {
+        return context.isOnError();
+    }
+
+    public void onActorError(Throwable ex)
     {
         context.onActorError(actor, ex);
     }
 
-    public void onActorTaskError(AOTask<?> task, Exception ex)
+    public void onActorTaskError(AOTask<?> task, Throwable ex)
     {
         context.onActorTaskError(actor, task, ex);
     }
 
-    public void onActorTasksError(Exception ex)
+    public void onActorTasksError(Throwable ex)
     {
         context.onActorTasksError(actor, ex);
     }
@@ -122,5 +133,4 @@ public class AOActorContext
     {
         context.onActorCompleted(actor);
     }
-
 }

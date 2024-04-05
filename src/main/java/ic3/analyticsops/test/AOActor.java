@@ -139,59 +139,81 @@ public class AOActor extends AOSerializable
      */
     public void run(AOActorContext context)
     {
-        LOGGER.info("[actor] '{}' run", name);
+        final Long durationS = context.getDurationS();
+        final Long expiryMS = durationS != null ? System.currentTimeMillis() + durationS * 1_000 : null;
+
+        if (durationS != null)
+        {
+            LOGGER.info("[actor] '{}' run for {} seconds", name, durationS);
+        }
+        else
+        {
+            LOGGER.info("[actor] '{}' run once", name);
+        }
 
         try
         {
-            new Thread(() ->
-            {
-                LOGGER.info("[actor] '{}' run started", name);
-
-                try
-                {
-                    context.clearTaskProperties();
-
-                    for (AOTask<?> task : tasks /* validated by now */)
-                    {
-                        final AORestApiClientOptions options = new AORestApiClientOptions()
-                                .dumpJson(task.isDumpJson());
-
-                        final AOTaskContext tContext = new AOTaskContext(context, options);
-
-                        try
-                        {
-                            task.run(tContext);
-
-                            LOGGER.debug("[task] '{}.{}' ✓", name, task.getName());
-                        }
-                        catch (Exception ex)
-                        {
-                            LOGGER.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
-
-                            context.onActorTaskError(task, ex);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LOGGER.error("[actor] '{}' run on-tasks-error", name, ex);
-
-                    context.onActorTasksError(ex);
-                }
-
-                LOGGER.info("[actor] '{}' run completed", name);
-
-                context.onActorCompleted();
-
-            }).start();
+            new Thread(() -> run(context, expiryMS), "actor-" + name).start();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             LOGGER.error("[actor] '{}' run on-error", name);
 
             context.onActorError(ex);
             context.onActorCompleted();
         }
+    }
+
+    protected void run(AOActorContext context, @Nullable Long expiryMS)
+    {
+        LOGGER.info("[actor] '{}' run started", name);
+
+        do
+        {
+            try
+            {
+                context.clearTaskProperties();
+
+                for (AOTask<?> task : tasks /* validated by now */)
+                {
+                    if (context.isOnError())
+                    {
+                        break /* i.e., another actor on error */;
+                    }
+
+                    final AORestApiClientOptions options = new AORestApiClientOptions()
+                            .dumpJson(task.isDumpJson());
+
+                    final AOTaskContext tContext = new AOTaskContext(context, options);
+
+                    try
+                    {
+                        task.run(tContext);
+
+                        LOGGER.debug("[task] '{}.{}' ✓", name, task.getName());
+                    }
+                    catch (Throwable /* AssertionError */ ex)
+                    {
+                        LOGGER.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
+
+                        context.onActorTaskError(task, ex);
+
+                        break;
+                    }
+                }
+            }
+            catch (Throwable ex)
+            {
+                LOGGER.error("[actor] '{}' run on-tasks-error", name, ex);
+
+                context.onActorTasksError(ex);
+            }
+        }
+        while (expiryMS != null /* single run */ && System.currentTimeMillis() < expiryMS && !context.isOnError());
+
+        LOGGER.info("[actor] '{}' run completed", name);
+
+        context.onActorCompleted();
     }
 
 }

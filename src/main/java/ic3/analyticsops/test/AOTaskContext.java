@@ -79,4 +79,8 @@ public class AOTaskContext
         );
     }
 
+    public boolean isOnError()
+    {
+        return context.isOnError();
+    }
 }

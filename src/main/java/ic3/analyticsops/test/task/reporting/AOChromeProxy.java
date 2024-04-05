@@ -179,7 +179,7 @@ public class AOChromeProxy
 
                 sf = sessionFactory;
 
-                LOGGER.debug("[chrome] getOrCreateSessionFactory: Chrome restarted [SF:" + (sf != null) + "]");
+                LOGGER.debug("[chrome] getOrCreateSessionFactory: Chrome restarted [SF:{}]", sf != null);
 
             }
             catch (AOChromeException ex)
@@ -206,7 +206,7 @@ public class AOChromeProxy
 
                 if (forced || sf == null || sf.closed())
                 {
-                    LOGGER.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: still required [forced:" + forced + "]");
+                    LOGGER.debug("[chrome] getOrCreateSessionFactory: restarting Chrome: still required [forced:{}]", forced);
 
                     shutdown();
                     setupAndLaunch();
@@ -343,8 +343,8 @@ public class AOChromeProxy
                 final ProcessManager manager = options.processManager();
                 final String pid = pid();
 
-                LOGGER.debug("[chrome] process manager : " + manager);
-                LOGGER.debug("[chrome] process ID      : " + pid);
+                LOGGER.debug("[chrome] process manager : {}", manager);
+                LOGGER.debug("[chrome] process ID      : {}", pid);
 
                 LOGGER.debug("[chrome] ");
                 LOGGER.debug("[chrome] Chrome|Chromium has been started");
@@ -356,11 +356,11 @@ public class AOChromeProxy
                 {
                     LOGGER.debug("[chrome] ");
                     LOGGER.debug("[chrome] Chrome|Chromium information");
-                    LOGGER.debug("[chrome]               product : " + v.getProduct());
-                    LOGGER.debug("[chrome]              revision : " + v.getRevision());
-                    LOGGER.debug("[chrome]            user agent : " + v.getUserAgent());
-                    LOGGER.debug("[chrome]      protocol version : " + v.getProtocolVersion());
-                    LOGGER.debug("[chrome]            JS version : " + v.getJsVersion());
+                    LOGGER.debug("[chrome]               product : {}", v.getProduct());
+                    LOGGER.debug("[chrome]              revision : {}", v.getRevision());
+                    LOGGER.debug("[chrome]            user agent : {}", v.getUserAgent());
+                    LOGGER.debug("[chrome]      protocol version : {}", v.getProtocolVersion());
+                    LOGGER.debug("[chrome]            JS version : {}", v.getJsVersion());
                     LOGGER.debug("[chrome] ");
                 }
             }

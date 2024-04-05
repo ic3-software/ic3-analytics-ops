@@ -6,7 +6,7 @@
 
 - Added JSON validation.
 
-- Added `duration` and parallel actor execution : each actor is run in its own thread of control.
+- Added `duration` and parallel actor execution : each actor runs in its own thread of control.
 
 `Tasks`
 

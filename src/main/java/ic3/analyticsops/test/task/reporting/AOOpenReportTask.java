@@ -92,7 +92,14 @@ public class AOOpenReportTask extends AOTask
                 int newTimoutMillis = Math.max(waitPeriodMS * 2, timeOutInMillis - (int) (System.currentTimeMillis() - start));
 
                 final boolean gotIt = session.waitUntil(
-                        s -> safeCompareVariable(s, "ic3printStatus"),
+                        s ->
+                        {
+                            if (context.isOnError() /* i.e., another actor on error */)
+                            {
+                                throw new RuntimeException("interrupted because of other error.");
+                            }
+                            return safeCompareVariable(s, "ic3printStatus");
+                        },
                         newTimoutMillis,
                         waitPeriodMS /* Cannot find context with specified id */,
                         true
@@ -119,7 +126,7 @@ public class AOOpenReportTask extends AOTask
         }
         catch (NullPointerException ex)
         {
-            LOGGER.warn("[chrome] could not access " + name + " variable (NPE)", ex);
+            LOGGER.warn("[chrome] could not access {} variable (NPE)", name, ex);
             return false;
         }
         catch (CdpException ex)
@@ -128,11 +135,11 @@ public class AOOpenReportTask extends AOTask
 
             if (error != null && error.endsWith("is not defined"))
             {
-                LOGGER.debug("[chrome] could not access " + name + " variable (not defined)");
+                LOGGER.debug("[chrome] could not access {} variable (not defined)", name);
                 return false;
             }
 
-            LOGGER.debug("[chrome] could not access " + name + " variable (exception)", ex);
+            LOGGER.debug("[chrome] could not access {} variable (exception)", name, ex);
             return false;
         }
     }
