@@ -2,9 +2,8 @@ package ic3.analyticsops.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.restapi.client.AORestApiClient;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -20,8 +19,6 @@ import java.util.regex.Pattern;
 
 public class AOTest extends AOSerializable
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     protected transient final File json;
 
     private final String name;
@@ -185,11 +182,11 @@ public class AOTest extends AOSerializable
 
         if (durationS != null)
         {
-            LOGGER.info("[test] duration : {} seconds", durationS);
+            AOLoggers.TEST.info("[test] duration : {} seconds", durationS);
         }
         else
         {
-            LOGGER.info("[test] duration : once");
+            AOLoggers.TEST.info("[test] duration : once");
         }
 
         final List<AOActor> activeActors = activeActors();
@@ -205,11 +202,11 @@ public class AOTest extends AOSerializable
             actor.run(aContext) /* in its own thread of control */;
         }
 
-        LOGGER.info("[test] waiting for {} actors", activeActors.size());
+        AOLoggers.TEST.info("[test] waiting for {} actors", activeActors.size());
 
         context.waitForCompletion();
 
-        LOGGER.info("[test] waiting for {} actors done", activeActors.size());
+        AOLoggers.TEST.info("[test] waiting for {} actors done", activeActors.size());
     }
 
     /**

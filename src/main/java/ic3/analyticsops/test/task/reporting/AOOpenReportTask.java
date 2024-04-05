@@ -1,13 +1,12 @@
 package ic3.analyticsops.test.task.reporting;
 
 import ic3.analyticsops.common.AOException;
+import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URLEncoder;
@@ -15,8 +14,6 @@ import java.nio.charset.StandardCharsets;
 
 public class AOOpenReportTask extends AOTask
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     private final String reportPath;
 
     @Nullable
@@ -126,7 +123,7 @@ public class AOOpenReportTask extends AOTask
         }
         catch (NullPointerException ex)
         {
-            LOGGER.warn("[chrome] could not access {} variable (NPE)", name, ex);
+            AOLoggers.CHROME.warn("[chrome] could not access {} variable (NPE)", name, ex);
             return false;
         }
         catch (CdpException ex)
@@ -135,11 +132,11 @@ public class AOOpenReportTask extends AOTask
 
             if (error != null && error.endsWith("is not defined"))
             {
-                LOGGER.debug("[chrome] could not access {} variable (not defined)", name);
+                AOLoggers.CHROME.debug("[chrome] could not access {} variable (not defined)", name);
                 return false;
             }
 
-            LOGGER.debug("[chrome] could not access {} variable (exception)", name, ex);
+            AOLoggers.CHROME.debug("[chrome] could not access {} variable (exception)", name, ex);
             return false;
         }
     }

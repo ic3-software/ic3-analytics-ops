@@ -1,10 +1,9 @@
 package ic3.analyticsops.test;
 
+import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import io.webfolder.cdp.session.Session;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -13,8 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AOTestContext
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     private final AOTest test;
 
     private final AOChromeProxy chrome;
@@ -102,7 +99,7 @@ public class AOTestContext
         }
         catch (Exception ex)
         {
-            LOGGER.warn("[shell] shutdown on error", ex);
+            AOLoggers.SHELL.warn("[shell] shutdown on error", ex);
         }
     }
 }

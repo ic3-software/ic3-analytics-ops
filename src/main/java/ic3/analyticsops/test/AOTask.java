@@ -23,7 +23,15 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     @Nullable
     private final String name;
 
-    private final boolean dumpJson;
+    /**
+     * Writes to the log the actual JSON returned by the server.
+     */
+    private final Boolean dumpJson;
+
+    /**
+     * Writes to the log a pretty-print version of the payload of the JSON reply.
+     */
+    private final Boolean dumpResult;
 
     /**
      * Dunno but GSON does not like the generic declaration.
@@ -36,7 +44,8 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         // JSON deserialization
 
         this.name = null;
-        this.dumpJson = false;
+        this.dumpJson = null;
+        this.dumpResult = null;
         this.assertions = null;
     }
 
@@ -116,7 +125,12 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
 
     public boolean isDumpJson()
     {
-        return dumpJson;
+        return dumpJson != null ? dumpJson : jsonParentActor.isDumpJson();
+    }
+
+    public boolean isDumpResult()
+    {
+        return dumpResult != null ? dumpResult : jsonParentActor.isDumpResult();
     }
 
     protected List<ASSERTION> assertions()

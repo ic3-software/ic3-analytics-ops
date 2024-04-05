@@ -1,12 +1,11 @@
 package ic3.analyticsops.shell;
 
+import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestContext;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import ic3.analyticsops.utils.AOStringUtils;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -16,8 +15,6 @@ import java.util.Properties;
 
 public class AOShell
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     public static void main(String[] args)
     {
         AOLog4jUtils.configure(Level.DEBUG);
@@ -38,7 +35,7 @@ public class AOShell
         }
         catch (Exception ex)
         {
-            LOGGER.error("[shell] could not setup the system properties : exit(-1)", ex);
+            AOLoggers.SHELL.error("[shell] could not setup the system properties : exit(-1)", ex);
             System.exit(-1);
         }
 
@@ -46,7 +43,7 @@ public class AOShell
 
         if (test == null)
         {
-            LOGGER.error("[shell] could not setup the test : exit(-1)");
+            AOLoggers.SHELL.error("[shell] could not setup the test : exit(-1)");
             System.exit(-1);
         }
 
@@ -58,7 +55,7 @@ public class AOShell
         }
         catch (InterruptedException ex /* dunno yet */)
         {
-            LOGGER.error("[shell] test interrupted : exit(-1)", ex);
+            AOLoggers.SHELL.error("[shell] test interrupted : exit(-1)", ex);
 
             context.onTestInterrupted(ex);
         }
@@ -69,12 +66,12 @@ public class AOShell
 
         if (context.isOnError())
         {
-            LOGGER.error("[shell] test completed on error : exit(-1)");
+            AOLoggers.SHELL.error("[shell] test completed on error : exit(-1)");
             System.exit(-1);
         }
         else
         {
-            LOGGER.info("[shell] test completed successfully : exit(0)");
+            AOLoggers.SHELL.info("[shell] test completed successfully : exit(0)");
             System.exit(0);
         }
     }
@@ -97,7 +94,7 @@ public class AOShell
                 json5 = new File("etc/tests/smoke.test.json5");
             }
 
-            LOGGER.info("[shell] JSON configuration : {}", json5.getAbsolutePath());
+            AOLoggers.SHELL.info("[shell] JSON configuration : {}", json5.getAbsolutePath());
 
             final AOTest test = AOTest.create(json5);
 
@@ -107,7 +104,7 @@ public class AOShell
         }
         catch (Exception ex)
         {
-            LOGGER.error("[shell] could not create and validate the test", ex);
+            AOLoggers.SHELL.error("[shell] could not create and validate the test", ex);
             return null;
         }
     }

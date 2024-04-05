@@ -2,6 +2,7 @@ package ic3.analyticsops.restapi.client;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ic3.analyticsops.common.AOLoggers;
 import ic3.analyticsops.restapi.error.AORestApiErrorException;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.error.AORestApiHttpException;
@@ -11,8 +12,6 @@ import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiReplyDeserializer;
 import ic3.analyticsops.restapi.request.AORestApiRequest;
 import ic3.analyticsops.test.AOAuthenticator;
 import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -30,8 +29,6 @@ import java.util.zip.GZIPInputStream;
 
 public class AORestApiClient
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     private final String restApiURL;
 
     private final AOAuthenticator authenticator;
@@ -164,7 +161,7 @@ public class AORestApiClient
 
             final String json = new String(bytes, StandardCharsets.UTF_8);
 
-            LOGGER.info("[response] JSON [{}] [{}]", bytes.length, json);
+            AOLoggers.DUMP_JSON.warn("[dump-json] [{}] [{}]", bytes.length, json);
 
             return new ByteArrayInputStream(bytes);
         }

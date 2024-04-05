@@ -1,16 +1,12 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.restapi.client.AORestApiClientOptions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import ic3.analyticsops.common.AOLoggers;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class AOActor extends AOSerializable
 {
-    public static final Logger LOGGER = LogManager.getLogger();
-
     /**
      * Final semantic: dunno how to set with JSON deserialization.
      */
@@ -38,6 +34,18 @@ public class AOActor extends AOSerializable
     @Nullable
     private final AOAuthenticator authenticator;
 
+    /**
+     * Writes to the log the actual JSON returned by the server.
+     */
+    @Nullable
+    private final Boolean dumpJson;
+
+    /**
+     * Writes to the log a pretty-print version of the payload of the JSON reply.
+     */
+    @Nullable
+    private final Boolean dumpResult;
+
     private final List<AOTask<?>> tasks;
 
     protected AOActor()
@@ -48,6 +56,8 @@ public class AOActor extends AOSerializable
         this.active = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.dumpJson = null;
+        this.dumpResult = null;
         this.tasks = null;
     }
 
@@ -134,6 +144,16 @@ public class AOActor extends AOSerializable
         return authenticator != null ? authenticator : testAuthenticator;
     }
 
+    public boolean isDumpJson()
+    {
+        return dumpJson != null && dumpJson;
+    }
+
+    public boolean isDumpResult()
+    {
+        return dumpResult != null && dumpResult;
+    }
+
     /**
      * Runs in its own thread of control.
      */
@@ -144,11 +164,11 @@ public class AOActor extends AOSerializable
 
         if (durationS != null)
         {
-            LOGGER.info("[actor] '{}' run for {} seconds", name, durationS);
+            AOLoggers.ACTOR.info("[actor] '{}' run for {} seconds", name, durationS);
         }
         else
         {
-            LOGGER.info("[actor] '{}' run once", name);
+            AOLoggers.ACTOR.info("[actor] '{}' run once", name);
         }
 
         try
@@ -157,7 +177,7 @@ public class AOActor extends AOSerializable
         }
         catch (Throwable ex)
         {
-            LOGGER.error("[actor] '{}' run on-error", name);
+            AOLoggers.ACTOR.error("[actor] '{}' run on-error", name);
 
             context.onActorError(ex);
             context.onActorCompleted();
@@ -166,7 +186,7 @@ public class AOActor extends AOSerializable
 
     protected void run(AOActorContext context, @Nullable Long expiryMS)
     {
-        LOGGER.info("[actor] '{}' run started", name);
+        AOLoggers.ACTOR.info("[actor] '{}' run started", name);
 
         do
         {
@@ -181,20 +201,17 @@ public class AOActor extends AOSerializable
                         break /* i.e., another actor on error */;
                     }
 
-                    final AORestApiClientOptions options = new AORestApiClientOptions()
-                            .dumpJson(task.isDumpJson());
-
-                    final AOTaskContext tContext = new AOTaskContext(context, options);
+                    final AOTaskContext tContext = new AOTaskContext(context, task);
 
                     try
                     {
                         task.run(tContext);
 
-                        LOGGER.debug("[task] '{}.{}' ✓", name, task.getName());
+                        AOLoggers.ACTOR.debug("[actor] '{}.{}' ✓", name, task.getName());
                     }
                     catch (Throwable /* AssertionError */ ex)
                     {
-                        LOGGER.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
+                        AOLoggers.ACTOR.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
 
                         context.onActorTaskError(task, ex);
 
@@ -204,14 +221,14 @@ public class AOActor extends AOSerializable
             }
             catch (Throwable ex)
             {
-                LOGGER.error("[actor] '{}' run on-tasks-error", name, ex);
+                AOLoggers.ACTOR.error("[actor] '{}' run on-tasks-error", name, ex);
 
                 context.onActorTasksError(ex);
             }
         }
         while (expiryMS != null /* single run */ && System.currentTimeMillis() < expiryMS && !context.isOnError());
 
-        LOGGER.info("[actor] '{}' run completed", name);
+        AOLoggers.ACTOR.info("[actor] '{}' run completed", name);
 
         context.onActorCompleted();
     }

@@ -1,5 +1,6 @@
 package ic3.analyticsops.test.task.reporting;
 
+import ic3.analyticsops.common.AOLoggers;
 import io.webfolder.cdp.Launcher;
 import io.webfolder.cdp.Options;
 import io.webfolder.cdp.channel.ChannelFactory;
@@ -95,7 +96,7 @@ public class AOChromeLauncher extends Launcher
         ProcessBuilder builder = new ProcessBuilder(arguments);
         builder.environment().put("CDP4J_ID", cdp4jId);
 
-        AOChromeProxy.LOGGER.debug("[chrome] ProcessBuilder:arguments:{}", arguments);
+        AOLoggers.CHROME.debug("[chrome] ProcessBuilder:arguments:{}", arguments);
 
         try
         {
@@ -107,7 +108,7 @@ public class AOChromeLauncher extends Launcher
                 {
                     final String line = scanner.nextLine().trim();
 
-                    AOChromeProxy.LOGGER.debug("[chrome] ProcessBuilder:stderr:{}", line);
+                    AOLoggers.CHROME.debug("[chrome] ProcessBuilder:stderr:{}", line);
 
                     if (line.isEmpty())
                     {
@@ -140,7 +141,8 @@ public class AOChromeLauncher extends Launcher
             options.processManager().setProcess(new CdpProcess(process, cdp4jId));
 
             final URI url = new URI(connection.getUrl().replace("ws://", "http://"));
-            AOChromeProxy.LOGGER.debug("[chrome] DevTools remote debugging URL: http://{}:{}", url.getHost(), url.getPort());
+
+            AOLoggers.CHROME.debug("[chrome] DevTools remote debugging URL: http://{}:{}", url.getHost(), url.getPort());
 
             return new SessionFactory(options, channelFactory, connection);
 

@@ -8,11 +8,17 @@
 
 - Added `duration` and parallel actor execution : each actor runs in its own thread of control.
 
+`Actor`
+
+- Added `dumpJson` and `dumpResult` configuration.
+
 `Tasks`
 
 - Added `DeleteSchemaBackup` task.
 
 - Added a way to pass information between tasks (e.g., timestamp of a generated schema backup).
+
+- Added `dumpJson` and `dumpResult` configuration (overriding actor's values).
 
 ## 1.0
 
