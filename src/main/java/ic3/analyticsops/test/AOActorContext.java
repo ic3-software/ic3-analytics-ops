@@ -18,6 +18,8 @@ public class AOActorContext
 
     private final AORestApiClient client;
 
+    private final AOActor actor;
+
     /**
      * Properties that can be produced and consumed by task.
      * <pre>
@@ -42,10 +44,11 @@ public class AOActorContext
      */
     private final Map<String, String> taskProperties = new ConcurrentHashMap<>();
 
-    public AOActorContext(AOTestContext context, AORestApiClient client)
+    public AOActorContext(AOTestContext context, AORestApiClient client, AOActor actor)
     {
         this.context = context;
         this.client = client;
+        this.actor = actor;
     }
 
     public String getRestApiURL()
@@ -99,4 +102,25 @@ public class AOActorContext
     {
         return client.sendRequest(request, options);
     }
+
+    public void onActorError(Exception ex)
+    {
+        context.onActorError(actor, ex);
+    }
+
+    public void onActorTaskError(AOTask<?> task, Exception ex)
+    {
+        context.onActorTaskError(actor, task, ex);
+    }
+
+    public void onActorTasksError(Exception ex)
+    {
+        context.onActorTasksError(actor, ex);
+    }
+
+    public void onActorCompleted()
+    {
+        context.onActorCompleted(actor);
+    }
+
 }

@@ -421,7 +421,7 @@ public class AOChromeProxy
             return;
         }
 
-        LOGGER.info("[chrome] shutdown: closing the session-factory");
+        LOGGER.debug("[chrome] shutdown: closing the session-factory");
 
         try
         {
@@ -439,7 +439,7 @@ public class AOChromeProxy
             LOGGER.warn("[chrome] shutdown error: closing the session-factory", ex);
         }
 
-        LOGGER.info("[chrome] shutdown: killing the Chrome process [{}]", pid());
+        LOGGER.debug("[chrome] shutdown: killing the Chrome process [{}]", pid());
 
         try
         {
@@ -457,7 +457,7 @@ public class AOChromeProxy
             LOGGER.warn("[chrome] shutdown error: killing the Chrome process", ex);
         }
 
-        LOGGER.info("[chrome] shutdown: delete the user-data-dir");
+        LOGGER.debug("[chrome] shutdown: delete the user-data-dir");
 
         try
         {
@@ -467,7 +467,7 @@ public class AOChromeProxy
             {
                 final Path userDataDir = opts.userDataDir();
 
-                LOGGER.info("[chrome] shutdown: delete the user-data-dir: {}", userDataDir);
+                LOGGER.debug("[chrome] shutdown: delete the user-data-dir: {}", userDataDir);
 
                 FileUtils.deleteQuietly(userDataDir.toFile());
             }
@@ -477,7 +477,7 @@ public class AOChromeProxy
             LOGGER.warn("[chrome] shutdown error: deleting the user-data-dir", ex);
         }
 
-        LOGGER.info("[chrome] shutdown: done");
+        LOGGER.debug("[chrome] shutdown: done");
     }
 
     @Nullable

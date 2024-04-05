@@ -2,7 +2,6 @@ package ic3.analyticsops.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.client.AORestApiClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -171,35 +170,46 @@ public class AOTest extends AOSerializable
         return duration != null ? duration.toSeconds() : null;
     }
 
+    public List<AOActor> activeActors()
+    {
+        return actors/* validated by now */.stream().filter(AOActor::isActive).toList();
+    }
+
+    /**
+     * Blocking call.
+     */
     public void run(AOTestContext context)
-            throws AOException
+            throws InterruptedException
     {
         final Long durationS = getDurationS();
 
         if (durationS != null)
         {
-            LOGGER.info("Duration : {} seconds", durationS);
+            LOGGER.info("[test] duration : {} seconds", durationS);
         }
         else
         {
-            LOGGER.info("Duration : once");
+            LOGGER.info("[test] duration : once");
         }
 
-        for (AOActor actor : actors /* validated by now */)
-        {
-            if (!actor.isActive())
-            {
-                continue;
-            }
+        final List<AOActor> activeActors = activeActors();
 
+        for (AOActor actor : activeActors)
+        {
             final String restApiURL = actor.getRestApiURL(this.restApiURL);
             final AOAuthenticator authenticator = actor.getAuthenticator(this.authenticator);
 
             final AORestApiClient client = new AORestApiClient(restApiURL, authenticator);
-            final AOActorContext aContext = new AOActorContext(context, client);
+            final AOActorContext aContext = new AOActorContext(context, client, actor);
 
-            actor.run(aContext);
+            actor.run(aContext) /* in its own thread of control */;
         }
+
+        LOGGER.info("[test] waiting for {} actors", activeActors.size());
+
+        context.waitForCompletion();
+
+        LOGGER.info("[test] waiting for {} actors done", activeActors.size());
     }
 
     /**

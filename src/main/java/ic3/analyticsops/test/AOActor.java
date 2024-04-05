@@ -1,6 +1,5 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.client.AORestApiClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -135,21 +134,63 @@ public class AOActor extends AOSerializable
         return authenticator != null ? authenticator : testAuthenticator;
     }
 
+    /**
+     * Runs in its own thread of control.
+     */
     public void run(AOActorContext context)
-            throws AOException
     {
-        context.clearTaskProperties();
+        LOGGER.info("[actor] '{}' run", name);
 
-        for (AOTask<?> task : tasks /* validated by now */)
+        try
         {
-            final AORestApiClientOptions options = new AORestApiClientOptions()
-                    .dumpJson(task.isDumpJson());
+            new Thread(() ->
+            {
+                LOGGER.info("[actor] '{}' run started", name);
 
-            final AOTaskContext tContext = new AOTaskContext(context, options);
+                try
+                {
+                    context.clearTaskProperties();
 
-            task.run(tContext);
+                    for (AOTask<?> task : tasks /* validated by now */)
+                    {
+                        final AORestApiClientOptions options = new AORestApiClientOptions()
+                                .dumpJson(task.isDumpJson());
 
-            LOGGER.info(name + " : " + task.getName() + " ✓");
+                        final AOTaskContext tContext = new AOTaskContext(context, options);
+
+                        try
+                        {
+                            task.run(tContext);
+
+                            LOGGER.debug("[task] '{}.{}' ✓", name, task.getName());
+                        }
+                        catch (Exception ex)
+                        {
+                            LOGGER.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
+
+                            context.onActorTaskError(task, ex);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LOGGER.error("[actor] '{}' run on-tasks-error", name, ex);
+
+                    context.onActorTasksError(ex);
+                }
+
+                LOGGER.info("[actor] '{}' run completed", name);
+
+                context.onActorCompleted();
+
+            }).start();
+        }
+        catch (Exception ex)
+        {
+            LOGGER.error("[actor] '{}' run on-error", name);
+
+            context.onActorError(ex);
+            context.onActorCompleted();
         }
     }
 

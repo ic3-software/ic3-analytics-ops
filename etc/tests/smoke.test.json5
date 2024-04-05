@@ -9,7 +9,7 @@
   // duration: "PT1m",
   actors: [
     {
-      name: "Demo Test",
+      name: "Misc",
       active: true,
       // Optional overriding the one defined at test level.
       restApiURL: "http://localhost:8282/icCube/api",

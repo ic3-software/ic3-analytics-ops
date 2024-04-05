@@ -1,27 +1,32 @@
 package ic3.analyticsops.test;
 
-import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import io.webfolder.cdp.session.Session;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AOTestContext
 {
+    public static final Logger LOGGER = LogManager.getLogger();
+
     private final AOTest test;
 
     private final AOChromeProxy chrome;
+
+    private final CountDownLatch completion;
+
+    private final AtomicBoolean onError = new AtomicBoolean(false);
 
     public AOTestContext(AOTest test)
     {
         this.test = test;
         this.chrome = new AOChromeProxy();
-    }
-
-    public void shutdown()
-    {
-        chrome.shutdown();
+        this.completion = new CountDownLatch(test.activeActors().size());
     }
 
     public File getMDXesDataFolder(String data)
@@ -46,9 +51,51 @@ public class AOTestContext
         return chrome.createBrowserSession(browserContext);
     }
 
-    public void run()
-            throws AOException
+    public boolean isOnError()
     {
-        test.run(this);
+        return onError.get();
+    }
+
+    public void onTestInterrupted(InterruptedException ex)
+    {
+        onError.set(true);
+    }
+
+    public void onActorError(AOActor actor, Exception ex)
+    {
+        onError.set(true);
+    }
+
+    public void onActorTaskError(AOActor actor, AOTask task, Exception ex)
+    {
+        onError.set(true);
+    }
+
+    public void onActorTasksError(AOActor actor, Exception ex)
+    {
+        onError.set(true);
+    }
+
+    public void onActorCompleted(AOActor actor)
+    {
+        completion.countDown();
+    }
+
+    public void waitForCompletion()
+            throws InterruptedException
+    {
+        completion.await();
+    }
+
+    public void shutdown()
+    {
+        try
+        {
+            chrome.shutdown();
+        }
+        catch (Exception ex)
+        {
+            LOGGER.warn("[shell] shutdown on error", ex);
+        }
     }
 }
