@@ -5,6 +5,8 @@
     user: "${analytics.ops.user}",
     password: "${analytics.ops.password}"
   },
+  // An optional duration : actor's tasks are executed in a loop for this duration or once.
+  // duration: "PT1m",
   actors: [
     {
       name: "Demo Test",

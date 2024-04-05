@@ -1,9 +1,11 @@
 package ic3.analyticsops.test;
 
 import com.google.gson.*;
+import ic3.analyticsops.gson.AODurationTypeAdapter;
 
 import java.io.File;
 import java.lang.reflect.Type;
+import java.time.Duration;
 
 public class AOTestDeserializer implements JsonDeserializer<AOTest>
 {
@@ -23,6 +25,7 @@ public class AOTestDeserializer implements JsonDeserializer<AOTest>
                 .serializeSpecialFloatingPointValues()
                 .registerTypeAdapter(AOTest.class, new AOTestInstanceCreator(json))
                 .registerTypeAdapter(AOTask.class, new AOTaskDeserializer())
+                .registerTypeAdapter(Duration.class, new AODurationTypeAdapter())
                 .create();
 
         final AOTest test = gson.fromJson(jsonElement, AOTest.class);

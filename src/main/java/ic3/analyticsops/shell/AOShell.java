@@ -50,7 +50,7 @@ public class AOShell
                 json5 = new File("etc/tests/smoke.test.json5");
             }
 
-            LOGGER.info("Running test : {}", json5.getAbsolutePath());
+            LOGGER.info("Test     : {}", json5.getAbsolutePath());
             
             final AOTest test = AOTest.create(json5);
 

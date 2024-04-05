@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -38,6 +39,9 @@ public class AOTest extends AOSerializable
     @Nullable
     private final AOAuthenticator authenticator;
 
+    @Nullable
+    private final Duration duration;
+
     private final List<AOActor> actors;
 
     protected AOTest(File json)
@@ -49,6 +53,7 @@ public class AOTest extends AOSerializable
         this.name = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.duration = null;
         this.actors = null;
     }
 
@@ -97,6 +102,14 @@ public class AOTest extends AOSerializable
             throws AOTestValidationException
     {
         validateNonEmptyField("name", name);
+
+        if (duration != null)
+        {
+            if (duration.isNegative() || duration.isZero())
+            {
+                throw new AOTestValidationException("the JSON field 'duration' cannot be negative or zero [" + duration + "]");
+            }
+        }
 
         validateActors();
     }
@@ -152,9 +165,26 @@ public class AOTest extends AOSerializable
         return new File(json.getParentFile(), data);
     }
 
+    @Nullable
+    public Long getDurationS()
+    {
+        return duration != null ? duration.toSeconds() : null;
+    }
+
     public void run(AOTestContext context)
             throws AOException
     {
+        final Long durationS = getDurationS();
+
+        if (durationS != null)
+        {
+            LOGGER.info("Duration : {} seconds", durationS);
+        }
+        else
+        {
+            LOGGER.info("Duration : once");
+        }
+
         for (AOActor actor : actors /* validated by now */)
         {
             if (!actor.isActive())
