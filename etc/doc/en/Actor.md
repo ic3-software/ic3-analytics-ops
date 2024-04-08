@@ -43,6 +43,23 @@ See also :
 - [`Task`](./Task.md)
 - [`Test`](./Test.md)
 
+## Example
+
+An actor printing a single report :
+
+```json5
+{
+  name: "Dashboard Printer",
+  tasks: [
+    {
+      action: "PrintReport",
+      reportPath: "shared:/ic3-analytics-ops",
+      pageSize: "A4"
+    }
+  ]
+}
+```
+
 ## Java Source Code
 
 For more details and the most current information, please refer to

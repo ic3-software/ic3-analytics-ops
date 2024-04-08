@@ -34,6 +34,37 @@ See also :
 - [`Duration`](./Duration.md)
 - [`Actor`](./Actor.md)
 
+## Example
+
+A test with a single actor performing some non-regression against the restored `CRM` schema :
+
+```json5
+{
+  name: "Non-Regression",
+  restApiURL: "http://localhost:8282/icCube/api",
+  authenticator: {
+    user: "${analytics.ops.user}",
+    password: "${analytics.ops.password}"
+  },
+  actors: [
+    {
+      name: "CRM",
+      tasks: [
+        {
+          action: "RestoreSchemaSnapshot",
+          snapshot: "CRM.icc-schema.1326727789266"
+        },
+        {
+          action: "MDXes",
+          data: "data/CRM",
+          schema: "CRM"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ## Java Source Code
 
 For more details and the most current information, please refer to
