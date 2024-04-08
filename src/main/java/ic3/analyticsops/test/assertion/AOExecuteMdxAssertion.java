@@ -211,7 +211,7 @@ public class AOExecuteMdxAssertion extends AOAssertion
     }
 
     /**
-     * The result must generate an expected error.
+     * The statement must generate an expected error.
      */
     static class StatementOnError
     {
@@ -231,7 +231,7 @@ public class AOExecuteMdxAssertion extends AOAssertion
     }
 
     /**
-     * The result must generate a single cell with an expected error.
+     * The statement must generate a single cell with an expected error.
      */
     static class CellOnError
     {

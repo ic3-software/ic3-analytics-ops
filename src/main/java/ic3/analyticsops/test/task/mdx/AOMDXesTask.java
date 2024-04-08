@@ -23,6 +23,9 @@ public class AOMDXesTask extends AOTask
 {
     private final String schema;
 
+    /**
+     * E.g., data/Sales is using the files 'Sales-N.mdx.txt(and .json)' into the 'data' folder.
+     */
     private final String data;
 
     /**

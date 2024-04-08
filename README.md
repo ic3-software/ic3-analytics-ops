@@ -21,7 +21,7 @@ Here is a non-exhaustive [list](./ROADMAP.md) of upcoming features and developme
 
 ## Documentation
 
-Refer to this [page](./etc/doc/en/README.md) for a technical description of the main concepts or simply
+Refer to this [page](./etc/doc/en/README.md) for a technical description of the project or simply
 browse the code to see how it works starting from the [shell](./src/main/java/ic3/analyticsops/shell/AOShell.java)
 class.
 

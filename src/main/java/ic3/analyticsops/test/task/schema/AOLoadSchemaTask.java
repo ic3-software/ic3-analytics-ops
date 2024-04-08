@@ -8,25 +8,29 @@ import ic3.analyticsops.test.AOAssertion;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 public class AOLoadSchemaTask extends AOTask
 {
     private final String schemaFile;
 
-    private final boolean incrLoad;
+    @Nullable
+    private final Boolean incrLoad;
 
-    private final boolean keepMdxResultCache;
+    @Nullable
+    private final Boolean keepMdxResultCache;
 
-    private final boolean forceBackup;
+    @Nullable
+    private final Boolean forceBackup;
 
     protected AOLoadSchemaTask()
     {
         // JSON deserialization
 
         this.schemaFile = null;
-        this.incrLoad = false;
-        this.keepMdxResultCache = false;
-        this.forceBackup = false;
+        this.incrLoad = null;
+        this.keepMdxResultCache = null;
+        this.forceBackup = null;
     }
 
     @Override
@@ -57,9 +61,9 @@ public class AOLoadSchemaTask extends AOTask
 
                 new AORestApiLoadSchemaRequest()
                         .schemaFile(schemaFile)
-                        .incrLoad(incrLoad)
-                        .keepMdxResultCache(keepMdxResultCache)
-                        .forceBackup(forceBackup)
+                        .incrLoad(incrLoad != null ? incrLoad : false)
+                        .keepMdxResultCache(keepMdxResultCache != null ? keepMdxResultCache : false)
+                        .forceBackup(forceBackup != null ? forceBackup : false)
 
         );
 
