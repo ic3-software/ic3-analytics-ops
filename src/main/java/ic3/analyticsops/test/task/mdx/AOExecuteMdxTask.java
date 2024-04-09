@@ -50,6 +50,8 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
     public void run(AOTaskContext context)
             throws AOException
     {
+        context.markForActualResult();
+
         final AORestApiMdxScriptResult reply = context.sendRequest(
 
                 new AORestApiExecuteMdxRequest()
@@ -57,6 +59,8 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
                         .mdx(statement)
 
         );
+
+        context.markForExpectedResult();
 
         final List<AOExecuteMdxAssertion> assertions = assertions();
 

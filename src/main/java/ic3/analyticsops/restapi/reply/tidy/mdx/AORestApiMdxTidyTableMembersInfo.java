@@ -353,23 +353,26 @@ public class AORestApiMdxTidyTableMembersInfo
     }
 
     @Nullable
-    public AORestApiTidyTableEntityType getDpType(String prop)
+    public AORestApiTidyTableEntityType getDpTypes(String dpName)
     {
-        if (dpTypes == null)
-        {
-            return null;
-        }
-        return dpTypes.get(prop);
+        return dpTypes != null ? dpTypes.get(dpName) : null;
     }
 
     @Nullable
-    public List<Object> getDpValues(String prop)
+    public Object getDpValue(String dpName, int memberIndex)
     {
-        if (dpValues == null)
+        final ArrayList<Object> values = dpValues != null ? dpValues.get(dpName) : null;
+        final Object value = values != null ? values.get(memberIndex) : null;
+
+        if (value == null)
         {
-            return null;
+            final AORestApiTidyTableColumnNaN valuesNaN = dpValuesN != null ? dpValuesN.get(dpName) : null;
+            final Object valueNaN = valuesNaN != null ? valuesNaN.get(memberIndex) : null;
+
+            return valueNaN;
         }
-        return dpValues.get(prop);
+
+        return value;
     }
 
     private String generateUniqueName(AORestApiMdxMemberUniqueNameType uniqueNameType, int memberIndex)

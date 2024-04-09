@@ -6,6 +6,7 @@ import ic3.analyticsops.restapi.request.AORestApiRequest;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,6 +19,9 @@ public class AOTaskContext
     private final AOActorContext context;
 
     private final AOTask<?> task;
+
+    @Nullable
+    private MarkedResult markedResult;
 
     public AOTaskContext(AOActorContext context, AOTask<?> task)
     {
@@ -62,6 +66,16 @@ public class AOTaskContext
         return context.getTaskProperty(name, defaultValue);
     }
 
+    public void markForActualResult()
+    {
+        markedResult = MarkedResult.actual;
+    }
+
+    public void markForExpectedResult()
+    {
+        markedResult = MarkedResult.expected;
+    }
+
     /**
      * Blocking call.
      */
@@ -87,7 +101,7 @@ public class AOTaskContext
         return prettyPrint(context.sendRequest(request, options));
     }
 
-    protected <REPLY> REPLY prettyPrint(REPLY reply)
+    public <REPLY> REPLY prettyPrint(REPLY reply)
     {
         if (!task.isDumpResult())
         {
@@ -105,11 +119,11 @@ public class AOTaskContext
 
             prettyPrint.invoke(reply, ps);
 
-            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] {}\n{}", reply.getClass().getSimpleName(), out.toString(StandardCharsets.UTF_8));
+            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] {}{}\n{}", reply.getClass().getSimpleName(), markedResult != null ? "(" + markedResult + ")" : "", out.toString(StandardCharsets.UTF_8));
         }
         catch (Exception ex)
         {
-            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] pretty-print missing for class : {}", reply.getClass().getSimpleName());
+            AOLog4jUtils.PRETTY_PRINT.warn("[pretty-print] pretty-print missing for class : {}{}", reply.getClass().getSimpleName(), markedResult != null ? "(" + markedResult + ")" : "");
         }
 
         return reply;
@@ -118,5 +132,10 @@ public class AOTaskContext
     public boolean isOnError()
     {
         return context.isOnError();
+    }
+
+    static enum MarkedResult
+    {
+        expected, actual
     }
 }

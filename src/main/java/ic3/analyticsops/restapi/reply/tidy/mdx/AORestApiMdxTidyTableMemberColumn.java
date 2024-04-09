@@ -1,8 +1,11 @@
 package ic3.analyticsops.restapi.reply.tidy.mdx;
 
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumn;
+import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableEntityType;
 import ic3.analyticsops.test.AOAssertion;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColumn
 {
@@ -103,12 +106,32 @@ public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColu
         final AORestApiMdxTidyTable table = getTable();
 
         final AORestApiMdxTidyTableAxis axisInfo = table.getAxis(axis.axis);
-        final AORestApiMdxTidyTableMembersInfo membersInfo = table.getMembers(axis.axis, axis.hierarchyIdx);
-
         final int tupleIndex = axisInfo.getTupleIndex(rowIndex);
+
+        final AORestApiMdxTidyTableMembersInfo membersInfo = getMembersInfo();
         final int memberIndex = membersInfo.getMemberIndex(tupleIndex);
 
         return supplier.get(membersInfo, memberIndex);
+    }
+
+    public AORestApiMdxTidyTableMembersInfo getMembersInfo()
+    {
+        final AORestApiMdxTidyTable table = getTable();
+        return table.getMembers(axis.axis, axis.hierarchyIdx);
+    }
+
+    @Nullable
+    public Object getDpValue(String dpName, int rowIndex)
+    {
+        final AORestApiMdxTidyTable table = getTable();
+
+        final AORestApiMdxTidyTableAxis axisInfo = table.getAxis(axis.axis);
+        final int tupleIndex = axisInfo.getTupleIndex(rowIndex);
+
+        final AORestApiMdxTidyTableMembersInfo membersInfo = getMembersInfo();
+        final int memberIndex = membersInfo.getMemberIndex(tupleIndex);
+
+        return membersInfo.getDpValue(dpName, memberIndex);
     }
 
     @Override
@@ -256,6 +279,35 @@ public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColu
             final Number longitudeActual = actual.getIc3Long(rr);
 
             AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] member-longitude", longitude, longitudeActual);
+        }
+
+        // DIMENSION PROPERTIES : index can be out of order => row-index => member-index required.
+
+        final AORestApiMdxTidyTableMembersInfo membersInfo = getMembersInfo();
+        final AORestApiMdxTidyTableMembersInfo membersInfoActual = actual.getMembersInfo();
+
+        final List<String> dpNames = membersInfo.getDpNames();
+        final List<String> dpNamesActual = membersInfoActual.getDpNames();
+
+        AOAssertion.assertEquals("column[" + name + "] dp-names", dpNames, dpNamesActual);
+
+        if (dpNames != null)
+        {
+            for (String dpName : dpNames)
+            {
+                final AORestApiTidyTableEntityType dpType = membersInfo.getDpTypes(dpName);
+                final AORestApiTidyTableEntityType dpTypeActual = membersInfoActual.getDpTypes(dpName);
+
+                AOAssertion.assertEquals("column[" + name + "] dp-name[" + dpName + "] dp-type", dpType, dpTypeActual);
+
+                for (int rr = 0; rr < rowCount; rr++)
+                {
+                    final Object dpValue = getDpValue(dpName, rr);
+                    final Object dpValueActual = actual.getDpValue(dpName, rr);
+
+                    AOAssertion.assertEquals("column[" + name + "] row[" + rr + "] dp-value[" + dpName + "]", dpValue, dpValueActual);
+                }
+            }
         }
     }
 }

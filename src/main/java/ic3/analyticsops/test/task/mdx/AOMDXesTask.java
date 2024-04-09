@@ -34,6 +34,13 @@ public class AOMDXesTask extends AOTask
     @Nullable
     private final AOPause pauses;
 
+    /**
+     * An optional filter : execute this MDX number only.
+     */
+    @Nullable
+    private final Integer filter;
+
+
     protected AOMDXesTask()
     {
         // JSON deserialization
@@ -41,6 +48,7 @@ public class AOMDXesTask extends AOTask
         this.schema = null;
         this.data = null;
         this.pauses = null;
+        this.filter = null;
     }
 
     @Override
@@ -113,9 +121,16 @@ public class AOMDXesTask extends AOTask
                 throw new AOException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb, ex);
             }
 
+            if (filter != null && filter != mdxNb)
+            {
+                ignore = true;
+            }
+
             if (!ignore)
             {
                 // Expected Result.
+
+                context.markForExpectedResult();
 
                 AORestApiMdxScriptResult expectedReply;
 
@@ -127,6 +142,8 @@ public class AOMDXesTask extends AOTask
                     {
                         throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNb);
                     }
+
+                    context.prettyPrint(expectedReply);
                 }
                 catch (IOException ex)
                 {
@@ -136,6 +153,8 @@ public class AOMDXesTask extends AOTask
                 final AORestApiTidyTable<?> expectedResult = assertOnlyDataset(expectedReply);
 
                 // Single dataset only for now.
+
+                context.markForActualResult();
 
                 final AORestApiMdxScriptResult actualReply = context.sendRequest(
 
@@ -178,6 +197,10 @@ public class AOMDXesTask extends AOTask
     {
         if (result.results == null)
         {
+            if (result.error != null)
+            {
+                throw new AssertionError("missing results (unexpected-error) : " + result.error);
+            }
             throw new AssertionError("missing results");
         }
 

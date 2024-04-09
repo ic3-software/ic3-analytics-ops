@@ -53,7 +53,11 @@ interface MDXesTask extends Task {
     data: string;
 
     // An optional pause applied after the processing of each MDX statement.
-    pause? : Pause
+    pause?: Pause;
+
+    // An optional filter : execute this MDX number only.
+    filter?: number;
+
 }
 ```
 

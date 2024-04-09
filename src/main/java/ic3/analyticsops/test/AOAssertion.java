@@ -2,6 +2,8 @@ package ic3.analyticsops.test;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class AOAssertion extends AOSerializable
@@ -103,6 +105,14 @@ public abstract class AOAssertion extends AOSerializable
         {
             return equals((float) expected, (float) actual, delta, deltaApplied);
         }
+        else if (expected instanceof Map && actual instanceof Map)
+        {
+            return equals((Map<?, ?>) expected, (Map<?, ?>) actual, delta, deltaApplied);
+        }
+        else if (expected instanceof ArrayList && actual instanceof ArrayList)
+        {
+            return equals((ArrayList<?>) expected, (ArrayList<?>) actual, delta, deltaApplied);
+        }
         return Objects.equals(expected, actual);
     }
 
@@ -143,6 +153,72 @@ public abstract class AOAssertion extends AOSerializable
                 return false;
             }
         }
+        return true;
+    }
+
+    public static boolean equals(Map<?, ?> expected, Map<?, ?> actual, double delta, @Nullable boolean[] deltaApplied)
+    {
+        if (actual == expected)
+        {
+            return true;
+        }
+
+        if (actual.size() != expected.size())
+        {
+            return false;
+        }
+
+        try
+        {
+            for (Map.Entry<?, ?> e : expected.entrySet())
+            {
+                final Object key = e.getKey();
+                final Object value = e.getValue();
+
+                if (value == null)
+                {
+                    if (!(actual.get(key) == null && actual.containsKey(key)))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!AOAssertion.equals(value, actual.get(key), delta, deltaApplied))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        catch (ClassCastException | NullPointerException unused)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean equals(ArrayList<?> expected, ArrayList<?> actual, double delta, @Nullable boolean[] deltaApplied)
+    {
+        if (actual == expected)
+        {
+            return true;
+        }
+
+        if (actual.size() != expected.size())
+        {
+            return false;
+        }
+
+        for (int ii = 0; ii < expected.size(); ii++)
+        {
+            if (!AOAssertion.equals(expected.get(ii), actual.get(ii), delta, deltaApplied))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
