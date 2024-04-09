@@ -24,7 +24,7 @@ public class AOTestContext
     public AOTestContext(AOTest test)
     {
         this.test = test;
-        this.chrome = new AOChromeProxy();
+        this.chrome = new AOChromeProxy(test.getChromeConfiguration());
         this.completion = new CountDownLatch(test.activeActors().size());
     }
 

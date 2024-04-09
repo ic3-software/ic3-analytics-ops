@@ -40,6 +40,9 @@ public class AOChromeProxy
     private volatile ChannelFactory webSocketFactory;
 
     @Nullable
+    private final AOChromeConfiguration configuration;
+
+    @Nullable
     private volatile AOChromeLauncher launcher;
 
     @Nullable
@@ -53,8 +56,9 @@ public class AOChromeProxy
      */
     private volatile boolean launched;
 
-    public AOChromeProxy()
+    public AOChromeProxy(@Nullable AOChromeConfiguration configuration)
     {
+        this.configuration = configuration;
         this.launched = false;
     }
 
@@ -83,13 +87,13 @@ public class AOChromeProxy
     @Nullable
     public String getExec()
     {
-        return null /* dunno yet */;
+        return configuration != null ? configuration.exec : null;
     }
 
     @Nullable
     public String getExecOptions()
     {
-        return null /* dunno yet */;
+        return configuration != null ? configuration.execOptions : null;
     }
 
     public String createBrowserContext()

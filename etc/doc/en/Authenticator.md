@@ -11,6 +11,7 @@ interface Authenticator {
     user : string;
     
     password: string;
+    
 }
 ```
 

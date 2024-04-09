@@ -23,6 +23,7 @@ interface OpenReportTask {
 See also :
 
 - [`JSON5`](../JSON5.md)
+- [`ChromeConfiguration`](../ChromeConfiguration.md)
 - [`Tasks`](../Tasks.md)
 - [`Task`](../Task.md)
 

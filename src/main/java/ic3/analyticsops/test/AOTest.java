@@ -3,6 +3,7 @@ package ic3.analyticsops.test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ic3.analyticsops.restapi.client.AORestApiClient;
+import ic3.analyticsops.test.task.reporting.AOChromeConfiguration;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +37,9 @@ public class AOTest extends AOSerializable
     private final AOAuthenticator authenticator;
 
     @Nullable
+    private final AOChromeConfiguration chrome;
+
+    @Nullable
     private final Duration duration;
 
     private final List<AOActor> actors;
@@ -49,6 +53,7 @@ public class AOTest extends AOSerializable
         this.name = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.chrome = null;
         this.duration = null;
         this.actors = null;
     }
@@ -151,6 +156,12 @@ public class AOTest extends AOSerializable
     public AOAuthenticator getAuthenticator()
     {
         return authenticator;
+    }
+
+    @Nullable
+    public AOChromeConfiguration getChromeConfiguration()
+    {
+        return chrome;
     }
 
     /**

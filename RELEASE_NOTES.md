@@ -8,6 +8,8 @@
 
 - Added `duration` and parallel actor execution : each actor runs in its own thread of control.
 
+- Added `chrome` configuration to use Chrome or Chromium for the `OpenReport` task.
+
 `Actor`
 
 - Added `dumpJson` and `dumpResult` configuration.

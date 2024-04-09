@@ -20,6 +20,8 @@ interface Test {
 
     authenticator?: Authenticator;
 
+    chrome?: ChromeConfiguration;
+    
     // Allows for running the test over a period to time (handy for stress-testing).
     duration?: Duration;
 
@@ -31,6 +33,7 @@ See also :
 
 - [`JSON5`](./JSON5.md)
 - [`Authenticator`](./Authenticator.md)
+- [`ChromeConfiguration`](./ChromeConfiguration.md)
 - [`Duration`](./Duration.md)
 - [`Actor`](./Actor.md)
 
