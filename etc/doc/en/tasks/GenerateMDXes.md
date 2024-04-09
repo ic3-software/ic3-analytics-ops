@@ -31,6 +31,9 @@ The generated results are compressed but, you can keep them uncompressed if you 
             sales.2.mdx.json.zip      : generated
     smoke.test.json5
 
+Note this task is using the [TidyExecuteMdxScript](https://doc.iccube.com/?ic3topic=server.api.TidyExecuteMdxScript)
+REST API request.
+
 ## JSON Definition
 
 ```typescript

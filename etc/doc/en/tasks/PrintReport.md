@@ -51,6 +51,6 @@ Print the `ic3-analytics-ops` dashboard using the `Letter` paper :
 ## Java Source Code
 
 For more details and the most current information, please refer to
-the [source code](../../../../src/main/java/ic3/analyticsops/test/task/reporting/AOOpenReportTask.java).
+the [source code](../../../../src/main/java/ic3/analyticsops/test/task/reporting/AOPrintReportTask.java).
 
 _

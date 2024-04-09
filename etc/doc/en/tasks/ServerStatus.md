@@ -5,6 +5,8 @@ Returns some information about the icCube server (requires an icCube server v8.4
 By default, this task is asserting the server is returning some information. When defined, the assertions
 allow for testing the versions of the server and/or the installed reporting application : exact match.
 
+Note this task is using the [ServerStatus](https://doc.iccube.com/?ic3topic=server.api.ServerStatus) REST API request.
+
 ## JSON Definition
 
 ```typescript

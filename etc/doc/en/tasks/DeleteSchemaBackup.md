@@ -4,6 +4,8 @@ Delete a schema backup.
 
 By default, this task asserts the backup is successfully deleted.
 
+Note this task is using the [DeleteBackup](https://doc.iccube.com/?ic3topic=server.api.DeleteBackup) REST API request.
+
 ## JSON Definition
 
 ```typescript

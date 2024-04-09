@@ -4,6 +4,9 @@ Load a schema by restoring a snapshot.
 
 By default, this task asserts the schema is successfully loaded.
 
+Note this task is using the [RestoreOffline](https://doc.iccube.com/?ic3topic=server.api.RestoreOffline) REST API
+request.
+
 ## JSON Definition
 
 ```typescript

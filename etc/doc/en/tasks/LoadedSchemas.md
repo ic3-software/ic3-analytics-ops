@@ -4,6 +4,8 @@ Return some information about the icCube server (requires an icCube server v8.4.
 
 By default, this task is asserting the schema is loaded.
 
+Note this task is using the [LoadedSchemas](https://doc.iccube.com/?ic3topic=server.api.LoadedSchemas) REST API request.
+
 ## JSON Definition
 
 ```typescript

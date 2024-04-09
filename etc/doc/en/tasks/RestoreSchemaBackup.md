@@ -4,6 +4,8 @@ Load a schema by restoring a backup.
 
 By default, this task asserts the schema is successfully loaded.
 
+Note this task is using the [RestoreBackup](https://doc.iccube.com/?ic3topic=server.api.RestoreBackup) REST API request.
+
 ## JSON Definition
 
 ```typescript
@@ -12,7 +14,8 @@ interface RestoreSchemaBackupTask extends Task {
     schemaFile: string;
     
     timestamp: string;
-
+    
+    mode? : "INITIAL_LOAD" | "FULL";
 }
 ```
 

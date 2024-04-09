@@ -2,6 +2,8 @@
 
 Retrieve some information about a deployed schema.
 
+Note this task is using the [SchemaInfo](https://doc.iccube.com/?ic3topic=server.api.SchemaInfo) REST API request.
+
 ## JSON Definition
 
 ```typescript

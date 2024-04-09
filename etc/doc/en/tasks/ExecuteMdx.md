@@ -4,6 +4,9 @@ Execute an MDX statement and assert its result using another equivalent MDX stat
 
 This task is **not using the server MDX result cache**.
 
+Note this task is using the [TidyExecuteMdxScript](https://doc.iccube.com/?ic3topic=server.api.TidyExecuteMdxScript)
+REST API request.
+
 ## JSON Definition
 
 ```typescript

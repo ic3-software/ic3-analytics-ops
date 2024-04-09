@@ -42,6 +42,9 @@ Should you want to ignore a statement use the following :
 SELECT ... FROM ...
 ```
 
+Note this task is using the [TidyExecuteMdxScript](https://doc.iccube.com/?ic3topic=server.api.TidyExecuteMdxScript)
+REST API request.
+
 ## JSON Definition
 
 ```typescript

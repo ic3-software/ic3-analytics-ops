@@ -10,6 +10,8 @@ When generating a backup, this task is creating the following **property** :
 
 that can be used by a following task (see the [example](#example) section below).
 
+Note this task is using the [LoadSchema](https://doc.iccube.com/?ic3topic=server.api.LoadSchema) REST API request.
+
 ## JSON Definition
 
 ```typescript

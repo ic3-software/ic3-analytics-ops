@@ -4,6 +4,8 @@ Unload a schema.
 
 By default, this task asserts the schema is properly unloaded (or nothing was required).
 
+Note this task is using the [UnloadSchema](https://doc.iccube.com/?ic3topic=server.api.UnloadSchema) REST API request.
+
 ## JSON Definition
 
 ```typescript
