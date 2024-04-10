@@ -4,6 +4,7 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaStatus;
 import ic3.analyticsops.restapi.reply.table.AORestApiSchemaInfoTable;
 import ic3.analyticsops.restapi.request.AORestApiSchemaInfoRequest;
+import ic3.analyticsops.test.AOAssertionMode;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
@@ -38,9 +39,9 @@ public class AOSchemaInfoTask extends AOTask<AOSchemaInfoAssertion>
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return true;
+        return AOAssertionMode.MANDATORY;
     }
 
     @Override
@@ -58,7 +59,7 @@ public class AOSchemaInfoTask extends AOTask<AOSchemaInfoAssertion>
 
         final AORestApiSchemaStatus actualStatus = reply.getStatus();
 
-        final List<AOSchemaInfoAssertion> assertions = assertions();
+        final List<AOSchemaInfoAssertion> assertions = getAssertions();
 
         for (AOSchemaInfoAssertion assertion : assertions /* validated by now */)
         {

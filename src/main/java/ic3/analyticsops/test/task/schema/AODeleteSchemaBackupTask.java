@@ -3,10 +3,7 @@ package ic3.analyticsops.test.task.schema;
 import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.AORestApiDeleted;
 import ic3.analyticsops.restapi.request.AORestApiDeleteSchemaBackupRequest;
-import ic3.analyticsops.test.AOAssertion;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
 
 public class AODeleteSchemaBackupTask extends AOTask
 {
@@ -33,9 +30,9 @@ public class AODeleteSchemaBackupTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     @Override

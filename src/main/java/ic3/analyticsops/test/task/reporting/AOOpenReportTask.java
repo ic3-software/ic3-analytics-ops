@@ -1,9 +1,8 @@
 package ic3.analyticsops.test.task.reporting;
 
 import ic3.analyticsops.common.AOException;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
+import ic3.analyticsops.test.assertion.AOOpenReportAssertion;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
@@ -11,8 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-public class AOOpenReportTask extends AOTask
+public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 {
     private final String reportPath;
 
@@ -43,9 +43,9 @@ public class AOOpenReportTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.OPTIONAL;
     }
 
     public void run(AOTaskContext context)
@@ -76,6 +76,8 @@ public class AOOpenReportTask extends AOTask
         {
             try (Session session = context.createBrowserSession(browserContext))
             {
+                AOLog4jUtils.CHROME.debug("[chrome] navigating to : {}", reportURL);
+
                 session.navigate(reportURL);
 
                 final int timeOutInMillis = 1000 * timeoutS;
@@ -88,6 +90,9 @@ public class AOOpenReportTask extends AOTask
 
                 int newTimoutMillis = Math.max(waitPeriodMS * 2, timeOutInMillis - (int) (System.currentTimeMillis() - start));
 
+                final boolean[] nonExisting = new boolean[]{false};
+                final boolean[] printReady = new boolean[]{false};
+
                 final boolean gotIt = session.waitUntil(
                         s ->
                         {
@@ -95,16 +100,45 @@ public class AOOpenReportTask extends AOTask
                             {
                                 throw new RuntimeException("interrupted because of other error.");
                             }
-                            return safeCompareVariable(s, "ic3printStatus");
+
+                            // Check either for one of this variable :
+                            //      ic3openReportStatus = DOCS_REPORT_OPEN_NON_EXISTING
+                            //      ic3printStatus      = ic3reportRendered:true
+
+                            if (safeCompareVariable(s, "ic3openReportStatus", "DOCS_REPORT_OPEN_NON_EXISTING"))
+                            {
+                                nonExisting[0] = true;
+                                return true;
+                            }
+
+                            if (safeCompareVariable(s, "ic3printStatus", "ic3reportRendered:true"))
+                            {
+                                printReady[0] = true;
+                                return true;
+                            }
+
+                            return false;
                         },
                         newTimoutMillis,
                         waitPeriodMS /* Cannot find context with specified id */,
                         true
                 );
 
-                if (!gotIt)
+                AOAssertion.assertTrue("open-report-failed:" + reportPath, gotIt);
+
+                final List<AOOpenReportAssertion> assertions = getOptionalAssertions();
+
+                if (assertions != null && !assertions.isEmpty())
                 {
-                    throw new AOChromeException("OpenReport failed : " + reportPath);
+                    for (AOOpenReportAssertion assertion : assertions)
+                    {
+                        assertion.assertOk(reportPath, nonExisting[0], printReady[0]);
+                    }
+                }
+                else
+                {
+                    AOAssertion.assertFalse("report-not-existing:" + reportPath, nonExisting[0]);
+                    AOAssertion.assertTrue("open-report:" + reportPath, printReady[0]);
                 }
             }
         }
@@ -114,11 +148,11 @@ public class AOOpenReportTask extends AOTask
         }
     }
 
-    private static boolean safeCompareVariable(Session session, String name)
+    private static boolean safeCompareVariable(Session session, String name, String expectedValue)
     {
         try
         {
-            return "ic3reportRendered:true".equalsIgnoreCase(session.getVariable(name, String.class));
+            return expectedValue.equalsIgnoreCase(session.getVariable(name, String.class));
 
         }
         catch (NullPointerException ex)

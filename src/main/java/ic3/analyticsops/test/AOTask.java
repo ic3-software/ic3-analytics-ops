@@ -88,13 +88,20 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     {
         validateProps();
 
-        if (!withAssertions())
+        switch (getAssertionsMode())
         {
-            validateEmptyField(validateFieldPathPrefix() + "assertions", assertions());
-        }
-        else
-        {
-            validateAssertions();
+            case NONE ->
+            {
+                validateEmptyField(validateFieldPathPrefix() + "assertions", getAssertions());
+            }
+            case OPTIONAL ->
+            {
+                // nothing we can do right now : the task is taking care when using them.
+            }
+            case MANDATORY ->
+            {
+                validateAssertions();
+            }
         }
     }
 
@@ -142,12 +149,30 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         return pause != null ? pause.pauseMS() : null;
     }
 
-    /**
-     * Requires some assertions being defined in the task definition (JSON5).
-     */
-    public abstract boolean withAssertions();
+    public abstract AOAssertionMode getAssertionsMode();
 
-    protected List<ASSERTION> assertions()
+    /**
+     * Introduced for OpenReport that might have some an assertion.
+     */
+    public boolean withOptionalAssertions()
+    {
+        return false;
+    }
+
+    /**
+     * Assuming (and enforced) not null.
+     */
+    protected List<ASSERTION> getAssertions()
+    {
+        if (assertions == null)
+        {
+            throw new RuntimeException("internal error: missing assertions");
+        }
+        return (List<ASSERTION>) assertions;
+    }
+
+    @Nullable
+    protected List<ASSERTION> getOptionalAssertions()
     {
         return (List<ASSERTION>) assertions;
     }

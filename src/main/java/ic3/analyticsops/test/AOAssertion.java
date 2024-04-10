@@ -53,6 +53,14 @@ public abstract class AOAssertion extends AOSerializable
         }
     }
 
+    public static void assertFalse(String message, boolean value)
+    {
+        if (value)
+        {
+            fail(format(message, "false", value));
+        }
+    }
+
     public static void assertNotNull(String message, @Nullable Object value)
     {
         if (value == null)

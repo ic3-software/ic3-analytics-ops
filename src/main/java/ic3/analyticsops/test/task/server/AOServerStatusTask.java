@@ -4,6 +4,7 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.table.AORestApiServerStatusTable;
 import ic3.analyticsops.restapi.request.AORestApiServerStatusRequest;
 import ic3.analyticsops.test.AOAssertion;
+import ic3.analyticsops.test.AOAssertionMode;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.assertion.AOServerStatusAssertion;
@@ -24,9 +25,9 @@ public class AOServerStatusTask extends AOTask<AOServerStatusAssertion>
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return true;
+        return AOAssertionMode.OPTIONAL;
     }
 
     @Override
@@ -41,11 +42,14 @@ public class AOServerStatusTask extends AOTask<AOServerStatusAssertion>
 
         AOAssertion.assertNotNull("pid", reply.getPID());
 
-        final List<AOServerStatusAssertion> assertions = assertions();
+        final List<AOServerStatusAssertion> assertions = getOptionalAssertions();
 
-        for (AOServerStatusAssertion assertion : assertions /* validated by now */)
+        if (assertions != null && !assertions.isEmpty())
         {
-            assertion.assertOk(reply);
+            for (AOServerStatusAssertion assertion : assertions)
+            {
+                assertion.assertOk(reply);
+            }
         }
     }
 

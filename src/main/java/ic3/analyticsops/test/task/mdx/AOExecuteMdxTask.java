@@ -3,6 +3,7 @@ package ic3.analyticsops.test.task.mdx;
 import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
+import ic3.analyticsops.test.AOAssertionMode;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
@@ -41,9 +42,9 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return true;
+        return AOAssertionMode.MANDATORY;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
 
         context.markForExpectedResult();
 
-        final List<AOExecuteMdxAssertion> assertions = assertions();
+        final List<AOExecuteMdxAssertion> assertions = getAssertions();
 
         for (AOExecuteMdxAssertion assertion : assertions /* validated by now */)
         {

@@ -2,6 +2,7 @@ package ic3.analyticsops.test.task.server;
 
 import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.request.AORestApiClearResultCacheRequest;
+import ic3.analyticsops.test.AOAssertionMode;
 import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
@@ -30,9 +31,9 @@ public class AOClearResultCacheTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     @Override

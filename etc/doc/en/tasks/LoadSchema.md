@@ -15,7 +15,7 @@ Note this task is using the [LoadSchema](https://doc.iccube.com/?ic3topic=server
 ## JSON Definition
 
 ```typescript
-interface LoadSchemaTask {
+interface LoadSchemaTask extends Task {
 
     schemaFile: string;
 

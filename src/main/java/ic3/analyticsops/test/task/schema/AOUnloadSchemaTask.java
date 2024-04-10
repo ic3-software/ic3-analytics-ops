@@ -4,10 +4,7 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLifeCycle;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLoadStatus;
 import ic3.analyticsops.restapi.request.AORestApiUnloadSchemaRequest;
-import ic3.analyticsops.test.AOAssertion;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
 
 public class AOUnloadSchemaTask extends AOTask
 {
@@ -36,9 +33,9 @@ public class AOUnloadSchemaTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     public void run(AOTaskContext context)

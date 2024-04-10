@@ -5,10 +5,7 @@ import ic3.analyticsops.restapi.reply.schema.AORestApiRestoreSchemaBackupMode;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLifeCycle;
 import ic3.analyticsops.restapi.reply.schema.AORestApiSchemaLoadStatus;
 import ic3.analyticsops.restapi.request.AORestApiRestoreSchemaBackupRequest;
-import ic3.analyticsops.test.AOAssertion;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
 import org.jetbrains.annotations.Nullable;
 
 public class AORestoreSchemaBackupTask extends AOTask
@@ -46,9 +43,9 @@ public class AORestoreSchemaBackupTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     public void run(AOTaskContext context)

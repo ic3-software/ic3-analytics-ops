@@ -7,10 +7,7 @@ import ic3.analyticsops.restapi.error.AORestApiErrorException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTable;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
-import ic3.analyticsops.test.AOAssertion;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -68,9 +65,9 @@ public class AOMDXesTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     @Override

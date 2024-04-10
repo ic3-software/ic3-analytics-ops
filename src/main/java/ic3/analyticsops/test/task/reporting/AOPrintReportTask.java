@@ -3,10 +3,7 @@ package ic3.analyticsops.test.task.reporting;
 import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.reply.print.AORestApiPrintedReport;
 import ic3.analyticsops.restapi.request.AORestApiPrintReportRequest;
-import ic3.analyticsops.test.AOAssertion;
-import ic3.analyticsops.test.AOTask;
-import ic3.analyticsops.test.AOTaskContext;
-import ic3.analyticsops.test.AOTestValidationException;
+import ic3.analyticsops.test.*;
 import org.jetbrains.annotations.Nullable;
 
 public class AOPrintReportTask extends AOTask
@@ -52,9 +49,9 @@ public class AOPrintReportTask extends AOTask
     }
 
     @Override
-    public boolean withAssertions()
+    public AOAssertionMode getAssertionsMode()
     {
-        return false;
+        return AOAssertionMode.NONE;
     }
 
     public void run(AOTaskContext context)
