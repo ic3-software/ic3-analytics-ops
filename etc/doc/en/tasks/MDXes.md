@@ -56,7 +56,7 @@ interface MDXesTask extends Task {
     data: string;
 
     // An optional pause applied after the processing of each MDX statement.
-    pause?: Pause;
+    pauses?: Pause;
 
     // An optional filter : execute this MDX number only.
     filter?: number;
@@ -81,7 +81,7 @@ The execution is **randomly pausing** (500 milliseconds to 1 second) between eac
   action: "MDXes",
   data: "data/sales",
   schema: "Sales",
-  pause: "PT:0.5s:PT:1s"
+  pauses: "PT:0.5s:PT:1s"
 }
 ```
 
