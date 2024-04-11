@@ -5,7 +5,7 @@ initiative so feel free to comment and ask for new features.
 
 **Authentication**
 
-Add support for HTTP headers (embedded scenario) + `OpenReport` task improvements (local Chrome navigation).
+`OpenReport` task improvements (fix local Chrome navigation authentication).
 
 **Performance Tests**
 

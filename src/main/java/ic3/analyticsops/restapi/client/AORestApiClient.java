@@ -24,7 +24,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 
 public class AORestApiClient
@@ -71,13 +70,15 @@ public class AORestApiClient
 
             try (final HttpClient httpClient = httpClientB.build())
             {
-                final HttpRequest httpRequest = HttpRequest.newBuilder(uri)
-                        .timeout(Duration.of(30, ChronoUnit.SECONDS))
-                        .header("Accept-Encoding", "gzip")
-                        .header("Content-Type", "application/json;charset=UTF-8")
-                        .header("X-AUTHORIZATION", Base64.getEncoder().encodeToString((authenticator.user + ":" + authenticator.password).getBytes()))
-                        .POST(HttpRequest.BodyPublishers.ofString(params))
-                        .build();
+                final HttpRequest.Builder httpRequestBuilder = authenticator.addHeaders(
+                        HttpRequest.newBuilder(uri)
+                                .timeout(Duration.of(30, ChronoUnit.SECONDS))
+                                .header("Accept-Encoding", "gzip")
+                                .header("Content-Type", "application/json;charset=UTF-8")
+                                .POST(HttpRequest.BodyPublishers.ofString(params))
+                );
+
+                final HttpRequest httpRequest = httpRequestBuilder.build();
 
                 final HttpResponse<InputStream> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
 
@@ -110,20 +111,24 @@ public class AORestApiClient
 
         try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8))
         {
-            final AORestApiReply<REPLY> reply;
-            final String json;
+            // ---------------------------------------------------------------------------------------------------------
+            // With or without JSON requested, let's first read the whole JSON in memory in case of error :
+            //      e.g., reply = "the user is not authorized ..." instead of a valid JSON
+            // I guess this is not an issue for now.
+            // ---------------------------------------------------------------------------------------------------------
 
-            if (withJson)
+            final String json = IOUtils.toString(reader);
+            final AORestApiReply<REPLY> reply;
+
+            try
             {
-                json = IOUtils.toString(reader);
                 reply = gson.<AORestApiReply<REPLY>>fromJson(json, AORestApiReply.class);
             }
-            else
+            catch (RuntimeException ex)
             {
-                json = null;
-                reply = gson.<AORestApiReply<REPLY>>fromJson(reader, AORestApiReply.class);
+                AOLog4jUtils.SHELL.error("[reply] unexpected REST API reply : {}", json);
+                throw ex;
             }
-
 
             if (reply.isError())
             {
@@ -132,7 +137,7 @@ public class AORestApiClient
 
             final REPLY payload = reply.getPayload();
 
-            if (payload instanceof AORestApiMdxScriptResult res)
+            if (withJson && payload instanceof AORestApiMdxScriptResult res)
             {
                 res.json = json;
             }

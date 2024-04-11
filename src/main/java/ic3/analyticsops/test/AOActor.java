@@ -108,6 +108,10 @@ public class AOActor extends AOSerializable
         {
             throw new AOTestValidationException("the JSON field 'authenticator' is missing from 'actors[" + jsonActorNb + "]' and test");
         }
+        else
+        {
+            authenticator.validate(validateFieldPathPrefix() + "authenticator.");
+        }
 
         validateTasks();
     }

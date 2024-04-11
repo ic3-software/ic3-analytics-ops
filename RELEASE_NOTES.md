@@ -14,6 +14,8 @@
 
 - Added `dumpJson` and `dumpResult` configuration.
 
+- Authentication : support for HTTP headers authorization.
+
 `Tasks`
 
 - Added `DeleteSchemaBackup` task.

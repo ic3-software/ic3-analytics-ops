@@ -54,6 +54,20 @@ public abstract class AOSerializable
         throw new AOTestValidationException("the JSON fields '" + path + "' are all null/empty");
     }
 
+    public void validateEmptyField(String path, @Nullable Object value)
+            throws AOTestValidationException
+    {
+        if (value instanceof String valueS && AOStringUtils.isNotEmpty(valueS))
+        {
+            throw new AOTestValidationException("the JSON field '" + path + "' must be empty");
+        }
+
+        if (value != null)
+        {
+            throw new AOTestValidationException("the JSON field '" + path + "' must be null");
+        }
+    }
+
     public <VALUE> void validateEmptyField(String path, @Nullable List<VALUE> values)
             throws AOTestValidationException
     {
