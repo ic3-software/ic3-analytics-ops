@@ -43,6 +43,11 @@ public class AORestApiClient
         return restApiURL;
     }
 
+    public AOAuthenticator getAuthenticator()
+    {
+        return authenticator;
+    }
+
     /**
      * Blocking call.
      */

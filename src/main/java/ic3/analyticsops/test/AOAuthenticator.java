@@ -9,13 +9,13 @@ import java.util.List;
 public class AOAuthenticator extends AOSerializable
 {
     @Nullable
-    public final String user;
+    private final String user;
 
     @Nullable
-    public final String password;
+    private final String password;
 
     @Nullable
-    public final List<AOHeader> headers;
+    private final List<AOHeader> headers;
 
     protected AOAuthenticator()
     {
@@ -51,6 +51,38 @@ public class AOAuthenticator extends AOSerializable
             validateNonEmptyField(prefix + "user", user);
             validateNonEmptyField(prefix + "password", password);
         }
+    }
+
+    /**
+     * Assuming this has been validated.
+     */
+    public boolean isFormAuth()
+    {
+        return headers == null;
+    }
+
+    /**
+     * Assuming this has been validated and isFormAuth().
+     */
+    public String getUser()
+    {
+        if (user == null)
+        {
+            throw new RuntimeException("internal error : unexpected missing user");
+        }
+        return user;
+    }
+
+    /**
+     * Assuming this has been validated and isFormAuth().
+     */
+    public String getPassword()
+    {
+        if (password == null)
+        {
+            throw new RuntimeException("internal error : unexpected missing password");
+        }
+        return password;
     }
 
     public HttpRequest.Builder addHeaders(HttpRequest.Builder builder)

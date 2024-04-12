@@ -54,18 +54,15 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         final String restApiURL = context.getRestApiURL();
 
         // -------------------------------------------------------------------------------------------------------------
-        // Very temporary code (needs more works) : more like a POC for now.
-        //      - print-in-browser : to ensure all widgets are rendered
-        //              regular /viewer is not rendering widgets until they're visible
-        //              assertion: ic3printStatus=ic3reportRendered:true
-        //      - authentication : assuming icCube is configured w/ &ic3demo=
+        // Mimicking 'Print in Browser' to ensure all widgets are rendered :
+        //      regular /viewer is not rendering widgets until they're visible
+        //      assertion: ic3printStatus=ic3reportRendered:true
         // -------------------------------------------------------------------------------------------------------------
 
         final String reportViewerURL = restApiURL.replace("/icCube/api", "/icCube/report/viewer");
 
         final String reportURL = reportViewerURL
-                + "?ic3demo="
-                + "&ic3report=" + encode(reportPath)
+                + "?ic3report=" + encode(reportPath)
                 + "&ic3printParams=" + encode(new AOPrintParams(reportViewerURL).toJson());
 
         final int timeoutS = this.timeoutS != null ? this.timeoutS : 30;
@@ -85,6 +82,8 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                 final long start = System.currentTimeMillis();
 
                 session.waitDocumentReady(timeOutInMillis);
+
+                login(context, session);
 
                 final int waitPeriodMS = 1000;
 
@@ -148,12 +147,93 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         }
     }
 
-    private static boolean safeCompareVariable(Session session, String name, String expectedValue)
+    protected void login(AOTaskContext context, Session session)
+    {
+        final AOAuthenticator authenticator = context.getAuthenticator();
+
+        if (authenticator.isFormAuth())
+        {
+            performFormAuthLogin(context, authenticator, session);
+        }
+        else
+        {
+            performHeadersAuth(context, authenticator, session);
+        }
+    }
+
+    private void performFormAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
+    {
+        final long start = System.currentTimeMillis();
+
+        final int waitPeriodMS = 500;
+        final int timeOutInMillis = 1000 * 5;
+
+        int newTimoutMillis = Math.max(waitPeriodMS * 2, timeOutInMillis - (int) (System.currentTimeMillis() - start));
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth.");
+
+        final boolean gotIt = session.waitUntil(
+                s ->
+                {
+                    if (context.isOnError() /* i.e., another actor on error */)
+                    {
+                        throw new RuntimeException("interrupted because of other error.");
+                    }
+
+                    return safeCompareVariable(s, "ic3formAuth", true);
+                },
+                newTimoutMillis,
+                waitPeriodMS /* Cannot find context with specified id */,
+                true
+        );
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : completed");
+
+        AOAssertion.assertTrue("open-report-login-form-failed:" + reportPath, gotIt);
+
+        final String username = authenticator.getUser();
+        final String password = authenticator.getPassword();
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : login ");
+
+        session.evaluate(
+                String.format(
+                        "{ document.getElementsByName('j_username').item(0).value = '%s'; document.getElementsByName('j_password').item(0).value = '%s'; document.getElementsByTagName('button').item(0).click(); }",
+                        username,
+                        password
+                )
+        );
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : login completed");
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : wait for document ready");
+
+        session.waitDocumentReady(timeOutInMillis) /* Cannot find context with specified id */;
+
+        AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : wait for document ready completed");
+    }
+
+    private void performHeadersAuth(AOTaskContext context, AOAuthenticator authenticator, Session session)
+    {
+        throw new RuntimeException("internal error : not yet!");
+    }
+
+    protected <VALUE> boolean safeCompareVariable(Session session, String name, VALUE expectedValue)
     {
         try
         {
-            return expectedValue.equalsIgnoreCase(session.getVariable(name, String.class));
-
+            if (expectedValue instanceof String expectedValueS)
+            {
+                return expectedValueS.equalsIgnoreCase(session.getVariable(name, String.class));
+            }
+            else if (expectedValue instanceof Boolean expectedValueB)
+            {
+                return expectedValueB == session.getVariable(name, Boolean.class);
+            }
+            else
+            {
+                throw new RuntimeException("internal error : unexpected value type : " + expectedValue.getClass());
+            }
         }
         catch (NullPointerException ex)
         {
@@ -175,7 +255,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         }
     }
 
-    private static String encode(String value)
+    protected String encode(String value)
     {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }

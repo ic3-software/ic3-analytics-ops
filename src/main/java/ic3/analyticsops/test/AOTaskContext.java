@@ -34,6 +34,11 @@ public class AOTaskContext
         return context.getRestApiURL();
     }
 
+    public AOAuthenticator getAuthenticator()
+    {
+        return context.getAuthenticator();
+    }
+
     public File getMDXesDataFolder(String data)
     {
         return context.getMDXesDataFolder(data);

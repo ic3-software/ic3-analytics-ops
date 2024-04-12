@@ -57,6 +57,11 @@ public class AOActorContext
         return client.getRestApiURL();
     }
 
+    public AOAuthenticator getAuthenticator()
+    {
+        return client.getAuthenticator();
+    }
+
     @Nullable
     public Duration getDuration()
     {
