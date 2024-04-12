@@ -4,16 +4,24 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.*;
 import ic3.analyticsops.test.assertion.AOOpenReportAssertion;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOStringUtils;
 import io.webfolder.cdp.command.Network;
+import io.webfolder.cdp.event.network.RequestWillBeSent;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 {
@@ -22,12 +30,19 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
     @Nullable
     private final Integer timeoutS;
 
+    /**
+     * Similar to the GenerateMDXes task : when present, MDX from the report will be extracted and saved there.
+     */
+    @Nullable
+    private final String data;
+
     protected AOOpenReportTask()
     {
         // JSON deserialization
 
         this.reportPath = null;
         this.timeoutS = null;
+        this.data = null;
     }
 
     @Override
@@ -54,6 +69,25 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
     public void run(AOTaskContext context)
             throws AOException
     {
+        final boolean withMdxGeneration = AOStringUtils.isNotEmpty(data);
+
+        if (withMdxGeneration)
+        {
+            final File data = context.getMDXesDataFolder(this.data);
+
+            final File container = data.getParentFile();
+
+            if (container.exists())
+            {
+                throw new AOException("existing data folder (remove first) " + container.getAbsolutePath());
+            }
+
+            if (!container.mkdirs())
+            {
+                throw new AOException("could not created the data folder " + container.getAbsolutePath());
+            }
+        }
+
         final String restApiURL = context.getRestApiURL();
 
         // -------------------------------------------------------------------------------------------------------------
@@ -72,10 +106,17 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
         final String browserContext = context.createBrowserContext();
 
+        final ConcurrentMap<String, String> statements = new ConcurrentHashMap<>();
+
         try
         {
             try (Session session = context.createBrowserSession(browserContext))
             {
+                if (withMdxGeneration)
+                {
+                    generateMDXes(context, session, statements);
+                }
+
                 final AOAuthenticator authenticator = context.getAuthenticator();
 
                 AOLog4jUtils.CHROME.debug("[chrome] navigating to : {}", reportURL);
@@ -158,9 +199,38 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         {
             context.disposeBrowserContext(browserContext);
         }
+
+        if (withMdxGeneration)
+        {
+            // How to wait for all the events ? But I guess all the 'requestWillBeSent' have been fully processed
+            // by now, so it's ok to save them into their respective files.
+
+            final File data = context.getMDXesDataFolder(this.data);
+
+            final File container = data.getParentFile();
+            final String pattern = data.getName();
+
+            int mdxNb = 0;
+
+            for (String statement : statements.values())
+            {
+                final File mdx = new File(container, pattern + "." + mdxNb + ".mdx.txt");
+
+                try
+                {
+                    Files.writeString(mdx.toPath(), statement, StandardCharsets.UTF_8);
+                }
+                catch (IOException ex)
+                {
+                    throw new AOException("could not write the MDX[" + mdxNb + "] statement " + mdx.getAbsolutePath());
+                }
+
+                mdxNb++;
+            }
+        }
     }
 
-    private void performFormAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
+    protected void performFormAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
     {
         final long start = System.currentTimeMillis();
 
@@ -212,7 +282,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : wait for document ready completed");
     }
 
-    private void performHeadersAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
+    protected void performHeadersAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
     {
         final Network network = session.getCommand().getNetwork();
 
@@ -270,6 +340,46 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
     protected String encode(String value)
     {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Did not find how to get the response data.
+     */
+    protected void generateMDXes(AOTaskContext context, Session session, ConcurrentMap<String, String> statements)
+    {
+        final Network network = session.getCommand().getNetwork();
+
+        network.enable();
+
+        session.addEventListener((event, value) ->
+        {
+            if (event.name.equals("requestWillBeSent"))
+            {
+                if (value instanceof RequestWillBeSent request && request.getRequest().getUrl().contains("/icCube/gvi") && request.getRequest().getPostData().contains("executeMdx"))
+                {
+//                    AOLog4jUtils.CHROME.warn(
+//                            "[chrome] event : {} {} {} {}",
+//                            event.name,
+//                            request.getRequestId(),
+//                            request.getRequest().getUrl(),
+//                            request.getRequest().getPostData()
+//                    );
+
+                    final String decoded = URLDecoder.decode(request.getRequest().getPostData(), StandardCharsets.UTF_8);
+                    final String[] parts = decoded.split("&");
+
+                    for (String part : parts)
+                    {
+                        if (part.startsWith("mdx="))
+                        {
+                            final String code = part.substring(4);
+
+                            statements.put(request.getRequestId(), code);
+                        }
+                    }
+                }
+            }
+        });
     }
 
 }

@@ -70,6 +70,8 @@ See also :
 - [`Pause`](../Pause.md)
 - [`Tasks`](../Tasks.md)
 - [`Task`](../Task.md)
+- [`GenerateMDXes`](./GenerateMDXes.md)
+- [`OpenReport`](./OpenReport.md)
 
 ## Example
 

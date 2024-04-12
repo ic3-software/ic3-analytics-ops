@@ -34,6 +34,8 @@
 
 - Added support for both FORM and HTTP headers authentication.
 
+- Added support to extract MDX statements.
+
 ## 1.0
 
 `General`

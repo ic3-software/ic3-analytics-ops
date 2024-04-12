@@ -52,6 +52,8 @@ See also :
 - [`JSON5`](../JSON5.md)
 - [`Tasks`](../Tasks.md)
 - [`Task`](../Task.md)
+- [`OpenReport`](./OpenReport.md)
+- [`MDXes`](./MDXes.md)
 
 ## Example
 
