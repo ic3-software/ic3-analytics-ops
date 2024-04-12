@@ -3,10 +3,6 @@
 Here is a non-exhaustive list of upcoming features and developments in no specific order. This is an ongoing
 initiative so feel free to comment and ask for new features.
 
-**Authentication**
-
-`OpenReport` task improvements (fix local Chrome navigation authentication).
-
 **Performance Tests**
 
 New assertions that can be used in several tasks :

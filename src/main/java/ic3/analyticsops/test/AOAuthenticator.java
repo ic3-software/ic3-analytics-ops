@@ -62,6 +62,14 @@ public class AOAuthenticator extends AOSerializable
     }
 
     /**
+     * Assuming this has been validated.
+     */
+    public boolean isHeadersAuth()
+    {
+        return headers != null;
+    }
+
+    /**
      * Assuming this has been validated and isFormAuth().
      */
     public String getUser()
@@ -83,6 +91,18 @@ public class AOAuthenticator extends AOSerializable
             throw new RuntimeException("internal error : unexpected missing password");
         }
         return password;
+    }
+
+    /**
+     * Assuming this has been validated and isHeadersAuth().
+     */
+    public List<AOHeader> getHeaders()
+    {
+        if (headers == null)
+        {
+            throw new RuntimeException("internal error : unexpected missing headers");
+        }
+        return headers;
     }
 
     public HttpRequest.Builder addHeaders(HttpRequest.Builder builder)

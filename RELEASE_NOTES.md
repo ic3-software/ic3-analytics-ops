@@ -30,6 +30,10 @@
 
 - Added `pauses` configuration to wait (possibly randomly) after the execution of each MDX statement.
 
+`Task:OpenReport`
+
+- Added support for both FORM and HTTP headers authentication.
+
 ## 1.0
 
 `General`

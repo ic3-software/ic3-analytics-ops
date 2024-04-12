@@ -4,13 +4,16 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.test.*;
 import ic3.analyticsops.test.assertion.AOOpenReportAssertion;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import io.webfolder.cdp.command.Network;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 {
@@ -73,7 +76,14 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         {
             try (Session session = context.createBrowserSession(browserContext))
             {
+                final AOAuthenticator authenticator = context.getAuthenticator();
+
                 AOLog4jUtils.CHROME.debug("[chrome] navigating to : {}", reportURL);
+
+                if (authenticator.isHeadersAuth())
+                {
+                    performHeadersAuthLogin(context, authenticator, session);
+                }
 
                 session.navigate(reportURL);
 
@@ -83,7 +93,10 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
                 session.waitDocumentReady(timeOutInMillis);
 
-                login(context, session);
+                if (authenticator.isFormAuth())
+                {
+                    performFormAuthLogin(context, authenticator, session);
+                }
 
                 final int waitPeriodMS = 1000;
 
@@ -147,20 +160,6 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         }
     }
 
-    protected void login(AOTaskContext context, Session session)
-    {
-        final AOAuthenticator authenticator = context.getAuthenticator();
-
-        if (authenticator.isFormAuth())
-        {
-            performFormAuthLogin(context, authenticator, session);
-        }
-        else
-        {
-            performHeadersAuth(context, authenticator, session);
-        }
-    }
-
     private void performFormAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
     {
         final long start = System.currentTimeMillis();
@@ -213,9 +212,22 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         AOLog4jUtils.SHELL.debug("[chrome] FORM auth. : wait for document ready completed");
     }
 
-    private void performHeadersAuth(AOTaskContext context, AOAuthenticator authenticator, Session session)
+    private void performHeadersAuthLogin(AOTaskContext context, AOAuthenticator authenticator, Session session)
     {
-        throw new RuntimeException("internal error : not yet!");
+        final Network network = session.getCommand().getNetwork();
+
+        final Map<String, Object> headers = new HashMap<>();
+
+
+        for (AOHeader header : authenticator.getHeaders())
+        {
+            headers.put(header.name, header.value);
+        }
+
+        network.setExtraHTTPHeaders(headers);
+        network.enable();
+
+        AOLog4jUtils.SHELL.debug("[chrome] headers auth. : completed");
     }
 
     protected <VALUE> boolean safeCompareVariable(Session session, String name, VALUE expectedValue)
