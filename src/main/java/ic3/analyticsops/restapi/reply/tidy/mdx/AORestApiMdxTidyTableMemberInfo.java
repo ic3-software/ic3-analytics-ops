@@ -4,12 +4,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class AORestApiMdxTidyTableMemberInfo
 {
-    private String caption;
+    public String caption;
 
-    private String name;
+    public String name;
 
-    private String uniqueName;
+    public String uniqueName;
 
     @Nullable
-    private Object key;
+    public Object key;
 }

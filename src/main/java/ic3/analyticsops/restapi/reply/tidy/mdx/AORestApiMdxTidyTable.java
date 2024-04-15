@@ -90,6 +90,32 @@ public class AORestApiMdxTidyTable extends AORestApiTidyTable<AORestApiMdxTidyTa
         final AORestApiMdxTidyTable actual = (AORestApiMdxTidyTable) other;
 
         AOAssertion.assertEquals("axis count", getAxisCount(), actual.getAxisCount());
+
+        assertEqualsInitialMembers(actual);
+    }
+
+    public void assertEqualsInitialMembers(AORestApiMdxTidyTable actual)
+    {
+        if (initialMembers == null)
+        {
+            AOAssertion.assertNull("initialMembers", actual.initialMembers);
+        }
+        else
+        {
+            AOAssertion.assertNotNull("initialMembers", actual.initialMembers);
+            AOAssertion.assertEquals("initialMembers length", initialMembers.size(), actual.initialMembers.size());
+
+            for (int ii = 0; ii < initialMembers.size(); ii++)
+            {
+                final AORestApiMdxTidyTableMemberInfo iMember = initialMembers.get(ii);
+                final AORestApiMdxTidyTableMemberInfo iMemberActual = actual.initialMembers.get(ii);
+
+                AOAssertion.assertEquals("initialMembers[" + ii + "] caption", iMember.caption, iMemberActual.caption);
+                AOAssertion.assertEquals("initialMembers[" + ii + "] caption", iMember.name, iMemberActual.name);
+                AOAssertion.assertEquals("initialMembers[" + ii + "] caption", iMember.uniqueName, iMemberActual.uniqueName);
+                AOAssertion.assertEquals("initialMembers[" + ii + "] caption", iMember.key, iMemberActual.key);
+            }
+        }
     }
 
     public void assertCellEquals(AORestApiMdxTidyTable other, double delta)

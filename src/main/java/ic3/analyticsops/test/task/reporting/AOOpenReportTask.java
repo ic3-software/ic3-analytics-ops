@@ -368,14 +368,28 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                     final String decoded = URLDecoder.decode(request.getRequest().getPostData(), StandardCharsets.UTF_8);
                     final String[] parts = decoded.split("&");
 
+                    String statement = null;
+                    String initialSelection = null;
+
                     for (String part : parts)
                     {
                         if (part.startsWith("mdx="))
                         {
-                            final String code = part.substring(4);
-
-                            statements.put(request.getRequestId(), code);
+                            statement = part.substring("mdx=".length());
                         }
+                        else if (part.startsWith("initialSelection="))
+                        {
+                            initialSelection = part;
+                        }
+                    }
+
+                    if (statement != null)
+                    {
+                        if (initialSelection != null)
+                        {
+                            statement += "\n//" + initialSelection;
+                        }
+                        statements.put(request.getRequestId(), statement);
                     }
                 }
             }
