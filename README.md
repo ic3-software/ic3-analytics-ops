@@ -14,6 +14,9 @@ errors and fosters greater trust in the analytics infrastructure.
 - automated data authorization tests.
 - automated dashboards tests.
 
+Here is the link to the introductory post on
+Medium: [AnalyticsOps and Automated Dashboard Tests](https://medium.com/@marc.polizzi/analyticsops-and-automated-dashboard-tests-535e2ab83ead).
+
 ## Roadmap
 
 The project is still in its **early days** so stay tuned for further updates.

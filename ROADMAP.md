@@ -20,8 +20,12 @@ down to identify the maximum throughput it can handle :
 
 **Cypress Tests**
 
-For ad-hoc dashboard/report tests right from the shell as well : re-use/improve the command file from the
-[ic3-dashboard-testing](https://github.com/ic3-software/ic3-dashboard-testing) project.
+For ad-hoc dashboard/report tests right from the shell as well : re-use/improve the `command` file from the
+Cypress [ic3-dashboard-testing](https://github.com/ic3-software/ic3-dashboard-testing) project.
+
+**Visual Non-Regression**
+
+Investigate how to integrate icCube testing for non-regression in widget (chart, table, filter, etc...) rendering.
 
 **Reporters**
 
