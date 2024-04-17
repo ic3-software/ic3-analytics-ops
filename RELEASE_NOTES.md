@@ -1,6 +1,6 @@
 # Release Notes
 
-## 1.1 ( next-version )
+## 1.1
 
 `Test`
 
