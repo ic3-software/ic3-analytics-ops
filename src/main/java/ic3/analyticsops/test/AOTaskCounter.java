@@ -15,7 +15,7 @@ public class AOTaskCounter
     private int runCount;
 
     /**
-     * Total elapsed time for the 'runtCount' runs.
+     * Total elapsed time for the 'runCount' runs.
      */
     private long runElapsedMStotal;
 
@@ -39,6 +39,7 @@ public class AOTaskCounter
         synchronized (lock)
         {
             runStartMS = System.currentTimeMillis();
+            runPausedMS = 0;
         }
     }
 
@@ -54,7 +55,8 @@ public class AOTaskCounter
     {
         synchronized (lock)
         {
-            final long elapsedMS = System.currentTimeMillis() - runStartMS - runPausedMS;
+            final long totalElapsedMS = System.currentTimeMillis() - runStartMS;
+            final long elapsedMS = totalElapsedMS - runPausedMS;
 
             runStartMS = 0;
             runPausedMS = 0;

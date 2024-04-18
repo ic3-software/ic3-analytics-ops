@@ -46,6 +46,9 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     @Nullable
     private final List<AOAssertion> assertions;
 
+    @Nullable
+    private final AOPerformanceTargets performanceTargets;
+
     protected AOTask()
     {
         // JSON deserialization
@@ -55,6 +58,7 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         this.dumpResult = null;
         this.pause = null;
         this.assertions = null;
+        this.performanceTargets = null;
     }
 
     /**
@@ -175,6 +179,12 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     protected List<ASSERTION> getOptionalAssertions()
     {
         return (List<ASSERTION>) assertions;
+    }
+
+    @Nullable
+    public AOPerformanceTargets getPerformanceTargets()
+    {
+        return performanceTargets;
     }
 
     public abstract void run(AOTaskContext context)

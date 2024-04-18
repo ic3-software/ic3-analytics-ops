@@ -2,6 +2,7 @@ package ic3.analyticsops.test;
 
 import com.google.gson.*;
 import ic3.analyticsops.common.AOPause;
+import ic3.analyticsops.gson.AODurationTypeAdapter;
 import ic3.analyticsops.gson.AOPauseTypeAdapter;
 import ic3.analyticsops.test.assertion.AOAssertionDeserializer;
 import ic3.analyticsops.test.task.mdx.AOExecuteMdxTask;
@@ -14,6 +15,7 @@ import ic3.analyticsops.test.task.server.AOClearResultCacheTask;
 import ic3.analyticsops.test.task.server.AOServerStatusTask;
 
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +54,7 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
                 .serializeSpecialFloatingPointValues()
                 .registerTypeAdapter(AOPause.class, new AOPauseTypeAdapter())
                 .registerTypeAdapter(AOAssertion.class, new AOAssertionDeserializer(id))
+                .registerTypeAdapter(Duration.class, new AODurationTypeAdapter())
                 .create();
 
         final AOTask<?> task = gson.fromJson(jsonElement, clazz);

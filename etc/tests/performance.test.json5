@@ -1,0 +1,48 @@
+{
+  name: "Performance",
+  restApiURL: "http://localhost:8282/icCube/api",
+  authenticator: {
+    user: "${analytics.ops.user}",
+    password: "${analytics.ops.password}"
+  },
+  duration: "PT6s",
+  actors: [
+    {
+      name: "Schema Loader",
+      active: true,
+      tasks: [
+        {
+          action: "RestoreSchemaBackup",
+          schemaName: "Sales",
+          timestamp: "2024-04-05 14-12-34 126 UTC",
+          pause: "PT0s:PT1s",
+          performanceTargets: {
+            // asserted after each run of the task
+            durationMax: "PT0.2s",
+            // asserted at the end of the test (avoid the initial spikes)
+            durationAverageEnd: "PT0.1s"
+          }
+        }
+      ]
+    },
+    {
+      name: "MDX Player",
+      active: true,
+      tasks: [
+        {
+          action: "MDXes",
+          data: "data/sales",
+          schema: "Sales",
+          pauses: "PT0s:PT0.5s",
+          shuffle: true,
+          performanceTargets: {
+            // asserted after each run of the task
+            durationMax: "PT0.4s",
+            // asserted at the end of the test (avoid the initial spikes)
+            durationAverageEnd: "PT0.3s"
+          }
+        }
+      ]
+    }
+  ]
+}

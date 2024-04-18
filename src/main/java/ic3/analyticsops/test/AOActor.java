@@ -219,8 +219,6 @@ public class AOActor extends AOSerializable
                     {
                         context.onBeforeRunTask(task);
 
-                        final long startMS = System.currentTimeMillis();
-
                         try
                         {
                             task.run(tContext);
@@ -249,6 +247,8 @@ public class AOActor extends AOSerializable
                             context.onAfterRunTask(task);
                         }
 
+                        context.assertPerformanceTargets(task) /* after .onAfterRunTask() */;
+
                     }
                     catch (Throwable /* AssertionError */ ex)
                     {
@@ -268,6 +268,23 @@ public class AOActor extends AOSerializable
             }
         }
         while (expiryMS != null /* single run */ && System.currentTimeMillis() < expiryMS && !context.isOnError());
+
+        if (!context.isOnError())
+        {
+            for (AOTask<?> task : tasks /* validated by now */)
+            {
+                try
+                {
+                    context.assertPerformanceTargetsEnd(task);
+                }
+                catch (Throwable /* AssertionError */ ex)
+                {
+                    AOLog4jUtils.ACTOR.error("[actor] '{}' run on-task-error '{}'", name, task.getName(), ex);
+
+                    context.onActorTaskError(task, ex);
+                }
+            }
+        }
 
         AOLog4jUtils.ACTOR.info("[actor] '{}' run completed", name);
 

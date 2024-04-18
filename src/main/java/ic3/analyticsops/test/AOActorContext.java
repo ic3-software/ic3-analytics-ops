@@ -166,7 +166,7 @@ public class AOActorContext
 
         if (counter == null)
         {
-            throw new RuntimeException("unexpected missing task counter : " + task.getName());
+            throw new RuntimeException("unexpected missing counter for task : " + task.getName());
         }
 
         counter.onRunPaused(elapsedMS);
@@ -178,7 +178,7 @@ public class AOActorContext
 
         if (counter == null)
         {
-            throw new RuntimeException("unexpected missing task counter : " + task.getName());
+            throw new RuntimeException("unexpected missing counter for task : " + task.getName());
         }
 
         counter.onAfterRun();
@@ -187,6 +187,40 @@ public class AOActorContext
     public void run()
     {
         actor.run(this) /* in its own thread of control */;
+    }
+
+    public void assertPerformanceTargets(AOTask<?> task)
+    {
+        final AOPerformanceTargets targets = task.getPerformanceTargets();
+
+        if (targets != null)
+        {
+            final AOTaskCounter counter = taskCounters.get(task);
+
+            if (counter == null)
+            {
+                throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+            }
+
+            targets.assertOk(counter, false);
+        }
+    }
+
+    public void assertPerformanceTargetsEnd(AOTask<?> task)
+    {
+        final AOPerformanceTargets targets = task.getPerformanceTargets();
+
+        if (targets != null)
+        {
+            final AOTaskCounter counter = taskCounters.get(task);
+
+            if (counter == null)
+            {
+                throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+            }
+
+            targets.assertOk(counter, true);
+        }
     }
 
     public void dumpStatistics()
@@ -200,7 +234,7 @@ public class AOActorContext
             final AOTaskCounter counter = taskCounters.get(task);
 
             AOLog4jUtils.ACTOR.debug(
-                    "[actor] '{}' task '{}' statistics : run:{} avg:{} max:{} min:{}",
+                    "[actor] '{}' task '{}' statistics : run-count:{} avg.:{} max.:{} min.:{}",
                     actor.getName(),
                     task.getName(),
                     counter.getRunCount(),
