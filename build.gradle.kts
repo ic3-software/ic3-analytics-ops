@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "ic3-software"
-version = "1.1"
+version = "1.2"
 
 java {
     toolchain {
@@ -117,7 +117,7 @@ tasks.register("kit-build") {
 
         copy {
             from(layout.projectDirectory.dir("etc/tests")) {
-                include("smoke.test.json5")
+                include("demo.test.json5")
             }
             into(layout.buildDirectory.dir("AnalyticsOps/tests"))
         }
