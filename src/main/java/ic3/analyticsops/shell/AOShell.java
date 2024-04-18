@@ -90,7 +90,7 @@ public class AOShell
             }
             else
             {
-                json5 = new File("etc/tests/smoke.test.json5");
+                json5 = new File("etc/tests/demo.test.json5");
             }
 
             AOLog4jUtils.SHELL.info("[shell] JSON configuration : {}", json5.getAbsolutePath());

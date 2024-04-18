@@ -106,6 +106,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
         final String browserContext = context.createBrowserContext();
 
+        // Populated from an event-listener.
         final ConcurrentMap<String, String> statements = new ConcurrentHashMap<>();
 
         try

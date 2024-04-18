@@ -201,16 +201,21 @@ public class AOTest extends AOSerializable
         }
 
         final List<AOActor> activeActors = activeActors();
-
-        for (AOActor actor : activeActors)
+        final List<AOActorContext> activeActorsContexts = activeActors.stream().map(actor ->
         {
+
             final String restApiURL = actor.getRestApiURL(this.restApiURL);
             final AOAuthenticator authenticator = actor.getAuthenticator(this.authenticator);
 
             final AORestApiClient client = new AORestApiClient(restApiURL, authenticator);
-            final AOActorContext aContext = new AOActorContext(context, client, actor);
 
-            actor.run(aContext) /* in its own thread of control */;
+            return new AOActorContext(context, client, actor);
+
+        }).toList();
+
+        for (AOActorContext actorContext : activeActorsContexts)
+        {
+            actorContext.run();
         }
 
         AOLog4jUtils.TEST.info("[test] waiting for {} actors", activeActors.size());
@@ -218,6 +223,11 @@ public class AOTest extends AOSerializable
         context.waitForCompletion();
 
         AOLog4jUtils.TEST.info("[test] waiting for {} actors done", activeActors.size());
+
+        for (AOActorContext actorContext : activeActorsContexts)
+        {
+            actorContext.dumpStatistics();
+        }
     }
 
     /**

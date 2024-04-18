@@ -5,11 +5,16 @@ import ic3.analyticsops.restapi.client.AORestApiClientOptions;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.request.AORestApiRequest;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
+import ic3.analyticsops.utils.AODurationUtils;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +48,12 @@ public class AOActorContext
      * },
      * </pre>
      */
-    private final Map<String, String> taskProperties = new ConcurrentHashMap<>();
+    private final Map<String, String> taskProperties = new HashMap<>();
+
+    /**
+     * Thread-safe to make it accessible from test level to aggregate ongoing statistics.
+     */
+    private final Map<AOTask<?>, AOTaskCounter> taskCounters = new ConcurrentHashMap<>();
 
     public AOActorContext(AOTestContext context, AORestApiClient client, AOActor actor)
     {
@@ -90,11 +100,6 @@ public class AOActorContext
         return context.createBrowserSession(browserContext);
     }
 
-    public void clearTaskProperties()
-    {
-        taskProperties.clear();
-    }
-
     public void setTaskProperty(String name, String value)
     {
         taskProperties.put(name, value);
@@ -135,8 +140,74 @@ public class AOActorContext
         context.onActorTasksError(actor, ex);
     }
 
+    /**
+     * Still in the actor thread.
+     */
     public void onActorCompleted()
     {
         context.onActorCompleted(actor);
+    }
+
+    public void onBeforeRunTasks(int run)
+    {
+        taskProperties.clear();
+    }
+
+    public void onBeforeRunTask(AOTask<?> task)
+    {
+        final AOTaskCounter counter = taskCounters.computeIfAbsent(task, t -> new AOTaskCounter(task));
+
+        counter.onBeforeRun();
+    }
+
+    public void onRunTaskPaused(AOTask<?> task, long elapsedMS)
+    {
+        final AOTaskCounter counter = taskCounters.get(task);
+
+        if (counter == null)
+        {
+            throw new RuntimeException("unexpected missing task counter : " + task.getName());
+        }
+
+        counter.onRunPaused(elapsedMS);
+    }
+
+    public void onAfterRunTask(AOTask<?> task)
+    {
+        final AOTaskCounter counter = taskCounters.get(task);
+
+        if (counter == null)
+        {
+            throw new RuntimeException("unexpected missing task counter : " + task.getName());
+        }
+
+        counter.onAfterRun();
+    }
+
+    public void run()
+    {
+        actor.run(this) /* in its own thread of control */;
+    }
+
+    public void dumpStatistics()
+    {
+        final List<AOTask<?>> sortedTasks = taskCounters.keySet().stream()
+                .sorted(Comparator.comparing(AOTask::getName))
+                .toList();
+
+        for (AOTask<?> task : sortedTasks)
+        {
+            final AOTaskCounter counter = taskCounters.get(task);
+
+            AOLog4jUtils.ACTOR.debug(
+                    "[actor] '{}' task '{}' statistics : run:{} avg:{} max:{} min:{}",
+                    actor.getName(),
+                    task.getName(),
+                    counter.getRunCount(),
+                    AODurationUtils.formatMillis(counter.getRunElapsedMSavg()),
+                    AODurationUtils.formatMillis(counter.getRunElapsedMSmax()),
+                    AODurationUtils.formatMillis(counter.getRunElapsedMSmin())
+            );
+        }
     }
 }

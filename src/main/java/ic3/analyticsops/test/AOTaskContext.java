@@ -139,7 +139,12 @@ public class AOTaskContext
         return context.isOnError();
     }
 
-    static enum MarkedResult
+    public void onRunPaused(long elapsedMS)
+    {
+        context.onRunTaskPaused(task, elapsedMS);
+    }
+
+    enum MarkedResult
     {
         expected, actual
     }

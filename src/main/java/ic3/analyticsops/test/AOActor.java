@@ -132,6 +132,11 @@ public class AOActor extends AOSerializable
         return "actors[" + jsonActorNb + "].";
     }
 
+    public String getName()
+    {
+        return name;
+    }
+
     public boolean isActive()
     {
         return active == null || active;
@@ -193,11 +198,13 @@ public class AOActor extends AOSerializable
     {
         AOLog4jUtils.ACTOR.info("[actor] '{}' run started", name);
 
+        int run = 0;
+
         do
         {
             try
             {
-                context.clearTaskProperties();
+                context.onBeforeRunTasks(++run);
 
                 for (AOTask<?> task : tasks /* validated by now */)
                 {
@@ -210,22 +217,38 @@ public class AOActor extends AOSerializable
 
                     try
                     {
-                        task.run(tContext);
+                        context.onBeforeRunTask(task);
 
-                        AOLog4jUtils.ACTOR.debug("[actor] '{}.{}' ✓", name, task.getName());
+                        final long startMS = System.currentTimeMillis();
 
-                        final Long pauseMS = task.getPauseMS();
-
-                        if (pauseMS != null)
+                        try
                         {
-                            try
+                            task.run(tContext);
+
+                            AOLog4jUtils.ACTOR.debug("[actor] '{}.{}' ✓", name, task.getName());
+
+                            final Long pauseMS = task.getPauseMS();
+
+                            if (pauseMS != null)
                             {
-                                Thread.sleep(pauseMS);
-                            }
-                            catch (InterruptedException ignored)
-                            {
+                                final long startPauseMS = System.currentTimeMillis();
+
+                                try
+                                {
+                                    Thread.sleep(pauseMS);
+                                }
+                                catch (InterruptedException ignored)
+                                {
+                                }
+
+                                context.onRunTaskPaused(task, System.currentTimeMillis() - startPauseMS);
                             }
                         }
+                        finally
+                        {
+                            context.onAfterRunTask(task);
+                        }
+
                     }
                     catch (Throwable /* AssertionError */ ex)
                     {
