@@ -17,7 +17,7 @@ containing the test definition being run :
             sales.0.mdx.txt
             sales.1.mdx.txt
             sales.2.mdx.txt
-    smoke.test.json5
+    demo.test.json5
 
 The generated results are compressed but, you can keep them uncompressed if you like :
 
@@ -29,7 +29,7 @@ The generated results are compressed but, you can keep them uncompressed if you 
             sales.1.mdx.json.zip      : generated
             sales.2.mdx.txt
             sales.2.mdx.json.zip      : generated
-    smoke.test.json5
+    demo.test.json5
 
 Note this task is using the [TidyExecuteMdxScript](https://doc.iccube.com/?ic3topic=server.api.TidyExecuteMdxScript)
 REST API request.
