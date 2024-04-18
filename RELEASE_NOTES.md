@@ -2,13 +2,17 @@
 
 ## 1.2 ( next-version )
 
+`Task:MDXes`
+
+- Added `shuffle` configuration to randomly permutes the list of MDX statements before executing them.
+
 ## 1.1
 
 `Test`
 
 - Added JSON validation.
 
-- Added `duration` and parallel actor execution : each actor runs in its own thread of control.
+- Added `duration` configuration and parallel actor execution : each actor runs in its own thread of control.
 
 - Added `chrome` configuration to use Chrome or Chromium for the `OpenReport` task.
 

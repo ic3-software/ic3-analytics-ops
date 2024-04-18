@@ -61,6 +61,9 @@ interface MDXesTask extends Task {
     // An optional filter : execute this MDX number only.
     filter?: number;
 
+    // Optionally randomly permutes the list of MDX statements before executing them.
+    shuffle?: boolean;
+
 }
 ```
 
