@@ -6,9 +6,15 @@ import java.time.Duration;
 
 public class AOPerformanceTargets extends AOSerializable
 {
+    /**
+     * Asserted after each run of the task.
+     */
     @Nullable
     private final Duration durationMax;
 
+    /**
+     * Asserted at the end of the test.
+     */
     @Nullable
     private final Duration durationAverageEnd;
 

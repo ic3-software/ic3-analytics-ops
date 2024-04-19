@@ -36,9 +36,9 @@
           pauses: "PT0s:PT0.5s",
           shuffle: true,
           performanceTargets: {
-            // asserted after each run of the task
+            // Asserted after each run of the task.
             durationMax: "PT0.4s",
-            // asserted at the end of the test (avoid the initial spikes)
+            // Asserted at the end of the test.
             durationAverageEnd: "PT0.3s"
           }
         }

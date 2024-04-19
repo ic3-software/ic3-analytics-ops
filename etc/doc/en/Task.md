@@ -31,11 +31,23 @@ interface Task<ASSERTION extends Assertion> {
 
     assertions?: ASSERTION[];
 
+    performanceTargets?: PerformanceTarget[];
+
 }
 
 interface Assertion {
 
     // Refer to each concrete implementation.
+
+}
+
+interface PerformanceTarget {
+
+    // Asserted after each run of the task.
+    durationMax?: Duration;
+
+    // Asserted at the end of the test.
+    durationAverageEnd?: Duration;
 
 }
 ```
@@ -44,10 +56,37 @@ See also :
 
 - [`JSON5`](./JSON5.md)
 - [`Pause`](./Pause.md)
+- [`Duration`](./Duration.md)
 - [`Assertion`](./Assertion.md)
 - [`Actor`](./Actor.md)
 - [`Test`](./Test.md)
 - [`Tasks`](./Tasks.md)
+
+## Example
+
+A single actor executing a bunch of MDX queries against the restored `Sales` schema and ensuring that all those
+queries are always executed in less than 10 seconds and eventually their average duration is less than 5 seconds :
+
+```json5
+{
+  actors: [
+    {
+      name: "MDX Player",
+      tasks: [
+        {
+          action: "MDXes",
+          data: "data/sales",
+          schema: "Sales",
+          performanceTargets: {
+            durationMax: "PT10s",
+            durationAverageEnd: "PT5s"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Java Source Code
 

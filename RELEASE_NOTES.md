@@ -2,6 +2,10 @@
 
 ## 1.2 ( next-version )
 
+`Tasks`
+
+- Added `performanceTargets` configuration defining several targets related to performance.
+
 `Task:MDXes`
 
 - Added `shuffle` configuration to randomly permutes the list of MDX statements before executing them.
