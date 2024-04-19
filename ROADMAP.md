@@ -3,13 +3,6 @@
 Here is a non-exhaustive list of upcoming features and developments in no specific order. This is an ongoing
 initiative so feel free to comment and ask for new features.
 
-**Performance Tests**
-
-New assertions that can be used in several tasks :
-
-- expected timing
-- expected number of request per seconds
-
 **Stress Tests**
 
 Compared to 'Performance Tests' would be nice to be able to scale the actors automatically until the system breaks
