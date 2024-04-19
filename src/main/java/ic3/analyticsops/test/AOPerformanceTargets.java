@@ -49,6 +49,4 @@ public class AOPerformanceTargets extends AOSerializable
             }
         }
     }
-
-    // TODO : documentation + release notes
 }

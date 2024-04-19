@@ -55,4 +55,9 @@ public class AOLoadTestConfiguration extends AOSerializable
         }
     }
 
+    public List<AOLoadTestStageConfiguration> getStages()
+    {
+        return stages;
+    }
+
 }

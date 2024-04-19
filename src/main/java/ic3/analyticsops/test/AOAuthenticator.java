@@ -34,8 +34,8 @@ public class AOAuthenticator extends AOSerializable
     {
         if (headers != null)
         {
-            validateEmptyField(prefix + "user", user);
-            validateEmptyField(prefix + "password", password);
+            validateNullField(prefix + "user", user);
+            validateNullField(prefix + "password", password);
 
             validateNonEmptyField(prefix + "headers", headers);
 

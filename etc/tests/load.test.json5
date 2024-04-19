@@ -1,0 +1,47 @@
+{
+  name: "Performance",
+  restApiURL: "http://localhost:8282/icCube/api",
+  authenticator: {
+    user: "${analytics.ops.user}",
+    password: "${analytics.ops.password}"
+  },
+  actors: [
+    {
+      name: "MDX Player",
+      tasks: [
+        {
+          action: "MDXes",
+          data: "data/sales",
+          schema: "Sales",
+          pauses: "PT0s:PT0.5s",
+          shuffle: true,
+          performanceTargets: {
+            durationMax: "PT0.4s"
+          }
+        }
+      ]
+    }
+  ],
+  load: {
+    stages: [
+      {
+        duration: "PT10s",
+        targets: {
+          "MDX Player": 2
+        }
+      },
+      {
+        duration: "PT20s",
+        targets: {
+          "MDX Player": 2
+        }
+      },
+      {
+        duration: "PT1s",
+        targets: {
+          "MDX Player": 0
+        }
+      }
+    ]
+  }
+}

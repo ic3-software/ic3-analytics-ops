@@ -5,9 +5,7 @@ import ic3.analyticsops.test.AOSerializable;
 import ic3.analyticsops.test.AOTestValidationException;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class AOLoadTestStageConfiguration extends AOSerializable
 {
@@ -53,24 +51,22 @@ public class AOLoadTestStageConfiguration extends AOSerializable
         validateNonEmptyField("load.stages[" + jsonStageNb + "].duration", duration);
         validateNonEmptyField("load.stages[" + jsonStageNb + "].targets", targets);
 
-        if (targets != null)
+        for (Map.Entry<String, Integer> entry : targets.entrySet())
         {
-            final Set<String> actors = new HashSet<>();
+            final String actorName = entry.getKey();
 
-            for (Map.Entry<String, Integer> entry : targets.entrySet())
+            final AOActor actor = jsonParentTestConfiguration.jsonParentTest.lookupActiveActor(actorName);
+
+            if (actor == null)
             {
-                final String actorName = entry.getKey();
-
-                actors.add(actorName);
-
-                final AOActor actor = jsonParentTestConfiguration.jsonParentTest.lookupActiveActor(actorName);
-
-                if (actor == null)
-                {
-                    throw new AOTestValidationException("load.stages[" + jsonStageNb + "].targets missing active actor from test : " + actorName);
-                }
+                throw new AOTestValidationException("load.stages[" + jsonStageNb + "].targets missing active actor from test : " + actorName);
             }
         }
+    }
+
+    public Duration getDuration()
+    {
+        return duration;
     }
 
 }

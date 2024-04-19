@@ -96,7 +96,7 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         {
             case NONE ->
             {
-                validateEmptyField(validateFieldPathPrefix() + "assertions", assertions);
+                validateNullField(validateFieldPathPrefix() + "assertions", assertions);
             }
             case OPTIONAL ->
             {

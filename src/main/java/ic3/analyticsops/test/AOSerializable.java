@@ -1,35 +1,31 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.utils.AOStringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 public abstract class AOSerializable
 {
+    @Contract("_,!null -> fail")
+    public void validateNullField(String path, @Nullable Object value)
+            throws AOTestValidationException
+    {
+        if (value != null)
+        {
+            throw new AOTestValidationException("the JSON field '" + path + "' must be null");
+        }
+    }
+
+    @Contract("_,null -> fail")
     public void validateNonEmptyField(String path, @Nullable Object value)
             throws AOTestValidationException
     {
-        if (value == null)
+        if (isNullOrEmpty(value))
         {
-            throw new AOTestValidationException("the JSON field '" + path + "' cannot be null");
-        }
-
-        if (value instanceof String valueS && AOStringUtils.isEmpty(valueS))
-        {
-            throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
-        }
-
-        if (value instanceof Collection<?> valueC && valueC.isEmpty())
-        {
-            throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
-        }
-
-        if (value instanceof Map<?, ?> valueM && valueM.isEmpty())
-        {
-            throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
+            throw new AOTestValidationException("the JSON field '" + path + "' cannot be null/empty");
         }
     }
 
@@ -39,15 +35,11 @@ public abstract class AOSerializable
     public void validateNonEmptyFields(String path, Object... values)
             throws AOTestValidationException
     {
-        if (values != null && values.length > 0)
+        if (values != null)
         {
             for (Object value : values)
             {
-                if (value instanceof String valueS && AOStringUtils.isNotEmpty(valueS))
-                {
-                    return;
-                }
-                if (value != null)
+                if (!isNullOrEmpty(value))
                 {
                     return;
                 }
@@ -57,27 +49,20 @@ public abstract class AOSerializable
         throw new AOTestValidationException("the JSON fields '" + path + "' are all null/empty");
     }
 
-    public void validateEmptyField(String path, @Nullable Object value)
-            throws AOTestValidationException
+    @Contract("null -> true")
+    private boolean isNullOrEmpty(@Nullable Object value)
     {
-        if (value instanceof String valueS && AOStringUtils.isNotEmpty(valueS))
+        return switch (value)
         {
-            throw new AOTestValidationException("the JSON field '" + path + "' must be empty");
-        }
+            case String valueS when AOStringUtils.isEmpty(valueS) -> true;
 
-        if (value != null)
-        {
-            throw new AOTestValidationException("the JSON field '" + path + "' must be null");
-        }
+            case Collection<?> valueC when valueC.isEmpty() -> true;
+
+            case Map<?, ?> valueM when valueM.isEmpty() -> true;
+
+            case null -> true;
+
+            default -> false;
+        };
     }
-
-    public <VALUE> void validateEmptyField(String path, @Nullable List<VALUE> values)
-            throws AOTestValidationException
-    {
-        if (values != null && !values.isEmpty())
-        {
-            throw new AOTestValidationException("the JSON field '" + path + "' is not null/empty");
-        }
-    }
-
 }
