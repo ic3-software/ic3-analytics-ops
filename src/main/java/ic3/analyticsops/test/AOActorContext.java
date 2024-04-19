@@ -53,7 +53,7 @@ public class AOActorContext
     /**
      * Thread-safe to make it accessible from test level to aggregate ongoing statistics.
      */
-    private final Map<AOTask<?>, AOTaskCounter> taskCounters = new ConcurrentHashMap<>();
+    private final Map<AOTask<?>, AOTaskGauge> taskGauges = new ConcurrentHashMap<>();
 
     public AOActorContext(AOTestContext context, AORestApiClient client, AOActor actor)
     {
@@ -155,33 +155,33 @@ public class AOActorContext
 
     public void onBeforeRunTask(AOTask<?> task)
     {
-        final AOTaskCounter counter = taskCounters.computeIfAbsent(task, t -> new AOTaskCounter(task));
+        final AOTaskGauge gauge = taskGauges.computeIfAbsent(task, t -> new AOTaskGauge(task));
 
-        counter.onBeforeRun();
+        gauge.onBeforeRun();
     }
 
     public void onRunTaskPaused(AOTask<?> task, long elapsedMS)
     {
-        final AOTaskCounter counter = taskCounters.get(task);
+        final AOTaskGauge gauge = taskGauges.get(task);
 
-        if (counter == null)
+        if (gauge == null)
         {
-            throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+            throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
         }
 
-        counter.onRunPaused(elapsedMS);
+        gauge.onRunPaused(elapsedMS);
     }
 
     public void onAfterRunTask(AOTask<?> task)
     {
-        final AOTaskCounter counter = taskCounters.get(task);
+        final AOTaskGauge gauge = taskGauges.get(task);
 
-        if (counter == null)
+        if (gauge == null)
         {
-            throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+            throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
         }
 
-        counter.onAfterRun();
+        gauge.onAfterRun();
     }
 
     public void run()
@@ -195,14 +195,14 @@ public class AOActorContext
 
         if (targets != null)
         {
-            final AOTaskCounter counter = taskCounters.get(task);
+            final AOTaskGauge gauge = taskGauges.get(task);
 
-            if (counter == null)
+            if (gauge == null)
             {
-                throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+                throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
             }
 
-            targets.assertOk(counter, false);
+            targets.assertOk(gauge, false);
         }
     }
 
@@ -212,35 +212,35 @@ public class AOActorContext
 
         if (targets != null)
         {
-            final AOTaskCounter counter = taskCounters.get(task);
+            final AOTaskGauge gauge = taskGauges.get(task);
 
-            if (counter == null)
+            if (gauge == null)
             {
-                throw new RuntimeException("unexpected missing counter for task : " + task.getName());
+                throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
             }
 
-            targets.assertOk(counter, true);
+            targets.assertOk(gauge, true);
         }
     }
 
     public void dumpStatistics()
     {
-        final List<AOTask<?>> sortedTasks = taskCounters.keySet().stream()
+        final List<AOTask<?>> sortedTasks = taskGauges.keySet().stream()
                 .sorted(Comparator.comparing(AOTask::getName))
                 .toList();
 
         for (AOTask<?> task : sortedTasks)
         {
-            final AOTaskCounter counter = taskCounters.get(task);
+            final AOTaskGauge gauge = taskGauges.get(task);
 
             AOLog4jUtils.ACTOR.debug(
                     "[actor] '{}' task '{}' statistics : run-count:{} avg.:{} max.:{} min.:{}",
                     actor.getName(),
                     task.getName(),
-                    counter.getRunCount(),
-                    AODurationUtils.formatMillis(counter.getRunElapsedMSavg()),
-                    AODurationUtils.formatMillis(counter.getRunElapsedMSmax()),
-                    AODurationUtils.formatMillis(counter.getRunElapsedMSmin())
+                    gauge.getRunCount(),
+                    AODurationUtils.formatMillis(gauge.getRunElapsedMSavg()),
+                    AODurationUtils.formatMillis(gauge.getRunElapsedMSmax()),
+                    AODurationUtils.formatMillis(gauge.getRunElapsedMSmin())
             );
         }
     }

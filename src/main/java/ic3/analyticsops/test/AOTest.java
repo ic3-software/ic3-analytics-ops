@@ -3,7 +3,9 @@ package ic3.analyticsops.test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ic3.analyticsops.restapi.client.AORestApiClient;
+import ic3.analyticsops.test.load.AOLoadTestConfiguration;
 import ic3.analyticsops.test.task.reporting.AOChromeConfiguration;
+import ic3.analyticsops.utils.AODurationUtils;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,6 +46,12 @@ public class AOTest extends AOSerializable
 
     private final List<AOActor> actors;
 
+    /**
+     * An optional configuration to make this test running as a load-test : stress, ...
+     */
+    @Nullable
+    private final AOLoadTestConfiguration load;
+
     protected AOTest(File json)
     {
         this.json = json;
@@ -56,6 +64,7 @@ public class AOTest extends AOSerializable
         this.chrome = null;
         this.duration = null;
         this.actors = null;
+        this.load = null;
     }
 
     public static AOTest create(File json)
@@ -94,6 +103,11 @@ public class AOTest extends AOSerializable
                 actor.onFromJson(this, aa);
             }
         }
+
+        if (load != null)
+        {
+            load.onFromJson(this);
+        }
     }
 
     /**
@@ -113,6 +127,7 @@ public class AOTest extends AOSerializable
         }
 
         validateActors();
+        validateLoadConfiguration();
     }
 
     public void validateActors()
@@ -143,6 +158,17 @@ public class AOTest extends AOSerializable
             {
                 actor.validate();
             }
+        }
+    }
+
+    public void validateLoadConfiguration()
+            throws AOTestValidationException
+    {
+        if (load != null)
+        {
+            load.validate();
+
+            // TODO do we want to ensure there is test.duration => the actual duration is from the load.stages.duration
         }
     }
 
@@ -183,6 +209,23 @@ public class AOTest extends AOSerializable
         return actors/* validated by now */.stream().filter(AOActor::isActive).toList();
     }
 
+    @Nullable
+    public AOActor lookupActiveActor(String name)
+    {
+        if (actors != null)
+        {
+            for (AOActor actor : actors)
+            {
+                if (name.equals(actor.getName()) && actor.isActive())
+                {
+                    return actor;
+                }
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Blocking call.
      */
@@ -193,11 +236,15 @@ public class AOTest extends AOSerializable
 
         if (duration != null)
         {
-            AOLog4jUtils.TEST.info("[test] duration : {}", duration);
+            AOLog4jUtils.TEST.info(
+                    "[test] The test will run for {} [duration : {}]",
+                    AODurationUtils.formatMillis(duration.toMillis()),
+                    duration
+            );
         }
         else
         {
-            AOLog4jUtils.TEST.info("[test] duration : once");
+            AOLog4jUtils.TEST.info("[test] The test will execute once every actor.");
         }
 
         final List<AOActor> activeActors = activeActors();

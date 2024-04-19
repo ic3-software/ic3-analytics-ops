@@ -3,7 +3,7 @@ package ic3.analyticsops.test;
 /**
  * Thread-safe to make it accessible from test level to aggregate ongoing statistics.
  */
-public class AOTaskCounter
+public class AOTaskGauge
 {
     private final AOTask<?> task;
 
@@ -29,7 +29,7 @@ public class AOTaskCounter
 
     private long runPausedMS;
 
-    public AOTaskCounter(AOTask<?> task)
+    public AOTaskGauge(AOTask<?> task)
     {
         this.task = task;
     }

@@ -3,7 +3,9 @@ package ic3.analyticsops.test;
 import ic3.analyticsops.utils.AOStringUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AOSerializable
 {
@@ -19,14 +21,15 @@ public abstract class AOSerializable
         {
             throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
         }
-    }
 
-    public <VALUE> void validateNonEmptyField(String path, @Nullable List<VALUE> values)
-            throws AOTestValidationException
-    {
-        if (values == null || values.isEmpty())
+        if (value instanceof Collection<?> valueC && valueC.isEmpty())
         {
-            throw new AOTestValidationException("the JSON field '" + path + "' cannot be null/empty");
+            throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
+        }
+
+        if (value instanceof Map<?, ?> valueM && valueM.isEmpty())
+        {
+            throw new AOTestValidationException("the JSON field '" + path + "' cannot be empty");
         }
     }
 
