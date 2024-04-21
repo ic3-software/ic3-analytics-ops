@@ -51,16 +51,40 @@ public class AOLoadTestStageConfiguration extends AOSerializable
         validateNonEmptyField("load.stages[" + jsonStageNb + "].duration", duration);
         validateNonEmptyField("load.stages[" + jsonStageNb + "].targets", targets);
 
+        // Ensure the stage is referencing existing actor(s) : potentially not active.
+
+        for (Map.Entry<String, Integer> entry : targets.entrySet())
+        {
+            final String actorName = entry.getKey();
+
+            final AOActor actor = jsonParentTestConfiguration.jsonParentTest.lookupActor(actorName);
+
+            if (actor == null)
+            {
+                throw new AOTestValidationException("load.stages[" + jsonStageNb + "].targets missing actor from test : " + actorName);
+            }
+        }
+
+        // Ensure the stage is using at least one active actor.
+
+        boolean activeActorFound = false;
+
         for (Map.Entry<String, Integer> entry : targets.entrySet())
         {
             final String actorName = entry.getKey();
 
             final AOActor actor = jsonParentTestConfiguration.jsonParentTest.lookupActiveActor(actorName);
 
-            if (actor == null)
+            if(actor != null)
             {
-                throw new AOTestValidationException("load.stages[" + jsonStageNb + "].targets missing active actor from test : " + actorName);
+                activeActorFound = true;
+                break;
             }
+        }
+
+        if(!activeActorFound)
+        {
+            throw new AOTestValidationException("load.stages[" + jsonStageNb + "].targets does not reference any active actor");
         }
     }
 
