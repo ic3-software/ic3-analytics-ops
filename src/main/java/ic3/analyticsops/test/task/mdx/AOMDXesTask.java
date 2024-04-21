@@ -94,6 +94,11 @@ public class AOMDXesTask extends AOTask
 
         for (final int mdxNB : mdxNBs)
         {
+            if (context.isOnError())
+            {
+                break /* i.e., another actor on error */;
+            }
+
             double delta = 0;
 
             String mdx;
