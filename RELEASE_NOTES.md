@@ -2,6 +2,11 @@
 
 ## 1.2 ( next-version )
 
+`Test`
+
+- Added `timeout` configuration (default:`30s`) related to the REST API requests. Can be overridden both
+  at actor and task levels
+
 `Tasks`
 
 - Added `performanceTargets` configuration defining several targets related to performance.

@@ -15,14 +15,21 @@ interface Test {
 
     name: string;
 
+    // Possibly overridden in each actor.
     // E.g., "http://localhost:8282/icCube/api"
     restApiURL?: string;
 
+    // Possibly overridden in each actor.
     authenticator?: Authenticator;
 
+    // REST API request timeout.
+    // Possibly overridden in each actor.
+    // Default: 30s.
+    timeout? : Duration;
+    
     chrome?: ChromeConfiguration;
     
-    // Allows for running the test over a period to time (handy for stress-testing).
+    // Allows for running the test over a period to time.
     duration?: Duration;
 
     actors: Actor[];

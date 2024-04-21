@@ -4,6 +4,7 @@ import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.common.AOPause;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
 
 public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializable
@@ -23,6 +24,13 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
      */
     @Nullable
     private final String name;
+
+    /**
+     * REST API request timeout.
+     * Overriding the one defined at test/actor level.
+     */
+    @Nullable
+    private final Duration timeout;
 
     /**
      * Writes to the log the actual JSON returned by the server.
@@ -56,6 +64,7 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         this.name = null;
         this.dumpJson = null;
         this.dumpResult = null;
+        this.timeout = null;
         this.pause = null;
         this.assertions = null;
         this.performanceTargets = null;
@@ -136,6 +145,12 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
     }
 
     public abstract String getKind();
+
+    @Nullable
+    public Duration getTimeout()
+    {
+        return timeout != null ? timeout : jsonParentActor.getTimeout();
+    }
 
     public boolean isDumpJson()
     {

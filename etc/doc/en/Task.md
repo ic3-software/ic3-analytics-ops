@@ -18,6 +18,10 @@ interface Task<ASSERTION extends Assertion> {
     // When null its kind will be used instead.
     name?: string;
 
+    // REST API request timeout.
+    // Overriding the one defined at test/actor level.
+    timeout?: Duration;
+    
     // Writes to the log the actual JSON returned by the server for each REST API request.
     // Overriding the one defined at actor level.
     dumpJson?: boolean;

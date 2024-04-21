@@ -36,6 +36,13 @@ public class AOActor extends AOSerializable
     private final AOAuthenticator authenticator;
 
     /**
+     * REST API request timeout.
+     * Overriding the one defined at test level.
+     */
+    @Nullable
+    private final Duration timeout;
+
+    /**
      * Writes to the log the actual JSON returned by the server.
      */
     @Nullable
@@ -57,6 +64,7 @@ public class AOActor extends AOSerializable
         this.active = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.timeout = null;
         this.dumpJson = null;
         this.dumpResult = null;
         this.tasks = null;
@@ -93,7 +101,7 @@ public class AOActor extends AOSerializable
     {
         validateNonEmptyField(validateFieldPathPrefix() + "name", name);
 
-        final String restApiURL = getRestApiURL(jsonParentTest.getRestApiURL());
+        final String restApiURL = getRestApiURL();
 
         // Guess better to identify this issue as fast as possible.
         if (restApiURL == null)
@@ -101,7 +109,7 @@ public class AOActor extends AOSerializable
             throw new AOTestValidationException("the JSON field 'restApiURL' is missing from 'actors[" + jsonActorNb + "]' and test");
         }
 
-        final AOAuthenticator authenticator = getAuthenticator(jsonParentTest.getAuthenticator());
+        final AOAuthenticator authenticator = getAuthenticator();
 
         // Guess better to identify this issue as fast as possible : mandatory for the time being.
         if (authenticator == null)
@@ -143,15 +151,21 @@ public class AOActor extends AOSerializable
     }
 
     @Nullable
-    public String getRestApiURL(@Nullable String testRestApiURL)
+    public String getRestApiURL()
     {
-        return restApiURL != null ? restApiURL : testRestApiURL;
+        return restApiURL != null ? restApiURL : jsonParentTest.getRestApiURL();
     }
 
     @Nullable
-    public AOAuthenticator getAuthenticator(@Nullable AOAuthenticator testAuthenticator)
+    public AOAuthenticator getAuthenticator()
     {
-        return authenticator != null ? authenticator : testAuthenticator;
+        return authenticator != null ? authenticator : jsonParentTest.getAuthenticator();
+    }
+
+    @Nullable
+    public Duration getTimeout()
+    {
+        return timeout != null ? timeout : jsonParentTest.getTimeout();
     }
 
     public boolean isDumpJson()

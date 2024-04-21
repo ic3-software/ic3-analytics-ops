@@ -23,19 +23,27 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * One instance per actor.
+ */
 public class AORestApiClient
 {
+    /**
+     * REST API request timeout.
+     */
+    public final Duration timeout;
+
     private final String restApiURL;
 
     private final AOAuthenticator authenticator;
 
-    public AORestApiClient(String restApiURL, AOAuthenticator authenticator)
+    public AORestApiClient(String restApiURL, AOAuthenticator authenticator, @Nullable Duration timeout)
     {
         this.restApiURL = restApiURL;
         this.authenticator = authenticator;
+        this.timeout = timeout != null ? timeout : Duration.ofSeconds(30);
     }
 
     public String getRestApiURL()
@@ -77,7 +85,7 @@ public class AORestApiClient
             {
                 final HttpRequest.Builder httpRequestBuilder = authenticator.addHeaders(
                         HttpRequest.newBuilder(uri)
-                                .timeout(Duration.of(30, ChronoUnit.SECONDS))
+                                .timeout(timeout(options))
                                 .header("Accept-Encoding", "gzip")
                                 .header("Content-Type", "application/json;charset=UTF-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(params))
@@ -151,7 +159,12 @@ public class AORestApiClient
         }
     }
 
-    private InputStream responseInputStream(HttpResponse<InputStream> httpResponse, @Nullable AORestApiClientOptions options)
+    protected Duration timeout(@Nullable AORestApiClientOptions options)
+    {
+        return options == null ? timeout : (options.timeout == null ? timeout : options.timeout);
+    }
+
+    protected InputStream responseInputStream(HttpResponse<InputStream> httpResponse, @Nullable AORestApiClientOptions options)
             throws IOException
     {
         final HttpHeaders headers = httpResponse.headers();

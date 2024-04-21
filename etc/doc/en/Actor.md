@@ -23,6 +23,9 @@ interface Actor {
 
     // Overriding the one defined at test level : handy for testing several security profiles.
     authenticator?: Authenticator;
+
+    // Overriding the one defined at test level.
+    timeout?: Duration;
     
     // Writes to the log the actual JSON returned by the server for each REST API request.
     // Default : false

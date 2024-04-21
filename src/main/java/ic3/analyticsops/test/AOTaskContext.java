@@ -88,6 +88,7 @@ public class AOTaskContext
             throws AORestApiException
     {
         final AORestApiClientOptions options = new AORestApiClientOptions()
+                .timeout(task.getTimeout())
                 .dumpJson(task.isDumpJson());
 
         return prettyPrint(context.sendRequest(request, options));
@@ -100,6 +101,7 @@ public class AOTaskContext
             throws AORestApiException
     {
         final AORestApiClientOptions options = new AORestApiClientOptions()
+                .timeout(task.getTimeout())
                 .dumpJson(task.isDumpJson())
                 .withJson(true);
 

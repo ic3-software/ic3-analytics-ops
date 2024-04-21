@@ -16,7 +16,7 @@ Java system properties :
 ```
 analytics.ops.user     : admin
 analytics.ops.password : admin
-analytics.ops.test     : /opt/tests/stress-testing.json5
+analytics.ops.test     : /opt/tests/stress.test.json5
 ```
 
 ### AnalyticsOps.sh

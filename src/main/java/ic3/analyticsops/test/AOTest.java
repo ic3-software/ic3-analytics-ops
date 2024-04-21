@@ -28,16 +28,23 @@ public class AOTest extends AOSerializable
     private final String name;
 
     /**
-     * Possibly defined in each actor.
+     * Possibly overridden in each actor.
      */
     @Nullable
     private final String restApiURL;
 
     /**
-     * Possibly defined in each actor.
+     * Possibly overridden in each actor.
      */
     @Nullable
     private final AOAuthenticator authenticator;
+
+    /**
+     * REST API request timeout.
+     * Possibly overridden in each actor.
+     */
+    @Nullable
+    private final Duration timeout;
 
     @Nullable
     private final AOChromeConfiguration chrome;
@@ -62,6 +69,7 @@ public class AOTest extends AOSerializable
         this.name = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.timeout = null;
         this.chrome = null;
         this.duration = null;
         this.actors = null;
@@ -190,6 +198,12 @@ public class AOTest extends AOSerializable
     }
 
     @Nullable
+    public Duration getTimeout()
+    {
+        return timeout;
+    }
+
+    @Nullable
     public AOChromeConfiguration getChromeConfiguration()
     {
         return chrome;
@@ -209,19 +223,14 @@ public class AOTest extends AOSerializable
         return duration;
     }
 
-    public List<AOActor> activeActors()
-    {
-        return actors/* validated by now */.stream().filter(AOActor::isActive).toList();
-    }
-
     @Nullable
-    public AOActor lookupActiveActor(String name)
+    public AOActor lookupActor(String name)
     {
         if (actors != null)
         {
             for (AOActor actor : actors)
             {
-                if (name.equals(actor.getName()) && actor.isActive())
+                if (name.equals(actor.getName()))
                 {
                     return actor;
                 }
@@ -229,6 +238,24 @@ public class AOTest extends AOSerializable
         }
 
         return null;
+    }
+
+    @Nullable
+    public AOActor lookupActiveActor(String name)
+    {
+        final AOActor actor = lookupActor(name);
+
+        if(actor != null && actor.isActive())
+        {
+            return actor;
+        }
+
+        return null;
+    }
+
+    public List<AOActor> activeActors()
+    {
+        return actors/* validated by now */.stream().filter(AOActor::isActive).toList();
     }
 
     /**
@@ -272,10 +299,11 @@ public class AOTest extends AOSerializable
         final List<AOActorContext> activeActorsContexts = activeActors.stream().map(actor ->
         {
 
-            final String restApiURL = actor.getRestApiURL(this.restApiURL);
-            final AOAuthenticator authenticator = actor.getAuthenticator(this.authenticator);
+            final String restApiURL = actor.getRestApiURL();
+            final AOAuthenticator authenticator = actor.getAuthenticator();
+            final Duration timeout = actor.getTimeout();
 
-            final AORestApiClient client = new AORestApiClient(restApiURL, authenticator);
+            final AORestApiClient client = new AORestApiClient(restApiURL, authenticator, timeout);
 
             return new AOActorContext(context, client, actor);
 
