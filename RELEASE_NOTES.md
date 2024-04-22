@@ -11,6 +11,10 @@
 
 - Added `performanceTargets` configuration defining several targets related to performance.
 
+- Added `ClearAuthDataCache` task to clear the data cached by the authentication/authorization service.
+
+- Added `ClearOnTheFlyPermsCache` task to Clear the cache containing the created on-the-fly permissions.
+
 `Task:MDXes`
 
 - Added `shuffle` configuration to randomly permutes the list of MDX statements before executing them.

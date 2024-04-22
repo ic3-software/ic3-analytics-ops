@@ -11,6 +11,8 @@ import ic3.analyticsops.test.task.mdx.AOMDXesTask;
 import ic3.analyticsops.test.task.reporting.AOOpenReportTask;
 import ic3.analyticsops.test.task.reporting.AOPrintReportTask;
 import ic3.analyticsops.test.task.schema.*;
+import ic3.analyticsops.test.task.server.AOClearAuthDataCacheTask;
+import ic3.analyticsops.test.task.server.AOClearOnTheFlyPermsCacheTask;
 import ic3.analyticsops.test.task.server.AOClearResultCacheTask;
 import ic3.analyticsops.test.task.server.AOServerStatusTask;
 
@@ -25,6 +27,8 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
 
     static
     {
+        classes.put(AOTaskID.ClearAuthDataCache, AOClearAuthDataCacheTask.class);
+        classes.put(AOTaskID.ClearOnTheFlyPermsCache, AOClearOnTheFlyPermsCacheTask.class);
         classes.put(AOTaskID.ClearResultCache, AOClearResultCacheTask.class);
         classes.put(AOTaskID.DeleteSchemaBackup, AODeleteSchemaBackupTask.class);
         classes.put(AOTaskID.GenerateMDXes, AOGenerateMDXesTask.class);

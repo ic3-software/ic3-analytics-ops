@@ -2,6 +2,8 @@ package ic3.analyticsops.test;
 
 public enum AOTaskID
 {
+    ClearAuthDataCache,
+    ClearOnTheFlyPermsCache,
     ClearResultCache,
     DeleteSchemaBackup,
     GenerateMDXes,

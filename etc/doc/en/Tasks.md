@@ -14,6 +14,14 @@ the expected results.
 
     Clear the MDX result cache used for the MDX queries sent by the dashboards.
 
+### [ClearAuthDataCache](./tasks/ClearAuthDataCache.md)
+
+    Clear the data cached by the authentication/authorization service.
+
+### [ClearOnTheFlyPermsDataCache](./tasks/ClearOnTheFlyPermsCache.md)
+
+    Clear the cache containing the created on-the-fly permissions.
+
 ## Schema Management
 
 ### [LoadSchema](./tasks/LoadSchema.md)
