@@ -13,13 +13,16 @@ public class AOLoadTestConfiguration extends AOSerializable
      */
     protected transient AOTest jsonParentTest;
 
-    private final List<AOLoadTestStageConfiguration> stages;
+    /**
+     * Load test profiles for each actor.
+     */
+    private final List<AOLoadTestActorConfiguration> actors;
 
     protected AOLoadTestConfiguration()
     {
         // JSON deserialization
 
-        this.stages = null;
+        this.actors = null;
     }
 
     /**
@@ -29,17 +32,17 @@ public class AOLoadTestConfiguration extends AOSerializable
     {
         this.jsonParentTest = jsonParent;
 
-        if (stages != null /* before any validation */)
+        if (actors != null /* before any validation */)
         {
-            if (!stages.isEmpty() && stages.getLast() == null)
+            if (!actors.isEmpty() && actors.getLast() == null)
             {
-                stages.removeLast() /* trailing comma in JSON5 [] */;
+                actors.removeLast() /* trailing comma in JSON5 [] */;
             }
 
-            for (int tt = 0; tt < stages.size(); tt++)
+            for (int tt = 0; tt < actors.size(); tt++)
             {
-                final AOLoadTestStageConfiguration stage = stages.get(tt);
-                stage.onFromJson(this, tt);
+                final AOLoadTestActorConfiguration actor = actors.get(tt);
+                actor.onFromJson(this, tt);
             }
         }
     }
@@ -47,17 +50,29 @@ public class AOLoadTestConfiguration extends AOSerializable
     public void validate()
             throws AOTestValidationException
     {
-        validateNonEmptyField("load.stages", stages);
+        validateNonEmptyField("load.actors", actors);
 
-        for (AOLoadTestStageConfiguration stage : stages)
+        boolean activeActorFound = false;
+
+        for (AOLoadTestActorConfiguration actor : actors)
         {
-            stage.validate();
+            actor.validate();
+
+            if (jsonParentTest.lookupActiveActor(actor.getActor()) != null)
+            {
+                activeActorFound = true;
+            }
+        }
+
+        if (!activeActorFound)
+        {
+            throw new AOTestValidationException("load.actors does not reference any active actor in the test");
         }
     }
 
-    public List<AOLoadTestStageConfiguration> getStages()
+    public List<AOLoadTestActorConfiguration> getActors()
     {
-        return stages;
+        return actors;
     }
 
 }

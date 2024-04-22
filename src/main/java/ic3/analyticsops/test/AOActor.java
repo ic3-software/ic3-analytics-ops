@@ -181,23 +181,11 @@ public class AOActor extends AOSerializable
     /**
      * Runs in its own thread of control.
      */
-    public void run(AOActorContext context)
+    public void run(AOActorContext context, long testStartMS)
     {
-        final Duration duration = context.getDuration();
-        final Long expiryMS = duration != null ? System.currentTimeMillis() + duration.toMillis() : null;
-
-        if (duration != null)
-        {
-            AOLog4jUtils.ACTOR.info("[actor] '{}' run for {}", name, duration);
-        }
-        else
-        {
-            AOLog4jUtils.ACTOR.info("[actor] '{}' run once", name);
-        }
-
         try
         {
-            new Thread(() -> run(context, expiryMS), "actor-" + name).start();
+            new Thread(() -> doRun(context, testStartMS), "actor-" + name).start();
         }
         catch (Throwable ex)
         {
@@ -208,8 +196,29 @@ public class AOActor extends AOSerializable
         }
     }
 
-    protected void run(AOActorContext context, @Nullable Long expiryMS)
+    protected void doRun(AOActorContext context, long testStartMS)
     {
+        final boolean isOnce = context.isOnce();
+
+        final long initialPauseMS = !isOnce ? context.getStartMS(testStartMS) - System.currentTimeMillis() : 0;
+
+        if (initialPauseMS > 0)
+        {
+            try
+            {
+                // TODO [load-testing] should be interrupted when context.isOnError() while waiting !
+                //      better to wait here on a condition w/ timeout
+                //      review other .sleep for random pauses
+
+                Thread.sleep(initialPauseMS);
+            }
+            catch (InterruptedException ignored)
+            {
+            }
+        }
+
+        final long endMS = !isOnce ? context.getEndMS(testStartMS) : 0;
+
         AOLog4jUtils.ACTOR.info("[actor] '{}' run started", name);
 
         int run = 0;
@@ -281,7 +290,7 @@ public class AOActor extends AOSerializable
                 context.onActorTasksError(ex);
             }
         }
-        while (expiryMS != null /* single run */ && System.currentTimeMillis() < expiryMS && !context.isOnError());
+        while (!isOnce && System.currentTimeMillis() < endMS && !context.isOnError());
 
         if (!context.isOnError())
         {

@@ -23,24 +23,13 @@
     }
   ],
   load: {
-    stages: [
+    actors: [
       {
-        duration: "PT10s",
-        targets: {
-          "MDX Player": 2
-        }
-      },
-      {
-        duration: "PT20s",
-        targets: {
-          "MDX Player": 2
-        }
-      },
-      {
-        duration: "PT1s",
-        targets: {
-          "MDX Player": 0
-        }
+        actor: "MDX Player",
+        count: 3,
+        rampUp: "PT6s",
+        steadyState: "PT4s",
+        rampDown: "PT6s"
       }
     ]
   }

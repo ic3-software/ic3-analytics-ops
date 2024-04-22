@@ -2,9 +2,9 @@ package ic3.analyticsops.test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ic3.analyticsops.restapi.client.AORestApiClient;
 import ic3.analyticsops.test.load.AOLoadTestConfiguration;
-import ic3.analyticsops.test.load.AOLoadTestStageConfiguration;
+import ic3.analyticsops.test.schedule.AOActorSchedule;
+import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeConfiguration;
 import ic3.analyticsops.utils.AODurationUtils;
 import ic3.analyticsops.utils.AOLog4jUtils;
@@ -158,7 +158,7 @@ public class AOTest extends AOSerializable
 
         if (active == 0)
         {
-            throw new AOTestValidationException("the JSON field 'actors' has no active actor");
+            throw new AOTestValidationException("the JSON field 'actors' are referencing non-active actors only");
         }
 
         for (AOActor actor : actors)
@@ -224,6 +224,12 @@ public class AOTest extends AOSerializable
     }
 
     @Nullable
+    public AOLoadTestConfiguration getLoad()
+    {
+        return load;
+    }
+
+    @Nullable
     public AOActor lookupActor(String name)
     {
         if (actors != null)
@@ -245,7 +251,7 @@ public class AOTest extends AOSerializable
     {
         final AOActor actor = lookupActor(name);
 
-        if(actor != null && actor.isActive())
+        if (actor != null && actor.isActive())
         {
             return actor;
         }
@@ -264,23 +270,8 @@ public class AOTest extends AOSerializable
     public void run(AOTestContext context)
             throws InterruptedException
     {
-        if (load != null)
-        {
-            runForLoadTesting(context);
-        }
-        else
-        {
-            runForRegularTesting(context);
-        }
-    }
-
-    /**
-     * Blocking call.
-     */
-    public void runForRegularTesting(AOTestContext context)
-            throws InterruptedException
-    {
-        final Duration duration = getDuration();
+        final AOTestSchedule schedule = context.getSchedule();
+        final Duration duration = schedule.getDuration();
 
         if (duration != null)
         {
@@ -295,67 +286,28 @@ public class AOTest extends AOSerializable
             AOLog4jUtils.TEST.info("[test] the test will execute once every actor.");
         }
 
-        final List<AOActor> activeActors = activeActors();
-        final List<AOActorContext> activeActorsContexts = activeActors.stream().map(actor ->
+        final List<AOActorSchedule> schedules = schedule.getActors();
+
+        final List<AOActorContext> actorsContexts = schedules.stream()
+                .map(s -> new AOActorContext(context, s))
+                .toList();
+
+        final long nowMS = System.currentTimeMillis();
+
+        for (AOActorContext actorContext : actorsContexts)
         {
-
-            final String restApiURL = actor.getRestApiURL();
-            final AOAuthenticator authenticator = actor.getAuthenticator();
-            final Duration timeout = actor.getTimeout();
-
-            final AORestApiClient client = new AORestApiClient(restApiURL, authenticator, timeout);
-
-            return new AOActorContext(context, client, actor);
-
-        }).toList();
-
-        for (AOActorContext actorContext : activeActorsContexts)
-        {
-            actorContext.run();
+            actorContext.run(nowMS);
         }
 
-        AOLog4jUtils.TEST.info("[test] waiting for {} actors", activeActors.size());
+        AOLog4jUtils.TEST.info("[test] waiting for {} actors", actorsContexts.size());
 
         context.waitForCompletion();
 
-        AOLog4jUtils.TEST.info("[test] waiting for {} actors done", activeActors.size());
+        AOLog4jUtils.TEST.info("[test] waiting for {} actors done", actorsContexts.size());
 
-        for (AOActorContext actorContext : activeActorsContexts)
+        for (AOActorContext actorContext : actorsContexts)
         {
             actorContext.dumpStatistics();
-        }
-
-        AOLog4jUtils.TEST.info("[test] completed");
-    }
-
-    /**
-     * Blocking call.
-     */
-    public void runForLoadTesting(AOTestContext context)
-    {
-        if (load == null)
-        {
-            throw new RuntimeException("internal error : unexpected missing stages");
-        }
-
-        final List<AOLoadTestStageConfiguration> stages = load.getStages();
-
-        AOLog4jUtils.TEST.info("[test] load-testing with {} stage(s)", stages.size());
-
-        for (int ii = 0; ii < stages.size(); ii++)
-        {
-            final AOLoadTestStageConfiguration stage = stages.get(ii);
-
-            final Duration stageDuration = stage.getDuration();
-            final long stageDurationMS = stageDuration.toMillis();
-
-            AOLog4jUtils.TEST.info(
-                    "[test] stage {} will run for {} [duration : {}]",
-                    ii, AODurationUtils.formatMillis(stageDurationMS), stageDuration
-            );
-
-            // TODO : rethink the actor scheduler to have a common way of doing w/ the 'regular' test
-            //      which is a sort of degenerated load-test
         }
 
         AOLog4jUtils.TEST.info("[test] completed");

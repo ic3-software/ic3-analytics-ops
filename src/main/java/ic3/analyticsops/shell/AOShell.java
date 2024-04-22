@@ -1,7 +1,12 @@
 package ic3.analyticsops.shell;
 
+import ic3.analyticsops.test.AOActor;
 import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestContext;
+import ic3.analyticsops.test.load.AOLoadTestActorConfiguration;
+import ic3.analyticsops.test.load.AOLoadTestConfiguration;
+import ic3.analyticsops.test.schedule.AOActorSchedule;
+import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import ic3.analyticsops.utils.AOStringUtils;
 import org.apache.logging.log4j.Level;
@@ -10,6 +15,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class AOShell
@@ -42,17 +50,24 @@ public class AOShell
 
         if (test == null)
         {
-            AOLog4jUtils.SHELL.error("[shell] could not setup the test : exit(-1)");
+            AOLog4jUtils.SHELL.error("[shell] could not create the test : exit(-1)");
             System.exit(-1);
         }
 
-        final AOTestContext context = new AOTestContext(test);
+        // A list of actor(s) to run for a given period of time (start - stop interval).
+        final AOTestSchedule schedule = createTestSchedule(test);
+
+        if (schedule == null)
+        {
+            AOLog4jUtils.SHELL.error("[shell] could not create the test schedule : exit(-1)");
+            System.exit(-1);
+        }
+
+        final AOTestContext context = new AOTestContext(test, schedule);
 
         try
         {
-            context.start();
-
-            test.run(context);
+            context.run();
         }
         catch (InterruptedException ex /* dunno yet */)
         {
@@ -109,4 +124,92 @@ public class AOShell
             return null;
         }
     }
+
+    @Nullable
+    public static AOTestSchedule createTestSchedule(AOTest test)
+    {
+        try
+        {
+            final AOLoadTestConfiguration load = test.getLoad();
+
+            final List<AOActorSchedule> schedules;
+
+            if (load != null)
+            {
+                schedules = createTestScheduleForLoadTesting(test);
+            }
+            else
+            {
+                schedules = createTestScheduleForRegularTesting(test);
+            }
+
+            return new AOTestSchedule(test.getDuration(), schedules);
+        }
+        catch (Exception ex)
+        {
+            AOLog4jUtils.SHELL.error("[shell] could not create and validate the test schedule", ex);
+            return null;
+        }
+    }
+
+    public static List<AOActorSchedule> createTestScheduleForRegularTesting(AOTest test)
+    {
+        final List<AOActorSchedule> schedules = new ArrayList<>();
+
+        final Duration duration = test.getDuration();
+
+        for (AOActor actor : test.activeActors())
+        {
+            if (duration == null)
+            {
+                schedules.add(new AOActorSchedule(actor));
+            }
+            else
+            {
+                schedules.add(new AOActorSchedule(actor, 0, duration.toMillis()));
+            }
+        }
+
+        return schedules;
+    }
+
+    public static List<AOActorSchedule> createTestScheduleForLoadTesting(AOTest test)
+    {
+        final List<AOActorSchedule> schedules = new ArrayList<>();
+
+        final AOLoadTestConfiguration load = test.getLoad();
+
+        if (load == null)
+        {
+            throw new RuntimeException("internal error : unexpected missing load configuration");
+        }
+
+        for (AOLoadTestActorConfiguration actorConfiguration : load.getActors())
+        {
+            final AOActor actor = test.lookupActiveActor(actorConfiguration.getActor());
+
+            if (actor != null)
+            {
+                final long delayMS = actorConfiguration.getDelayMS();
+
+                final long rampUpMS = actorConfiguration.getRampUpMS();
+                final long steadyStateMS = actorConfiguration.getSteadyStateMS();
+
+                final long createStepMS = actorConfiguration.getRampUpMS() / actorConfiguration.getCount();
+                final long killStepMS = actorConfiguration.getRampDownMS() / actorConfiguration.getCount();
+
+                for (int ii = 0; ii < actorConfiguration.getCount(); ii++)
+                {
+                    schedules.add(new AOActorSchedule(
+                            actor,
+                            delayMS + createStepMS * ii,
+                            delayMS + rampUpMS + steadyStateMS + killStepMS * ii
+                    ));
+                }
+            }
+        }
+
+        return schedules;
+    }
+
 }

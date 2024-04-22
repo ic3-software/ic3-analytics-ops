@@ -1,14 +1,13 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.stats.AOBigBrother;
+import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,24 +17,29 @@ public class AOTestContext
 
     private final AOTest test;
 
+    private final AOTestSchedule schedule;
+
     private final AOChromeProxy chrome;
 
     private final CountDownLatch completion;
 
     private final AtomicBoolean onError = new AtomicBoolean(false);
 
-    public AOTestContext(AOTest test)
+    public AOTestContext(AOTest test, AOTestSchedule schedule)
     {
         this.bigBrother = new AOBigBrother(this);
+
         this.test = test;
+        this.schedule = schedule;
+
         this.chrome = new AOChromeProxy(test.getChromeConfiguration());
-        this.completion = new CountDownLatch(test.activeActors().size());
+
+        this.completion = new CountDownLatch(schedule.getActorCount());
     }
 
-    @Nullable
-    public Duration getDuration()
+    public AOTestSchedule getSchedule()
     {
-        return test.getDuration();
+        return schedule;
     }
 
     public File getMDXesDataFolder(String data)
@@ -96,9 +100,15 @@ public class AOTestContext
         completion.await();
     }
 
-    public void start()
+    /**
+     * Blocking call.
+     */
+    public void run()
+            throws InterruptedException
     {
         bigBrother.start();
+
+        test.run(this);
     }
 
     public void shutdown()

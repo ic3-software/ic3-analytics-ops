@@ -4,6 +4,7 @@ import ic3.analyticsops.restapi.client.AORestApiClient;
 import ic3.analyticsops.restapi.client.AORestApiClientOptions;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.request.AORestApiRequest;
+import ic3.analyticsops.test.schedule.AOActorSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.utils.AODurationUtils;
 import ic3.analyticsops.utils.AOLog4jUtils;
@@ -25,6 +26,8 @@ public class AOActorContext
     private final AORestApiClient client;
 
     private final AOActor actor;
+
+    private final AOActorSchedule schedule;
 
     /**
      * Properties that can be produced and consumed by task.
@@ -55,11 +58,35 @@ public class AOActorContext
      */
     private final Map<AOTask<?>, AOTaskGauge> taskGauges = new ConcurrentHashMap<>();
 
-    public AOActorContext(AOTestContext context, AORestApiClient client, AOActor actor)
+    public AOActorContext(AOTestContext context, AOActorSchedule schedule)
     {
+        final AOActor actor = schedule.getActor();
+
+        final String restApiURL = actor.getRestApiURL();
+        final AOAuthenticator authenticator = actor.getAuthenticator();
+        final Duration timeout = actor.getTimeout();
+
+        final AORestApiClient client = new AORestApiClient(restApiURL, authenticator, timeout);
+
         this.context = context;
         this.client = client;
-        this.actor = actor;
+        this.actor = schedule.getActor();
+        this.schedule = schedule;
+    }
+
+    public boolean isOnce()
+    {
+        return schedule.isOnce();
+    }
+
+    public long getStartMS(long testStartMS)
+    {
+        return testStartMS + schedule.getStartMS();
+    }
+
+    public long getEndMS(long testStartMS)
+    {
+        return testStartMS + schedule.getEndMS();
     }
 
     public String getRestApiURL()
@@ -70,12 +97,6 @@ public class AOActorContext
     public AOAuthenticator getAuthenticator()
     {
         return client.getAuthenticator();
-    }
-
-    @Nullable
-    public Duration getDuration()
-    {
-        return context.getDuration();
     }
 
     public File getMDXesDataFolder(String data)
@@ -184,9 +205,9 @@ public class AOActorContext
         gauge.onAfterRun();
     }
 
-    public void run()
+    public void run(long testStartMS)
     {
-        actor.run(this) /* in its own thread of control */;
+        actor.run(this, testStartMS) /* in its own thread of control */;
     }
 
     public void assertPerformanceTargets(AOTask<?> task)
