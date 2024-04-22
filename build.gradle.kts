@@ -28,18 +28,24 @@ repositories {
 dependencies {
 
 
-    implementation("org.apache.logging.log4j:log4j-api:2.23.1")
-    implementation("org.apache.logging.log4j:log4j-core:2.23.1")
-    // e.g., cdp4j
-    implementation("org.apache.logging.log4j:log4j-1.2-api:2.22.0")
+    implementation("org.apache.logging.log4j:log4j-api:3.0.0-beta1")
+    implementation("org.apache.logging.log4j:log4j-core:3.0.0-beta1")
+
+    // CDP4j
+    implementation("org.apache.logging.log4j:log4j-1.2-api:3.0.0-beta1")
 
     implementation("org.jetbrains:annotations:24.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("commons-io:commons-io:2.15.1")
+    implementation("commons-io:commons-io:2.16.1")
     implementation("com.vdurmont:semver4j:3.1.0")
     implementation(":cdp4j-6.0.0")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    // System Load
+    implementation("com.github.oshi:oshi-core:6.6.0")
+    implementation("org.slf4j:slf4j-api:2.0.13")
+    implementation("org.slf4j:slf4j-reload4j:2.0.13")
+
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
