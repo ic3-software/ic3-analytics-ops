@@ -141,6 +141,11 @@ public class AOTaskContext
         return context.isOnError();
     }
 
+    public void pause(long pauseMS)
+    {
+        context.pause(pauseMS);
+    }
+
     public void onRunPaused(long elapsedMS)
     {
         context.onRunTaskPaused(task, elapsedMS);

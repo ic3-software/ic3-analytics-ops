@@ -23,6 +23,7 @@
     }
   ],
   load: {
+    failAtCpuLoad: 0.2,
     actors: [
       {
         actor: "MDX Player",

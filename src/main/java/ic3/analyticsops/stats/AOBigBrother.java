@@ -6,13 +6,20 @@ import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AOBigBrother
 {
     private final AOTestContext context;
 
-    private final AtomicBoolean shutdown = new AtomicBoolean(false);
+    private final ReentrantLock shutdownLOCK = new ReentrantLock();
+
+    private final Condition shutdownCondition = shutdownLOCK.newCondition();
+
+    private final AtomicBoolean shutdown = new AtomicBoolean();
 
     public AOBigBrother(AOTestContext context)
     {
@@ -33,7 +40,16 @@ public class AOBigBrother
             {
                 try
                 {
-                    Thread.sleep(1_000);
+                    shutdownLOCK.lock();
+
+                    try
+                    {
+                        shutdownCondition.await(1_000, TimeUnit.MILLISECONDS);
+                    }
+                    finally
+                    {
+                        shutdownLOCK.unlock();
+                    }
                 }
                 catch (InterruptedException ignored)
                 {
@@ -41,6 +57,14 @@ public class AOBigBrother
 
                 final double load = proc.getSystemCpuLoadBetweenTicks(prevTicks);
                 prevTicks = proc.getSystemCpuLoadTicks();
+
+                final Double failAtCpuLoad = context.getLoadFailAtCpuLoad();
+
+                if (failAtCpuLoad != null && load >= failAtCpuLoad)
+                {
+                    AOLog4jUtils.BIG_BROTHER.error("CPU load failed : {} >= {}", load, failAtCpuLoad);
+                    context.onLoadCpuLoadError();
+                }
 
                 if (load >= .8)
                 {
@@ -54,6 +78,17 @@ public class AOBigBrother
     public void shutdown()
     {
         shutdown.set(true);
+
+        shutdownLOCK.lock();
+
+        try
+        {
+            shutdownCondition.signalAll();
+        }
+        finally
+        {
+            shutdownLOCK.unlock();
+        }
     }
 
 }

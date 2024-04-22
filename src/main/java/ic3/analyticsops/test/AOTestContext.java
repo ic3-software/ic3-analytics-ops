@@ -1,15 +1,20 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.stats.AOBigBrother;
+import ic3.analyticsops.test.load.AOLoadTestConfiguration;
 import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import io.webfolder.cdp.session.Session;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AOTestContext
 {
@@ -24,6 +29,10 @@ public class AOTestContext
     private final CountDownLatch completion;
 
     private final AtomicBoolean onError = new AtomicBoolean(false);
+
+    private final ReentrantLock statusLOCK = new ReentrantLock();
+
+    private final Condition statusCondition = statusLOCK.newCondition();
 
     public AOTestContext(AOTest test, AOTestSchedule schedule)
     {
@@ -45,6 +54,19 @@ public class AOTestContext
     public File getMDXesDataFolder(String data)
     {
         return test.getMDXesDataFolder(data);
+    }
+
+    @Nullable
+    public Double getLoadFailAtCpuLoad()
+    {
+        final AOLoadTestConfiguration load = test.getLoad();
+
+        if (load != null)
+        {
+            return load.getFailAtCpuLoad();
+        }
+
+        return null;
     }
 
     public String createBrowserContext()
@@ -69,24 +91,45 @@ public class AOTestContext
         return onError.get();
     }
 
-    public void onTestInterrupted(InterruptedException ex)
+    public void setOnError()
     {
         onError.set(true);
+
+        statusLOCK.lock();
+
+        try
+        {
+            statusCondition.signalAll();
+        }
+        finally
+        {
+            statusLOCK.unlock();
+        }
+    }
+
+    public void onTestInterrupted(InterruptedException ex)
+    {
+        setOnError();
     }
 
     public void onActorError(AOActor actor, Throwable ex)
     {
-        onError.set(true);
+        setOnError();
     }
 
     public void onActorTaskError(AOActor actor, AOTask task, Throwable ex)
     {
-        onError.set(true);
+        setOnError();
     }
 
     public void onActorTasksError(AOActor actor, Throwable ex)
     {
-        onError.set(true);
+        setOnError();
+    }
+
+    public void onLoadCpuLoadError()
+    {
+        setOnError();
     }
 
     public void onActorCompleted(AOActor actor)
@@ -98,6 +141,41 @@ public class AOTestContext
             throws InterruptedException
     {
         completion.await();
+    }
+
+    public void pause(long pauseMS)
+    {
+        if (pauseMS <= 0)
+        {
+            return;
+        }
+
+        final long deadlineMS = System.currentTimeMillis() + pauseMS;
+
+        while (!isOnError() && System.currentTimeMillis() < deadlineMS)
+        {
+            final long actualPauseMS = deadlineMS - System.currentTimeMillis();
+
+            if (actualPauseMS > 0)
+            {
+                try
+                {
+                    statusLOCK.lock();
+
+                    try
+                    {
+                        statusCondition.await(actualPauseMS, TimeUnit.MILLISECONDS);
+                    }
+                    finally
+                    {
+                        statusLOCK.unlock();
+                    }
+                }
+                catch (InterruptedException ignored)
+                {
+                }
+            }
+        }
     }
 
     /**

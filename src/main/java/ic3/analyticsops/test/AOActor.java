@@ -202,20 +202,7 @@ public class AOActor extends AOSerializable
 
         final long initialPauseMS = !isOnce ? context.getStartMS(testStartMS) - System.currentTimeMillis() : 0;
 
-        if (initialPauseMS > 0)
-        {
-            try
-            {
-                // TODO [load-testing] should be interrupted when context.isOnError() while waiting !
-                //      better to wait here on a condition w/ timeout
-                //      review other .sleep for random pauses
-
-                Thread.sleep(initialPauseMS);
-            }
-            catch (InterruptedException ignored)
-            {
-            }
-        }
+        context.pause(initialPauseMS);
 
         final long endMS = !isOnce ? context.getEndMS(testStartMS) : 0;
 
@@ -254,13 +241,7 @@ public class AOActor extends AOSerializable
                             {
                                 final long startPauseMS = System.currentTimeMillis();
 
-                                try
-                                {
-                                    Thread.sleep(pauseMS);
-                                }
-                                catch (InterruptedException ignored)
-                                {
-                                }
+                                context.pause(pauseMS);
 
                                 context.onRunTaskPaused(task, System.currentTimeMillis() - startPauseMS);
                             }

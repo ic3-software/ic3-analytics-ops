@@ -205,6 +205,11 @@ public class AOActorContext
         gauge.onAfterRun();
     }
 
+    public void pause(long pauseMS)
+    {
+        context.pause(pauseMS);
+    }
+
     public void run(long testStartMS)
     {
         actor.run(this, testStartMS) /* in its own thread of control */;

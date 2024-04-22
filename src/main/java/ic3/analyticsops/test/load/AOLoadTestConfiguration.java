@@ -3,6 +3,7 @@ package ic3.analyticsops.test.load;
 import ic3.analyticsops.test.AOSerializable;
 import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,6 +15,11 @@ public class AOLoadTestConfiguration extends AOSerializable
     protected transient AOTest jsonParentTest;
 
     /**
+     * Optional max. system load before an error is generated (a value between 0 and 1).
+     */
+    private final Double failAtCpuLoad;
+
+    /**
      * Load test profiles for each actor.
      */
     private final List<AOLoadTestActorConfiguration> actors;
@@ -22,6 +28,7 @@ public class AOLoadTestConfiguration extends AOSerializable
     {
         // JSON deserialization
 
+        this.failAtCpuLoad = null;
         this.actors = null;
     }
 
@@ -68,6 +75,12 @@ public class AOLoadTestConfiguration extends AOSerializable
         {
             throw new AOTestValidationException("load.actors does not reference any active actor in the test");
         }
+    }
+
+    @Nullable
+    public Double getFailAtCpuLoad()
+    {
+        return failAtCpuLoad;
     }
 
     public List<AOLoadTestActorConfiguration> getActors()

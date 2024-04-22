@@ -174,13 +174,7 @@ public class AOMDXesTask extends AOTask
             {
                 final long startPauseMS = System.currentTimeMillis();
 
-                try
-                {
-                    Thread.sleep(pauseMS);
-                }
-                catch (InterruptedException ignored)
-                {
-                }
+                context.pause(pauseMS);
 
                 context.onRunPaused(System.currentTimeMillis() - startPauseMS);
             }
