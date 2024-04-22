@@ -14,6 +14,8 @@ public abstract class AOLog4jUtils
 {
     public static final Logger SHELL = LogManager.getLogger("AnalyticsOps.Shell");
 
+    public static final Logger BIG_BROTHER = LogManager.getLogger("AnalyticsOps.BigBrother");
+
     public static final Logger CHROME = LogManager.getLogger("AnalyticsOps.Chrome");
 
     public static final Logger TEST = LogManager.getLogger("AnalyticsOps.Test");
@@ -35,11 +37,17 @@ public abstract class AOLog4jUtils
         Configurator.reconfigure(configuration);
 
         final org.apache.log4j.Level warn = org.apache.log4j.Level.WARN;
+
+        // CDP4j
         {
             org.apache.log4j.Logger.getLogger("cdp4j.launcher").setLevel(warn);
             org.apache.log4j.Logger.getLogger("cdp4j.flow").setLevel(warn);
             org.apache.log4j.Logger.getLogger("cdp4j.ws.request").setLevel(warn);
             org.apache.log4j.Logger.getLogger("cdp4j.ws.response").setLevel(warn);
+        }
+        // OSHI
+        {
+            org.apache.log4j.Logger.getLogger("oshi.util.FileUtil").setLevel(warn);
         }
     }
 
@@ -54,8 +62,8 @@ public abstract class AOLog4jUtils
                 .addAttribute("target", "SYSTEM_OUT")
                 .add(
                         builder.newLayout("PatternLayout")
-                                // .addAttribute("pattern", "{%40.40c} [%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
-                                .addAttribute("pattern", "[%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
+                                .addAttribute("pattern", "{%40.40c} [%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
+                        // .addAttribute("pattern", "[%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
                 );
 
         // Root Logger

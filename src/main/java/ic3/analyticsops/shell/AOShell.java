@@ -50,6 +50,8 @@ public class AOShell
 
         try
         {
+            context.start();
+
             test.run(context);
         }
         catch (InterruptedException ex /* dunno yet */)

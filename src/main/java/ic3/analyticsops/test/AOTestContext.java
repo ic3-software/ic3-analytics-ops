@@ -1,5 +1,6 @@
 package ic3.analyticsops.test;
 
+import ic3.analyticsops.stats.AOBigBrother;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.test.task.reporting.AOChromeProxy;
 import ic3.analyticsops.utils.AOLog4jUtils;
@@ -13,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AOTestContext
 {
+    private final AOBigBrother bigBrother;
+
     private final AOTest test;
 
     private final AOChromeProxy chrome;
@@ -23,6 +26,7 @@ public class AOTestContext
 
     public AOTestContext(AOTest test)
     {
+        this.bigBrother = new AOBigBrother(this);
         this.test = test;
         this.chrome = new AOChromeProxy(test.getChromeConfiguration());
         this.completion = new CountDownLatch(test.activeActors().size());
@@ -92,6 +96,11 @@ public class AOTestContext
         completion.await();
     }
 
+    public void start()
+    {
+        bigBrother.start();
+    }
+
     public void shutdown()
     {
         try
@@ -100,7 +109,16 @@ public class AOTestContext
         }
         catch (Exception ex)
         {
-            AOLog4jUtils.SHELL.warn("[shell] shutdown on error", ex);
+            AOLog4jUtils.SHELL.warn("[shell] chrome shutdown on error", ex);
+        }
+
+        try
+        {
+            bigBrother.shutdown();
+        }
+        catch (Exception ex)
+        {
+            AOLog4jUtils.SHELL.warn("[shell] big-brother shutdown on error", ex);
         }
     }
 }
