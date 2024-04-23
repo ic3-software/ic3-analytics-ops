@@ -217,7 +217,9 @@ public class AOActor extends AOSerializable
         {
             try
             {
-                context.onBeforeRunTasks(++run);
+                ++run;
+
+                context.onBeforeRunTasks();
 
                 for (AOTask<?> task : tasks /* validated by now */)
                 {
@@ -266,6 +268,8 @@ public class AOActor extends AOSerializable
                         break;
                     }
                 }
+
+                context.onAfterRunTasks();
             }
             catch (Throwable ex)
             {

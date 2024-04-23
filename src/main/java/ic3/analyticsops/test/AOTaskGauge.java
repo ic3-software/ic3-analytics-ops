@@ -14,16 +14,15 @@ public class AOTaskGauge
 
     private int runCount;
 
-    /**
-     * Total elapsed time for the 'runCount' runs.
-     */
+    private long runElapsedMS;
+
     private long runElapsedMStotal;
 
-    private long runElapsedMSmin = Long.MAX_VALUE;
+    private long runElapsedMSavg;
 
     private long runElapsedMSmax = Long.MIN_VALUE;
 
-    private long runElapsedMSavg;
+    private long runElapsedMSmin = Long.MAX_VALUE;
 
     private long runStartMS;
 
@@ -40,6 +39,8 @@ public class AOTaskGauge
         {
             runStartMS = System.currentTimeMillis();
             runPausedMS = 0;
+
+            runElapsedMS = 0;
         }
     }
 
@@ -63,10 +64,12 @@ public class AOTaskGauge
 
             runCount++;
 
+            runElapsedMS = elapsedMS;
+
             runElapsedMStotal += elapsedMS;
-            runElapsedMSmin = Math.min(runElapsedMSmin, elapsedMS);
-            runElapsedMSmax = Math.max(runElapsedMSmax, elapsedMS);
             runElapsedMSavg = runElapsedMStotal / runCount;
+            runElapsedMSmax = Math.max(runElapsedMSmax, elapsedMS);
+            runElapsedMSmin = Math.min(runElapsedMSmin, elapsedMS);
         }
     }
 
@@ -78,6 +81,14 @@ public class AOTaskGauge
         }
     }
 
+    public long getRunElapsedMS()
+    {
+        synchronized (lock)
+        {
+            return runElapsedMS;
+        }
+    }
+
     public long getRunElapsedMStotal()
     {
         synchronized (lock)
@@ -86,11 +97,11 @@ public class AOTaskGauge
         }
     }
 
-    public long getRunElapsedMSmin()
+    public long getRunElapsedMSavg()
     {
         synchronized (lock)
         {
-            return runElapsedMSmin;
+            return runElapsedMSavg;
         }
     }
 
@@ -102,11 +113,11 @@ public class AOTaskGauge
         }
     }
 
-    public long getRunElapsedMSavg()
+    public long getRunElapsedMSmin()
     {
         synchronized (lock)
         {
-            return runElapsedMSavg;
+            return runElapsedMSmin;
         }
     }
 }

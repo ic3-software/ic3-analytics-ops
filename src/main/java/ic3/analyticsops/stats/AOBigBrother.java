@@ -31,52 +31,66 @@ public class AOBigBrother
     {
         AOThreadUtils.startNewThread("big-brother", () ->
         {
-            final SystemInfo si = new SystemInfo();
-            final HardwareAbstractionLayer hw = si.getHardware();
-            final CentralProcessor proc = hw.getProcessor();
-
-            long[] prevTicks = proc.getSystemCpuLoadTicks();
-
-            while (!shutdown.get())
+            try
             {
+                unsafeStart();
+            }
+            catch (Exception ex)
+            {
+                AOLog4jUtils.BIG_BROTHER.error("[big-brother] unexpected error", ex);
+
+                context.setOnError();
+            }
+        });
+    }
+
+    private void unsafeStart()
+    {
+        final SystemInfo si = new SystemInfo();
+        final HardwareAbstractionLayer hw = si.getHardware();
+        final CentralProcessor proc = hw.getProcessor();
+
+        long[] prevTicks = proc.getSystemCpuLoadTicks();
+
+        while (!shutdown.get())
+        {
+            try
+            {
+                shutdownLOCK.lock();
+
                 try
                 {
-                    shutdownLOCK.lock();
-
-                    try
-                    {
-                        shutdownCondition.await(1_000, TimeUnit.MILLISECONDS);
-                    }
-                    finally
-                    {
-                        shutdownLOCK.unlock();
-                    }
+                    shutdownCondition.await(1_000, TimeUnit.MILLISECONDS);
                 }
-                catch (InterruptedException ignored)
+                finally
                 {
+                    shutdownLOCK.unlock();
                 }
+            }
+            catch (InterruptedException ignored)
+            {
+            }
 
-                final double load = proc.getSystemCpuLoadBetweenTicks(prevTicks);
-                prevTicks = proc.getSystemCpuLoadTicks();
+            final double load = proc.getSystemCpuLoadBetweenTicks(prevTicks);
+            prevTicks = proc.getSystemCpuLoadTicks();
 
-                final Double failAtCpuLoad = context.getLoadFailAtCpuLoad();
+            final Double failAtCpuLoad = context.getLoadFailAtCpuLoad();
 
-                if (failAtCpuLoad != null && load >= failAtCpuLoad)
-                {
-                    AOLog4jUtils.BIG_BROTHER.error("CPU load failed : {} >= {}", load, failAtCpuLoad);
-                    context.onLoadCpuLoadError();
-                }
+            if (failAtCpuLoad != null && load >= failAtCpuLoad)
+            {
+                AOLog4jUtils.BIG_BROTHER.error("[big-brother] CPU load failed : {} >= {}", load, failAtCpuLoad);
+                context.onLoadCpuLoadError();
+            }
 
-                if (load >= .8)
-                {
-                    AOLog4jUtils.BIG_BROTHER.warn("CPU load : {}", String.format("%.1f", load * 100));
-                }
-
-                context.onStatisticsTick();
+            if (load >= .8)
+            {
+                AOLog4jUtils.BIG_BROTHER.warn("[big-brother] CPU load : {}", String.format("%.1f", load * 100));
             }
 
             context.onStatisticsTick();
-        });
+        }
+
+        context.onStatisticsTick();
     }
 
     public void shutdown()

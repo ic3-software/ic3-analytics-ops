@@ -1,9 +1,9 @@
 package ic3.analyticsops.stats;
 
 import ic3.analyticsops.test.AOActor;
+import ic3.analyticsops.test.AOActorContext;
 import ic3.analyticsops.utils.AOLog4jUtils;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,37 +16,50 @@ public class AOStats
 {
     private int rowNb;
 
-    private final Map<AOActor, AOStatsColumn> runningActorCountColumns = new HashMap<>();
+    private final Map<AOActor, Integer> positions = new HashMap<>();
+
+    private final AOList<AOStatsColumn<?>> columns = new AOList<>();
 
     public AOStats()
     {
     }
 
-    public void onTick(Map<AOActor, AtomicInteger> runningActors)
+    public void onTick(Map<AOActor, AtomicInteger> runningActors, List<AOActorContext> runningActorContexts)
     {
-        // TODO [load-testing] would be nice to see as well tasks : elapsed-avg | elapsed-max  | elapsed-min
-
-        // Create a tidy-table : [ tidy-column ]
-        //
-        //      MDX Player |  Dashboard Opener |  Schema Loader | ...
-        //               1 |                 - |              - | ...
-        //               2 |                 - |              1 | ...
-        //               3 |                 2 |              - | ...
-        //               3 |                 4 |              1 | ...
-        //               3 |                 4 |              - | ...
-
-        synchronized (runningActorCountColumns)
+        synchronized (columns)
         {
             for (Map.Entry<AOActor, AtomicInteger> entry : runningActors.entrySet())
             {
                 final AOActor actor = entry.getKey();
                 final AtomicInteger running = entry.getValue();
 
-                final AOStatsColumn column = runningActorCountColumns.computeIfAbsent(
-                        actor, a -> new AOStatsColumn(actor, "Running Count")
+                final int pos = positions.computeIfAbsent(actor, a -> positions.size());
+
+                final AOIntegerStatsColumn countC = columns.computeIfAbsent(
+                        pos * 2, () -> new AOIntegerStatsColumn(actor.getName() + "/Count")
                 );
 
-                column.addRow(rowNb, running.get());
+                countC.setIntValue(rowNb, running.get());
+            }
+
+            for (AOActorContext context : runningActorContexts)
+            {
+                final long ms = context.getElapsedMS();
+
+                if (ms == -1)
+                {
+                    continue;
+                }
+
+                final AOActor actor = context.getActor();
+
+                final int pos = positions.computeIfAbsent(actor, a -> positions.size());
+
+                final AOAvgLongStatsColumn avgC = columns.computeIfAbsent(
+                        pos * 2 + 1, () -> new AOAvgLongStatsColumn(actor.getName() + "/ElapsedMS")
+                );
+
+                avgC.setLongValue(rowNb, 1, ms);
             }
 
             rowNb++;
@@ -55,46 +68,53 @@ public class AOStats
 
     public void dump()
     {
-        synchronized (runningActorCountColumns)
+        synchronized (columns)
         {
-            final List<AOActor> actors = runningActorCountColumns.keySet().stream()
-                    .sorted(Comparator.comparing(AOActor::getName))
-                    .toList();
+            AOLog4jUtils.TEST.debug("[test] ticks:{}", rowNb);
 
-            final StringBuilder csv = new StringBuilder();
+            final int columnCount = columns.size();
 
-            for (int aa = 0; aa < actors.size(); aa++)
+            // Table Header
             {
-                final AOActor actor = actors.get(aa);
+                final StringBuilder csv = new StringBuilder("Tick");
 
-                if (aa > 0)
+                for (int cc = 0; cc < columnCount; cc++)
                 {
-                    csv.append(",");
+                    final AOStatsColumn<?> column = columns.get(cc);
+
+                    if (column == null)
+                    {
+                        continue;
+                    }
+
+                    csv.append(",").append(column.getName());
                 }
 
-                csv.append(actor.getName());
+                AOLog4jUtils.TEST.debug("[test] >  {}", csv.toString());
             }
 
-            csv.append("\n");
+            // Table Rows
 
             for (int tt = 0; tt < rowNb; tt++)
             {
-                for (int aa = 0; aa < actors.size(); aa++)
-                {
-                    final AOActor actor = actors.get(aa);
+                final StringBuilder csv = new StringBuilder(String.valueOf(tt));
 
-                    if (aa > 0)
+                for (int cc = 0; cc < columnCount; cc++)
+                {
+                    final AOStatsColumn<?> column = columns.get(cc);
+
+                    if (column == null)
                     {
-                        csv.append(",");
+                        continue;
                     }
 
-                    csv.append(runningActorCountColumns.get(actor).getValue(tt));
+                    final Object value = column.getValue(tt);
+
+                    csv.append(",").append(value != null ? value.toString() : null);
                 }
 
-                csv.append("\n");
+                AOLog4jUtils.TEST.debug("[test] >  {}", csv.toString());
             }
-
-            AOLog4jUtils.TEST.debug("[test] ticks:{}\n{}", rowNb, csv.toString());
         }
     }
 }

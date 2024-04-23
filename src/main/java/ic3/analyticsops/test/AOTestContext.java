@@ -86,7 +86,7 @@ public class AOTestContext
 
     public void onStatisticsTick()
     {
-        stats.onTick(runningActors);
+        stats.onTick(runningActors, actorContexts);
     }
 
     public String createBrowserContext()
@@ -245,7 +245,7 @@ public class AOTestContext
 
     public void dumpStatistics()
     {
-        AOLog4jUtils.TEST.debug("[test] -- actor's statistics ---------------");
+        AOLog4jUtils.TEST.debug("[test] -- actor's statistics -----");
 
         for (AOActorContext actorContext : actorContexts)
         {
@@ -254,11 +254,9 @@ public class AOTestContext
 
         if (schedule.isLoadTesting())
         {
-            AOLog4jUtils.TEST.debug("[test] -- load-testing statistics ----------");
+            AOLog4jUtils.TEST.debug("[test] -- load-testing statistics -----");
 
             stats.dump();
         }
-
-        AOLog4jUtils.TEST.debug("[test] -------------------------------------");
     }
 }

@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AOActorContext
 {
@@ -58,6 +60,31 @@ public class AOActorContext
      */
     private final Map<AOTask<?>, AOTaskGauge> taskGauges = new ConcurrentHashMap<>();
 
+    /**
+     * For all the tasks : updated after each task's loop has been completed.
+     */
+    private final AtomicInteger runCount = new AtomicInteger();
+
+    /**
+     * For all the tasks : updated after each task's loop has been completed.
+     */
+    private final AtomicLong elapsedMS = new AtomicLong(-1);
+
+    /**
+     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     */
+    private final AtomicLong elapsedMSavg = new AtomicLong(-1);
+
+    /**
+     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     */
+    private final AtomicLong elapsedMSmax = new AtomicLong(-1);
+
+    /**
+     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     */
+    private final AtomicLong elapsedMSmin = new AtomicLong(-1);
+
     public AOActorContext(AOTestContext context, AOActorSchedule schedule)
     {
         final AOActor actor = schedule.getActor();
@@ -84,6 +111,11 @@ public class AOActorContext
         return schedule.isOnce();
     }
 
+    public AOActor getActor()
+    {
+        return actor;
+    }
+
     public long getStartMS(long testStartMS)
     {
         return testStartMS + schedule.getStartMS();
@@ -107,6 +139,43 @@ public class AOActorContext
     public File getMDXesDataFolder(String data)
     {
         return context.getMDXesDataFolder(data);
+    }
+
+    public int getRunCount()
+    {
+        return runCount.get();
+    }
+
+    /**
+     * @return -1 means not relevant and should be ignored
+     */
+    public long getElapsedMS()
+    {
+        return elapsedMS.get();
+    }
+
+    /**
+     * @return -1 means not relevant and should be ignored
+     */
+    public long getElapsedMSavg()
+    {
+        return elapsedMSavg.get();
+    }
+
+    /**
+     * @return -1 means not relevant and should be ignored
+     */
+    public long getElapsedMSmax()
+    {
+        return elapsedMSmax.get();
+    }
+
+    /**
+     * @return -1 means not relevant and should be ignored
+     */
+    public long getElapsedMSmin()
+    {
+        return elapsedMSmin.get();
     }
 
     public String createBrowserContext()
@@ -179,9 +248,38 @@ public class AOActorContext
         context.onActorCompleted(actor);
     }
 
-    public void onBeforeRunTasks(int run)
+    public void onBeforeRunTasks()
     {
         taskProperties.clear();
+    }
+
+    public void onAfterRunTasks()
+    {
+        final long[] elapsedMS = new long[1];
+        final long[] elapsedMSavg = new long[1];
+        final long[] elapsedMSmax = new long[1];
+        final long[] elapsedMSmin = new long[1];
+
+        taskGauges.forEach((task, gauge) ->
+        {
+            elapsedMS[0] += gauge.getRunElapsedMS();
+            elapsedMSavg[0] += gauge.getRunElapsedMSavg();
+            elapsedMSmax[0] += gauge.getRunElapsedMSmax();
+            elapsedMSmin[0] += gauge.getRunElapsedMSmin();
+        });
+
+        runCount.incrementAndGet();
+
+        this.elapsedMS.set(elapsedMS[0]);
+        this.elapsedMSavg.set(elapsedMSavg[0]);
+        this.elapsedMSmax.set(elapsedMSmax[0]);
+        this.elapsedMSmin.set(elapsedMSmin[0]);
+
+        // TODO [load-testing] have some logs here to troubleshoot the stats at then end
+        //      => should be consistent w/ the Ticks !
+        //      => then multi-tasks
+        //      => then multi-actors
+        //      :make the tick period as a configuration (1 sec. might be very low for long running tests)
     }
 
     public void onBeforeRunTask(AOTask<?> task)
@@ -261,6 +359,15 @@ public class AOActorContext
 
     public void dumpStatistics()
     {
+        AOLog4jUtils.TEST.debug(
+                "[test] {} : run-count:{} avg.:{} max.:{} min.:{}",
+                String.format("%20.20s", actor.getName()),
+                runCount,
+                AODurationUtils.formatMillis(elapsedMSavg.get()),
+                AODurationUtils.formatMillis(elapsedMSmax.get()),
+                AODurationUtils.formatMillis(elapsedMSmin.get())
+        );
+
         final List<AOTask<?>> sortedTasks = taskGauges.keySet().stream()
                 .sorted(Comparator.comparing(AOTask::getName))
                 .toList();
@@ -270,9 +377,8 @@ public class AOActorContext
             final AOTaskGauge gauge = taskGauges.get(task);
 
             AOLog4jUtils.TEST.debug(
-                    "[test] '{}' task '{}' : run-count:{} avg.:{} max.:{} min.:{}",
-                    actor.getName(),
-                    task.getName(),
+                    "[test] {} : run-count:{} avg.:{} max.:{} min.:{}",
+                    String.format("%20.20s", task.getName()),
                     gauge.getRunCount(),
                     AODurationUtils.formatMillis(gauge.getRunElapsedMSavg()),
                     AODurationUtils.formatMillis(gauge.getRunElapsedMSmax()),

@@ -79,7 +79,10 @@ public class AOShell
             context.shutdown() /* safe */;
         }
 
-        context.dumpStatistics();
+        if (!context.isOnError())
+        {
+            context.dumpStatistics();
+        }
 
         if (context.isOnError())
         {
