@@ -1,6 +1,7 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.stats.AOBigBrother;
+import ic3.analyticsops.stats.AOStats;
 import ic3.analyticsops.test.load.AOLoadTestConfiguration;
 import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
@@ -10,9 +11,14 @@ import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -33,6 +39,15 @@ public class AOTestContext
     private final ReentrantLock statusLOCK = new ReentrantLock();
 
     private final Condition statusCondition = statusLOCK.newCondition();
+
+    /**
+     * Introduced for dumping statistics once the test has been completed.
+     */
+    private final List<AOActorContext> actorContexts = new ArrayList<>();
+
+    private final Map<AOActor, AtomicInteger> runningActors = new ConcurrentHashMap<>();
+
+    private final AOStats stats = new AOStats();
 
     public AOTestContext(AOTest test, AOTestSchedule schedule)
     {
@@ -67,6 +82,11 @@ public class AOTestContext
         }
 
         return null;
+    }
+
+    public void onStatisticsTick()
+    {
+        stats.onTick(runningActors);
     }
 
     public String createBrowserContext()
@@ -132,8 +152,15 @@ public class AOTestContext
         setOnError();
     }
 
+    public void onActorStarted(AOActor actor)
+    {
+        runningActors.computeIfAbsent(actor, a -> new AtomicInteger(0)).getAndIncrement();
+    }
+
     public void onActorCompleted(AOActor actor)
     {
+        runningActors.get(actor).decrementAndGet();
+
         completion.countDown();
     }
 
@@ -178,6 +205,12 @@ public class AOTestContext
         }
     }
 
+    public void attachActorContext(AOActorContext actorContext)
+    {
+        // Called from the main thread only.
+        actorContexts.add(actorContext);
+    }
+
     /**
      * Blocking call.
      */
@@ -208,5 +241,24 @@ public class AOTestContext
         {
             AOLog4jUtils.SHELL.warn("[shell] big-brother shutdown on error", ex);
         }
+    }
+
+    public void dumpStatistics()
+    {
+        AOLog4jUtils.TEST.debug("[test] -- actor's statistics ---------------");
+
+        for (AOActorContext actorContext : actorContexts)
+        {
+            actorContext.dumpStatistics();
+        }
+
+        if (schedule.isLoadTesting())
+        {
+            AOLog4jUtils.TEST.debug("[test] -- load-testing statistics ----------");
+
+            stats.dump();
+        }
+
+        AOLog4jUtils.TEST.debug("[test] -------------------------------------");
     }
 }

@@ -71,8 +71,11 @@ public class AOBigBrother
                 {
                     AOLog4jUtils.BIG_BROTHER.warn("CPU load : {}", String.format("%.1f", load * 100));
                 }
+
+                context.onStatisticsTick();
             }
 
+            context.onStatisticsTick();
         });
     }
 

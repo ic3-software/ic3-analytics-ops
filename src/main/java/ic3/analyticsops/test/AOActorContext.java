@@ -166,6 +166,11 @@ public class AOActorContext
         context.onActorTasksError(actor, ex);
     }
 
+    public void onActorStarted()
+    {
+        context.onActorStarted(actor);
+    }
+
     /**
      * Still in the actor thread.
      */
@@ -264,8 +269,8 @@ public class AOActorContext
         {
             final AOTaskGauge gauge = taskGauges.get(task);
 
-            AOLog4jUtils.ACTOR.debug(
-                    "[actor] '{}' task '{}' statistics : run-count:{} avg.:{} max.:{} min.:{}",
+            AOLog4jUtils.TEST.debug(
+                    "[test] '{}' task '{}' : run-count:{} avg.:{} max.:{} min.:{}",
                     actor.getName(),
                     task.getName(),
                     gauge.getRunCount(),

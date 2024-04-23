@@ -293,7 +293,7 @@ public class AOTest extends AOSerializable
         {
             AOLog4jUtils.TEST.info(
                     "[test] the load test will run for {}",
-                    AODurationUtils.formatMillis(schedule.getActorMaxDurationMS())
+                    AODurationUtils.formatMillis(schedule.getLoadTestingMaxDurationMS())
             );
         }
 
@@ -307,19 +307,13 @@ public class AOTest extends AOSerializable
 
         for (AOActorContext actorContext : actorsContexts)
         {
+            context.attachActorContext(actorContext);
             actorContext.run(nowMS);
         }
 
         AOLog4jUtils.TEST.info("[test] waiting for {} actors", actorsContexts.size());
 
         context.waitForCompletion();
-
-        AOLog4jUtils.TEST.info("[test] waiting for {} actors done", actorsContexts.size());
-
-        for (AOActorContext actorContext : actorsContexts)
-        {
-            actorContext.dumpStatistics();
-        }
 
         AOLog4jUtils.TEST.info("[test] completed");
     }

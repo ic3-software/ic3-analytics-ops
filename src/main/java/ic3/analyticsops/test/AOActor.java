@@ -209,6 +209,8 @@ public class AOActor extends AOSerializable
 
         AOLog4jUtils.ACTOR.info("[actor] '{}' run started", name);
 
+        context.onActorStarted();
+
         int run = 0;
 
         do

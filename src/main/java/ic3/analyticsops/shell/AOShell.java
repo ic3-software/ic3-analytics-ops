@@ -71,14 +71,15 @@ public class AOShell
         }
         catch (InterruptedException ex /* dunno yet */)
         {
-            AOLog4jUtils.SHELL.error("[shell] test interrupted : exit(-1)", ex);
-
+            AOLog4jUtils.SHELL.error("[shell] test (unexpected) interrupted", ex);
             context.onTestInterrupted(ex);
         }
         finally
         {
             context.shutdown() /* safe */;
         }
+
+        context.dumpStatistics();
 
         if (context.isOnError())
         {
@@ -143,7 +144,7 @@ public class AOShell
                 schedules = createTestScheduleForRegularTesting(test);
             }
 
-            return new AOTestSchedule(load != null, test.getDuration(), schedules);
+            return new AOTestSchedule(load, test.getDuration(), schedules);
         }
         catch (Exception ex)
         {

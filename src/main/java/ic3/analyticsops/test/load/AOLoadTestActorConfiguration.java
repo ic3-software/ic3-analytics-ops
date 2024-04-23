@@ -109,5 +109,10 @@ public class AOLoadTestActorConfiguration extends AOSerializable
     {
         return rampDown != null ? rampDown.toMillis() : 0;
     }
+
+    public long getDurationMS()
+    {
+        return getDelayMS() + getRampUpMS() + getSteadyStateMS() + getRampDownMS();
+    }
 }
 

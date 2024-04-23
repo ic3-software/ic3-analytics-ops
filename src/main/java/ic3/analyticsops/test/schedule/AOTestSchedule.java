@@ -1,5 +1,7 @@
 package ic3.analyticsops.test.schedule;
 
+import ic3.analyticsops.test.load.AOLoadTestActorConfiguration;
+import ic3.analyticsops.test.load.AOLoadTestConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -10,7 +12,8 @@ public class AOTestSchedule
     /**
      * Load-testing : actors are duplicated and run according to a given profile.
      */
-    private final boolean loadTesting;
+    @Nullable
+    private final AOLoadTestConfiguration loadTesting;
 
     /**
      * No duration means each actor will run once their tasks unless this is a load test.
@@ -20,7 +23,7 @@ public class AOTestSchedule
 
     private final List<AOActorSchedule> actors;
 
-    public AOTestSchedule(boolean loadTesting, @Nullable Duration duration, List<AOActorSchedule> actors)
+    public AOTestSchedule(@Nullable AOLoadTestConfiguration loadTesting, @Nullable Duration duration, List<AOActorSchedule> actors)
     {
         this.loadTesting = loadTesting;
         this.duration = duration;
@@ -29,7 +32,22 @@ public class AOTestSchedule
 
     public boolean isLoadTesting()
     {
-        return loadTesting;
+        return loadTesting != null;
+    }
+
+    public long getLoadTestingMaxDurationMS()
+    {
+        long max = Integer.MIN_VALUE;
+
+        if (loadTesting != null)
+        {
+            for (AOLoadTestActorConfiguration actor : loadTesting.getActors())
+            {
+                max = Math.max(max, actor.getDurationMS());
+            }
+        }
+
+        return max;
     }
 
     @Nullable
@@ -46,17 +64,5 @@ public class AOTestSchedule
     public List<AOActorSchedule> getActors()
     {
         return actors;
-    }
-
-    public long getActorMaxDurationMS()
-    {
-        long max = Integer.MIN_VALUE;
-
-        for (AOActorSchedule actor : actors)
-        {
-            max = Math.max(max, actor.getDurationMS());
-        }
-
-        return max;
     }
 }
