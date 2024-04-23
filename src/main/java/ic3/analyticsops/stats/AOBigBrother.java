@@ -2,6 +2,7 @@ package ic3.analyticsops.stats;
 
 import ic3.analyticsops.test.AOTestContext;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOThreadUtils;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -28,7 +29,7 @@ public class AOBigBrother
 
     public void start()
     {
-        new Thread(() ->
+        AOThreadUtils.startNewThread("big-brother", () ->
         {
             final SystemInfo si = new SystemInfo();
             final HardwareAbstractionLayer hw = si.getHardware();
@@ -72,7 +73,7 @@ public class AOBigBrother
                 }
             }
 
-        }, "big-brother").start();
+        });
     }
 
     public void shutdown()

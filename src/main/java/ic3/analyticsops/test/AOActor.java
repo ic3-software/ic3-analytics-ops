@@ -1,6 +1,7 @@
 package ic3.analyticsops.test;
 
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOThreadUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -185,7 +186,7 @@ public class AOActor extends AOSerializable
     {
         try
         {
-            new Thread(() -> doRun(context, testStartMS), "actor-" + name).start();
+            AOThreadUtils.startNewThread(context.createThreadName(), () -> doRun(context, testStartMS));
         }
         catch (Throwable ex)
         {

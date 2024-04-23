@@ -271,19 +271,30 @@ public class AOTest extends AOSerializable
             throws InterruptedException
     {
         final AOTestSchedule schedule = context.getSchedule();
-        final Duration duration = schedule.getDuration();
 
-        if (duration != null)
+        if (!schedule.isLoadTesting())
         {
-            AOLog4jUtils.TEST.info(
-                    "[test] the test will run for {} [duration : {}]",
-                    AODurationUtils.formatMillis(duration.toMillis()),
-                    duration
-            );
+            final Duration duration = schedule.getDuration();
+
+            if (duration != null)
+            {
+                AOLog4jUtils.TEST.info(
+                        "[test] the test will run for {} [duration : {}]",
+                        AODurationUtils.formatMillis(duration.toMillis()),
+                        duration
+                );
+            }
+            else
+            {
+                AOLog4jUtils.TEST.info("[test] the test will execute once every actor.");
+            }
         }
         else
         {
-            AOLog4jUtils.TEST.info("[test] the test will execute once every actor.");
+            AOLog4jUtils.TEST.info(
+                    "[test] the load test will run for {}",
+                    AODurationUtils.formatMillis(schedule.getActorMaxDurationMS())
+            );
         }
 
         final List<AOActorSchedule> schedules = schedule.getActors();

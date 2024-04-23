@@ -74,6 +74,11 @@ public class AOActorContext
         this.schedule = schedule;
     }
 
+    public String createThreadName()
+    {
+        return actor.getName() + ".actor" + (schedule.getId() != -1 ? "." + schedule.getId() : "");
+    }
+
     public boolean isOnce()
     {
         return schedule.isOnce();
@@ -270,4 +275,5 @@ public class AOActorContext
             );
         }
     }
+
 }

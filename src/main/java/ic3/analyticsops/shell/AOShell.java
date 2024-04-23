@@ -143,7 +143,7 @@ public class AOShell
                 schedules = createTestScheduleForRegularTesting(test);
             }
 
-            return new AOTestSchedule(test.getDuration(), schedules);
+            return new AOTestSchedule(load != null, test.getDuration(), schedules);
         }
         catch (Exception ex)
         {
@@ -152,6 +152,9 @@ public class AOShell
         }
     }
 
+    /**
+     * Degenerated load-testing : actors are not duplicated and started immediately.
+     */
     public static List<AOActorSchedule> createTestScheduleForRegularTesting(AOTest test)
     {
         final List<AOActorSchedule> schedules = new ArrayList<>();
@@ -173,6 +176,9 @@ public class AOShell
         return schedules;
     }
 
+    /**
+     * Actors are duplicated and started according to their ramp-up stage.
+     */
     public static List<AOActorSchedule> createTestScheduleForLoadTesting(AOTest test)
     {
         final List<AOActorSchedule> schedules = new ArrayList<>();
@@ -183,6 +189,8 @@ public class AOShell
         {
             throw new RuntimeException("internal error : unexpected missing load configuration");
         }
+
+        int id = 0;
 
         for (AOLoadTestActorConfiguration actorConfiguration : load.getActors())
         {
@@ -202,6 +210,7 @@ public class AOShell
                 {
                     schedules.add(new AOActorSchedule(
                             actor,
+                            id++,
                             delayMS + createStepMS * ii,
                             delayMS + rampUpMS + steadyStateMS + killStepMS * ii
                     ));

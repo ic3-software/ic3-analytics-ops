@@ -62,8 +62,9 @@ public abstract class AOLog4jUtils
                 .addAttribute("target", "SYSTEM_OUT")
                 .add(
                         builder.newLayout("PatternLayout")
-                                .addAttribute("pattern", "{%40.40c} [%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
-                        // .addAttribute("pattern", "[%20.20t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
+                                // logger name at the front for debugging extra. log
+                                // .addAttribute("pattern", "< %40.40c > [%25.25t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
+                                .addAttribute("pattern", "[%25.25t] [%5.5p] (%d{HH:mm:ss.SSS z}) %m%n")
                 );
 
         // Root Logger
