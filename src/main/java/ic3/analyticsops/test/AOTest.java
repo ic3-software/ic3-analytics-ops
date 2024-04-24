@@ -16,7 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -158,7 +160,7 @@ public class AOTest extends AOSerializable
 
         if (active == 0)
         {
-            throw new AOTestValidationException("the JSON field 'actors' are referencing non-active actors only");
+            throw new AOTestValidationException("the JSON field 'actors' is referencing non-active actors only");
         }
 
         for (AOActor actor : actors)
@@ -167,6 +169,19 @@ public class AOTest extends AOSerializable
             {
                 actor.validate();
             }
+        }
+
+        // Ensure names are unique : load-test configuration is referencing actors by their name.
+
+        final Set<String> names = new HashSet<>();
+
+        for (AOActor actor : actors)
+        {
+            if (names.contains(actor.getName()))
+            {
+                throw new AOTestValidationException("the JSON field 'actors' contains several actors with the same name : " + actor.getName());
+            }
+            names.add(actor.getName());
         }
     }
 
