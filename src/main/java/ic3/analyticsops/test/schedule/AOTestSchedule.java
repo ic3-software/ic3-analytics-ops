@@ -50,6 +50,16 @@ public class AOTestSchedule
         return max;
     }
 
+    public long getLoadTestingCpuLoadTickMS()
+    {
+        return loadTesting != null ? loadTesting.getCpuLoadTickMS() : 1_000;
+    }
+
+    public long getLoadTestingStatsTickMS()
+    {
+        return loadTesting != null ? loadTesting.getStatsTickMS() : 1_000;
+    }
+
     @Nullable
     public Duration getDuration()
     {

@@ -20,12 +20,22 @@ public class AOMinLongStatsColumn extends AOStatsColumn<Long>
     @Nullable
     public Long getValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return null;
+        }
+
         final long val = getLongValue(index);
         return val == Long.MAX_VALUE ? null : val;
     }
 
     public long getLongValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return Long.MAX_VALUE;
+        }
+
         return data[index];
     }
 

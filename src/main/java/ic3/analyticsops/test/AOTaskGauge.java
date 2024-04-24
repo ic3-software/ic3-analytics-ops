@@ -33,7 +33,7 @@ public class AOTaskGauge
         this.task = task;
     }
 
-    public void onBeforeRun()
+    public void onBeforeRunTask()
     {
         synchronized (lock)
         {
@@ -44,7 +44,7 @@ public class AOTaskGauge
         }
     }
 
-    public void onRunPaused(long elapsedMS)
+    public void onRunTaskPaused(long elapsedMS)
     {
         synchronized (lock)
         {
@@ -52,7 +52,7 @@ public class AOTaskGauge
         }
     }
 
-    public void onAfterRun()
+    public void onAfterRunTask()
     {
         synchronized (lock)
         {

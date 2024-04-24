@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * This context is identifying a run for a given actor. The same actor is running several times when in load-testing.
+ */
 public class AOActorContext
 {
     private final AOTestContext context;
@@ -61,27 +64,27 @@ public class AOActorContext
     private final Map<AOTask<?>, AOTaskGauge> taskGauges = new ConcurrentHashMap<>();
 
     /**
-     * For all the tasks : updated after each task's loop has been completed.
+     * Updated after each task's loop has been completed.
      */
     private final AtomicInteger runCount = new AtomicInteger();
 
     /**
-     * For all the tasks : updated after each task's loop has been completed.
+     * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
     private final AtomicLong elapsedMS = new AtomicLong(-1);
 
     /**
-     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
     private final AtomicLong elapsedMSavg = new AtomicLong(-1);
 
     /**
-     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     * Aor all the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
     private final AtomicLong elapsedMSmax = new AtomicLong(-1);
 
     /**
-     * For all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     * Aor all the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
     private final AtomicLong elapsedMSmin = new AtomicLong(-1);
 
@@ -246,6 +249,8 @@ public class AOActorContext
     public void onActorCompleted()
     {
         context.onActorCompleted(actor);
+
+        elapsedMS.set(-1);
     }
 
     public void onBeforeRunTasks()
@@ -255,38 +260,37 @@ public class AOActorContext
 
     public void onAfterRunTasks()
     {
-        final long[] elapsedMS = new long[1];
-        final long[] elapsedMSavg = new long[1];
-        final long[] elapsedMSmax = new long[1];
-        final long[] elapsedMSmin = new long[1];
+        long ms = 0;
+        long msAvg = 0;
+        long msMax = 0;
+        long msMin = 0;
 
-        taskGauges.forEach((task, gauge) ->
+        for (AOTaskGauge gauge : taskGauges.values())
         {
-            elapsedMS[0] += gauge.getRunElapsedMS();
-            elapsedMSavg[0] += gauge.getRunElapsedMSavg();
-            elapsedMSmax[0] += gauge.getRunElapsedMSmax();
-            elapsedMSmin[0] += gauge.getRunElapsedMSmin();
-        });
+            ms += gauge.getRunElapsedMS();
+            msAvg += gauge.getRunElapsedMSavg();
+            msMax += gauge.getRunElapsedMSmax();
+            msMin += gauge.getRunElapsedMSmin();
+        }
 
         runCount.incrementAndGet();
 
-        this.elapsedMS.set(elapsedMS[0]);
-        this.elapsedMSavg.set(elapsedMSavg[0]);
-        this.elapsedMSmax.set(elapsedMSmax[0]);
-        this.elapsedMSmin.set(elapsedMSmin[0]);
+        elapsedMS.set(ms);
+        elapsedMSavg.set(msAvg);
+        elapsedMSmax.set(msMax);
+        elapsedMSmin.set(msMin);
 
-        // TODO [load-testing] have some logs here to troubleshoot the stats at then end
-        //      => should be consistent w/ the Ticks !
-        //      => then multi-tasks
-        //      => then multi-actors
-        //      :make the tick period as a configuration (1 sec. might be very low for long running tests)
+//        AOLog4jUtils.ACTOR.debug(
+//                "onAfterRunTasks run:{} ms:{} avg:{} max:{} min:{}",
+//                runCount.get(), ms, msAvg, msMax, msMin
+//        );
     }
 
     public void onBeforeRunTask(AOTask<?> task)
     {
         final AOTaskGauge gauge = taskGauges.computeIfAbsent(task, t -> new AOTaskGauge(task));
 
-        gauge.onBeforeRun();
+        gauge.onBeforeRunTask();
     }
 
     public void onRunTaskPaused(AOTask<?> task, long elapsedMS)
@@ -298,7 +302,7 @@ public class AOActorContext
             throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
         }
 
-        gauge.onRunPaused(elapsedMS);
+        gauge.onRunTaskPaused(elapsedMS);
     }
 
     public void onAfterRunTask(AOTask<?> task)
@@ -310,7 +314,7 @@ public class AOActorContext
             throw new RuntimeException("unexpected missing gauge for task : " + task.getName());
         }
 
-        gauge.onAfterRun();
+        gauge.onAfterRunTask();
     }
 
     public void pause(long pauseMS)

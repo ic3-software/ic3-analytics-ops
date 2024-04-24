@@ -1,5 +1,7 @@
 package ic3.analyticsops.stats;
 
+import org.jetbrains.annotations.Nullable;
+
 public class AOIntegerStatsColumn extends AOStatsColumn<Integer>
 {
     private int[] data = new int[16];
@@ -11,13 +13,24 @@ public class AOIntegerStatsColumn extends AOStatsColumn<Integer>
         super(name);
     }
 
+    @Nullable
     public Integer getValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return null;
+        }
+
         return getIntValue(index);
     }
 
     public int getIntValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return 0;
+        }
+
         return data[index];
     }
 

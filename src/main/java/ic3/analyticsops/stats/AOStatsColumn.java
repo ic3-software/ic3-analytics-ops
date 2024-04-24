@@ -1,5 +1,7 @@
 package ic3.analyticsops.stats;
 
+import org.jetbrains.annotations.Nullable;
+
 public abstract class AOStatsColumn<VALUE>
 {
     private final String name;
@@ -14,6 +16,7 @@ public abstract class AOStatsColumn<VALUE>
         return name;
     }
 
+    @Nullable
     public abstract VALUE getValue(int rowNb);
 
     @Override

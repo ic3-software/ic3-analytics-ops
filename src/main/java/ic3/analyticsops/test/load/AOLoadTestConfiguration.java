@@ -5,6 +5,7 @@ import ic3.analyticsops.test.AOTest;
 import ic3.analyticsops.test.AOTestValidationException;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
 
 public class AOLoadTestConfiguration extends AOSerializable
@@ -13,6 +14,18 @@ public class AOLoadTestConfiguration extends AOSerializable
      * Final semantic: dunno how to set with JSON deserialization.
      */
     protected transient AOTest jsonParentTest;
+
+    /**
+     * The CPU load is checked every 'cpuLoadTick'. Defaulted to 1 sec.
+     */
+    @Nullable
+    private final Duration cpuLoadTick;
+
+    /**
+     * The statistics are reported every 'statsTick'. Defaulted to 1 sec.
+     */
+    @Nullable
+    private final Duration statsTick;
 
     /**
      * Optional max. system load before an error is generated (a value between 0 and 1).
@@ -28,6 +41,8 @@ public class AOLoadTestConfiguration extends AOSerializable
     {
         // JSON deserialization
 
+        this.cpuLoadTick = null;
+        this.statsTick = null;
         this.failAtCpuLoad = null;
         this.actors = null;
     }
@@ -88,4 +103,13 @@ public class AOLoadTestConfiguration extends AOSerializable
         return actors;
     }
 
+    public long getCpuLoadTickMS()
+    {
+        return cpuLoadTick != null ? cpuLoadTick.toMillis() : 1_000;
+    }
+
+    public long getStatsTickMS()
+    {
+        return statsTick != null ? statsTick.toMillis() : 1_000;
+    }
 }

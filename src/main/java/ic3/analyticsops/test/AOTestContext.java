@@ -217,7 +217,10 @@ public class AOTestContext
     public void run()
             throws InterruptedException
     {
-        bigBrother.start();
+        if (schedule.isLoadTesting())
+        {
+            bigBrother.start();
+        }
 
         test.run(this);
     }
@@ -235,7 +238,10 @@ public class AOTestContext
 
         try
         {
-            bigBrother.shutdown();
+            if (schedule.isLoadTesting())
+            {
+                bigBrother.shutdown();
+            }
         }
         catch (Exception ex)
         {

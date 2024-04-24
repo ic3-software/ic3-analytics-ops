@@ -2,19 +2,33 @@ package ic3.analyticsops.stats;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 
-public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
+public class AOTimestampStatsColumn extends AOStatsColumn<Long>
 {
+    private final SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss.SSS z");
+
     private long[] data = new long[16];
 
     private int pos;
 
-    public AOMaxLongStatsColumn(String name)
+    public AOTimestampStatsColumn(String name)
     {
         super(name);
+    }
 
-        Arrays.fill(data, Long.MIN_VALUE);
+    @Nullable
+    public String getValueS(int index)
+    {
+        if (index < 0 || index >= pos)
+        {
+            return null;
+        }
+
+        synchronized (df)
+        {
+            return df.format(getLongValue(index));
+        }
     }
 
     @Nullable
@@ -25,15 +39,14 @@ public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
             return null;
         }
 
-        final long val = getLongValue(index);
-        return val == Long.MIN_VALUE ? null : val;
+        return getLongValue(index);
     }
 
     public long getLongValue(int index)
     {
         if (index < 0 || index >= pos)
         {
-            return Long.MIN_VALUE;
+            return 0;
         }
 
         return data[index];
@@ -47,7 +60,7 @@ public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
             pos = index + 1;
         }
 
-        data[index] = Math.max(data[index], value);
+        data[index] = value;
     }
 
     private void ensureCapacity(int capacity)
@@ -58,7 +71,6 @@ public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
             final long[] tmp = new long[newCapacity];
 
             System.arraycopy(data, 0, tmp, 0, data.length);
-            Arrays.fill(tmp, data.length, tmp.length, Long.MIN_VALUE);
 
             data = tmp;
         }

@@ -18,12 +18,22 @@ public class AOAvgLongStatsColumn extends AOStatsColumn<Long>
     @Nullable
     public Long getValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return null;
+        }
+
         final int c = count[index];
         return c == 0 ? null : getLongValue(index);
     }
 
     public long getLongValue(int index)
     {
+        if (index < 0 || index >= pos)
+        {
+            return 0;
+        }
+
         final int c = count[index];
         return c == 0 ? 0 : sum[index] / count[index];
     }

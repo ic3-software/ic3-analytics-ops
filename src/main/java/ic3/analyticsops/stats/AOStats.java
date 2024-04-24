@@ -28,6 +28,12 @@ public class AOStats
     {
         synchronized (columns)
         {
+            final AOTimestampStatsColumn tsC = columns.computeIfAbsent(
+                    0, () -> new AOTimestampStatsColumn("Timestamp")
+            );
+
+            tsC.setLongValue(rowNb, System.currentTimeMillis());
+
             for (Map.Entry<AOActor, AtomicInteger> entry : runningActors.entrySet())
             {
                 final AOActor actor = entry.getKey();
@@ -36,7 +42,7 @@ public class AOStats
                 final int pos = positions.computeIfAbsent(actor, a -> positions.size());
 
                 final AOIntegerStatsColumn countC = columns.computeIfAbsent(
-                        pos * 2, () -> new AOIntegerStatsColumn(actor.getName() + "/Count")
+                        1 + (pos * 2), () -> new AOIntegerStatsColumn(actor.getName() + "/Count")
                 );
 
                 countC.setIntValue(rowNb, running.get());
@@ -56,7 +62,7 @@ public class AOStats
                 final int pos = positions.computeIfAbsent(actor, a -> positions.size());
 
                 final AOAvgLongStatsColumn avgC = columns.computeIfAbsent(
-                        pos * 2 + 1, () -> new AOAvgLongStatsColumn(actor.getName() + "/ElapsedMS")
+                        1 + (pos * 2 + 1), () -> new AOAvgLongStatsColumn(actor.getName() + "/ElapsedMS")
                 );
 
                 avgC.setLongValue(rowNb, 1, ms);
@@ -70,8 +76,6 @@ public class AOStats
     {
         synchronized (columns)
         {
-            AOLog4jUtils.TEST.debug("[test] ticks:{}", rowNb);
-
             final int columnCount = columns.size();
 
             // Table Header
@@ -108,7 +112,8 @@ public class AOStats
                         continue;
                     }
 
-                    final Object value = column.getValue(tt);
+                    final Object value = column instanceof AOTimestampStatsColumn columnTS
+                            ? columnTS.getValueS(tt) : column.getValue(tt);
 
                     csv.append(",").append(value != null ? value.toString() : null);
                 }

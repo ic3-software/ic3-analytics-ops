@@ -1,76 +1,93 @@
 package ic3.analyticsops.stats;
 
 import ic3.analyticsops.test.AOTestContext;
+import ic3.analyticsops.test.schedule.AOTestSchedule;
 import ic3.analyticsops.utils.AOLog4jUtils;
-import ic3.analyticsops.utils.AOThreadUtils;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class AOBigBrother
 {
     private final AOTestContext context;
 
-    private final ReentrantLock shutdownLOCK = new ReentrantLock();
+    private final Timer timer;
 
-    private final Condition shutdownCondition = shutdownLOCK.newCondition();
+    private final TimerTask taskCpuLoad;
 
-    private final AtomicBoolean shutdown = new AtomicBoolean();
+    private final TimerTask taskStats;
 
     public AOBigBrother(AOTestContext context)
     {
         this.context = context;
+
+        this.timer = new Timer("big-brother");
+
+        this.taskCpuLoad = new CpuLoadTask(context);
+        this.taskStats = new StatsTask(context);
     }
 
     public void start()
     {
-        AOThreadUtils.startNewThread("big-brother", () ->
+        try
+        {
+            final long ms = System.currentTimeMillis() % 1000;
+            Thread.sleep(1000 - ms);
+        }
+        catch (InterruptedException ignored)
+        {
+        }
+
+        final AOTestSchedule schedule = context.getSchedule();
+
+        timer.scheduleAtFixedRate(taskCpuLoad, 0, schedule.getLoadTestingCpuLoadTickMS());
+        timer.scheduleAtFixedRate(taskStats, 0, schedule.getLoadTestingStatsTickMS());
+    }
+
+    public void shutdown()
+    {
+        taskCpuLoad.cancel();
+        taskStats.cancel();
+    }
+
+    static class CpuLoadTask extends TimerTask
+    {
+        private final AOTestContext context;
+
+        private final CentralProcessor proc;
+
+        private long[] prevTicks;
+
+        public CpuLoadTask(AOTestContext context)
+        {
+            this.context = context;
+
+            final SystemInfo si = new SystemInfo();
+            final HardwareAbstractionLayer hw = si.getHardware();
+
+            this.proc = hw.getProcessor();
+            this.prevTicks = proc.getSystemCpuLoadTicks();
+        }
+
+        @Override
+        public void run()
         {
             try
             {
-                unsafeStart();
+                runUnsafe();
             }
             catch (Exception ex)
             {
-                AOLog4jUtils.BIG_BROTHER.error("[big-brother] unexpected error", ex);
-
+                AOLog4jUtils.BIG_BROTHER.error("[big-brother] CPU load unexpected error", ex);
                 context.setOnError();
             }
-        });
-    }
+        }
 
-    private void unsafeStart()
-    {
-        final SystemInfo si = new SystemInfo();
-        final HardwareAbstractionLayer hw = si.getHardware();
-        final CentralProcessor proc = hw.getProcessor();
-
-        long[] prevTicks = proc.getSystemCpuLoadTicks();
-
-        while (!shutdown.get())
+        private void runUnsafe()
         {
-            try
-            {
-                shutdownLOCK.lock();
-
-                try
-                {
-                    shutdownCondition.await(1_000, TimeUnit.MILLISECONDS);
-                }
-                finally
-                {
-                    shutdownLOCK.unlock();
-                }
-            }
-            catch (InterruptedException ignored)
-            {
-            }
-
             final double load = proc.getSystemCpuLoadBetweenTicks(prevTicks);
             prevTicks = proc.getSystemCpuLoadTicks();
 
@@ -86,27 +103,35 @@ public class AOBigBrother
             {
                 AOLog4jUtils.BIG_BROTHER.warn("[big-brother] CPU load : {}", String.format("%.1f", load * 100));
             }
+        }
+    }
 
+    static class StatsTask extends TimerTask
+    {
+        private final AOTestContext context;
+
+        public StatsTask(AOTestContext context)
+        {
+            this.context = context;
+        }
+
+        @Override
+        public void run()
+        {
+            try
+            {
+                runUnsafe();
+            }
+            catch (Exception ex)
+            {
+                AOLog4jUtils.BIG_BROTHER.error("[big-brother] stats. unexpected error", ex);
+                context.setOnError();
+            }
+        }
+
+        private void runUnsafe()
+        {
             context.onStatisticsTick();
         }
-
-        context.onStatisticsTick();
     }
-
-    public void shutdown()
-    {
-        shutdown.set(true);
-
-        shutdownLOCK.lock();
-
-        try
-        {
-            shutdownCondition.signalAll();
-        }
-        finally
-        {
-            shutdownLOCK.unlock();
-        }
-    }
-
 }
