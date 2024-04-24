@@ -1,16 +1,21 @@
-package ic3.analyticsops.stats;
+package ic3.analyticsops.stats.column;
 
+import ic3.analyticsops.stats.AOStatsColumn;
 import org.jetbrains.annotations.Nullable;
 
-public class AOLongStatsColumn extends AOStatsColumn<Long>
+import java.util.Arrays;
+
+public class AOMinLongStatsColumn extends AOStatsColumn<Long>
 {
     private long[] data = new long[16];
 
     private int pos;
 
-    public AOLongStatsColumn(String name)
+    public AOMinLongStatsColumn(String name)
     {
         super(name);
+
+        Arrays.fill(data, Long.MAX_VALUE);
     }
 
     @Nullable
@@ -21,14 +26,15 @@ public class AOLongStatsColumn extends AOStatsColumn<Long>
             return null;
         }
 
-        return getLongValue(index);
+        final long val = getLongValue(index);
+        return val == Long.MAX_VALUE ? null : val;
     }
 
     public long getLongValue(int index)
     {
         if (index < 0 || index >= pos)
         {
-            return 0;
+            return Long.MAX_VALUE;
         }
 
         return data[index];
@@ -42,7 +48,7 @@ public class AOLongStatsColumn extends AOStatsColumn<Long>
             pos = index + 1;
         }
 
-        data[index] = value;
+        data[index] = Math.min(data[index], value);
     }
 
     private void ensureCapacity(int capacity)
@@ -53,6 +59,7 @@ public class AOLongStatsColumn extends AOStatsColumn<Long>
             final long[] tmp = new long[newCapacity];
 
             System.arraycopy(data, 0, tmp, 0, data.length);
+            Arrays.fill(tmp, data.length, tmp.length, Long.MAX_VALUE);
 
             data = tmp;
         }

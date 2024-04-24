@@ -1,8 +1,13 @@
 package ic3.analyticsops.stats;
 
+import ic3.analyticsops.stats.column.AOAvgLongStatsColumn;
+import ic3.analyticsops.stats.column.AOIntegerStatsColumn;
+import ic3.analyticsops.stats.column.AOTimestampStatsColumn;
 import ic3.analyticsops.test.AOActor;
 import ic3.analyticsops.test.AOActorContext;
+import ic3.analyticsops.utils.AODurationUtils;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOTimestampUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -72,8 +77,10 @@ public class AOStats
         }
     }
 
-    public void dump()
+    public void dump(List<AOActorContext> actorContexts)
     {
+        dumpActorSummaries(actorContexts);
+
         synchronized (columns)
         {
             final int columnCount = columns.size();
@@ -120,6 +127,34 @@ public class AOStats
 
                 AOLog4jUtils.TEST.debug("[test] >  {}", csv.toString());
             }
+        }
+    }
+
+    private void dumpActorSummaries(List<AOActorContext> actorContexts)
+    {
+        final Map<AOActor, AOActorSummary> summaries = new HashMap<>();
+
+        for (AOActorContext actorContext : actorContexts)
+        {
+            final AOActor actor = actorContext.getActor();
+
+            final AOActorSummary summary = summaries.computeIfAbsent(actor, a -> new AOActorSummary(actor));
+
+            summary.addForContext(actorContext);
+        }
+
+        for (AOActorSummary summary : summaries.values())
+        {
+            AOLog4jUtils.TEST.debug(
+                    "[test] {} : run-count:{} avg.:{} max.:{}({}) min.:{}({})",
+                    String.format("%20.20s", summary.getActor().getName()),
+                    summary.getRunCount(),
+                    AODurationUtils.formatMillis(summary.getElapsedMSavg()),
+                    AODurationUtils.formatMillis(summary.getElapsedMSmax()),
+                    AOTimestampUtils.formatTimestamp(summary.getElapsedMSmaxTS()),
+                    AODurationUtils.formatMillis(summary.getElapsedMSmin()),
+                    AOTimestampUtils.formatTimestamp(summary.getElapsedMSminTS())
+            );
         }
     }
 }

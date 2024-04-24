@@ -1,45 +1,41 @@
-package ic3.analyticsops.stats;
+package ic3.analyticsops.stats.column;
 
+import ic3.analyticsops.stats.AOStatsColumn;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-
-public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
+public class AOIntegerStatsColumn extends AOStatsColumn<Integer>
 {
-    private long[] data = new long[16];
+    private int[] data = new int[16];
 
     private int pos;
 
-    public AOMaxLongStatsColumn(String name)
+    public AOIntegerStatsColumn(String name)
     {
         super(name);
-
-        Arrays.fill(data, Long.MIN_VALUE);
     }
 
     @Nullable
-    public Long getValue(int index)
+    public Integer getValue(int index)
     {
         if (index < 0 || index >= pos)
         {
             return null;
         }
 
-        final long val = getLongValue(index);
-        return val == Long.MIN_VALUE ? null : val;
+        return getIntValue(index);
     }
 
-    public long getLongValue(int index)
+    public int getIntValue(int index)
     {
         if (index < 0 || index >= pos)
         {
-            return Long.MIN_VALUE;
+            return 0;
         }
 
         return data[index];
     }
 
-    public void setLongValue(int index, long value)
+    public void setIntValue(int index, int value)
     {
         if (index >= pos)
         {
@@ -47,7 +43,7 @@ public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
             pos = index + 1;
         }
 
-        data[index] = Math.max(data[index], value);
+        data[index] = value;
     }
 
     private void ensureCapacity(int capacity)
@@ -55,10 +51,9 @@ public class AOMaxLongStatsColumn extends AOStatsColumn<Long>
         if (capacity > data.length)
         {
             final int newCapacity = Math.max((data.length * 3) / 2 + 1, capacity);
-            final long[] tmp = new long[newCapacity];
+            final int[] tmp = new int[newCapacity];
 
             System.arraycopy(data, 0, tmp, 0, data.length);
-            Arrays.fill(tmp, data.length, tmp.length, Long.MIN_VALUE);
 
             data = tmp;
         }

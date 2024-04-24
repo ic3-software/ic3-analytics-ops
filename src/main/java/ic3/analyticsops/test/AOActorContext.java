@@ -8,6 +8,7 @@ import ic3.analyticsops.test.schedule.AOActorSchedule;
 import ic3.analyticsops.test.task.reporting.AOChromeException;
 import ic3.analyticsops.utils.AODurationUtils;
 import ic3.analyticsops.utils.AOLog4jUtils;
+import ic3.analyticsops.utils.AOTimestampUtils;
 import io.webfolder.cdp.session.Session;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,9 +18,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This context is identifying a run for a given actor. The same actor is running several times when in load-testing.
@@ -58,35 +56,36 @@ public class AOActorContext
      */
     private final Map<String, String> taskProperties = new HashMap<>();
 
-    /**
-     * Thread-safe to make it accessible from test level to aggregate ongoing statistics.
-     */
-    private final Map<AOTask<?>, AOTaskGauge> taskGauges = new ConcurrentHashMap<>();
+    private final Map<AOTask<?>, AOTaskGauge> taskGauges = new HashMap<>();
 
     /**
      * Updated after each task's loop has been completed.
      */
-    private final AtomicInteger runCount = new AtomicInteger();
+    private int runCount;
 
     /**
      * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
-    private final AtomicLong elapsedMS = new AtomicLong(-1);
+    private long elapsedMS = -1;
 
     /**
      * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
-    private final AtomicLong elapsedMSavg = new AtomicLong(-1);
+    private long elapsedMSavg = -1;
 
     /**
-     * Aor all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
-    private final AtomicLong elapsedMSmax = new AtomicLong(-1);
+    private long elapsedMSmax = Long.MIN_VALUE;
+
+    private long elapsedMSmaxTS = 0;
 
     /**
-     * Aor all the tasks : updated after each task's loop has been completed (value for 'runCount').
+     * All the tasks : updated after each task's loop has been completed (value for 'runCount').
      */
-    private final AtomicLong elapsedMSmin = new AtomicLong(-1);
+    private long elapsedMSmin = Long.MAX_VALUE;
+
+    private long elapsedMSminTS = 0;
 
     public AOActorContext(AOTestContext context, AOActorSchedule schedule)
     {
@@ -146,7 +145,7 @@ public class AOActorContext
 
     public int getRunCount()
     {
-        return runCount.get();
+        return runCount;
     }
 
     /**
@@ -154,7 +153,7 @@ public class AOActorContext
      */
     public long getElapsedMS()
     {
-        return elapsedMS.get();
+        return elapsedMS;
     }
 
     /**
@@ -162,23 +161,27 @@ public class AOActorContext
      */
     public long getElapsedMSavg()
     {
-        return elapsedMSavg.get();
+        return elapsedMSavg;
     }
 
-    /**
-     * @return -1 means not relevant and should be ignored
-     */
     public long getElapsedMSmax()
     {
-        return elapsedMSmax.get();
+        return elapsedMSmax;
     }
 
-    /**
-     * @return -1 means not relevant and should be ignored
-     */
+    public long getElapsedMSmaxTS()
+    {
+        return elapsedMSmaxTS;
+    }
+
     public long getElapsedMSmin()
     {
-        return elapsedMSmin.get();
+        return elapsedMSmin;
+    }
+
+    public long getElapsedMSminTS()
+    {
+        return elapsedMSminTS;
     }
 
     public String createBrowserContext()
@@ -250,7 +253,7 @@ public class AOActorContext
     {
         context.onActorCompleted(actor);
 
-        elapsedMS.set(-1);
+        elapsedMS = -1;
     }
 
     public void onBeforeRunTasks()
@@ -262,23 +265,28 @@ public class AOActorContext
     {
         long ms = 0;
         long msAvg = 0;
-        long msMax = 0;
-        long msMin = 0;
 
         for (AOTaskGauge gauge : taskGauges.values())
         {
-            ms += gauge.getRunElapsedMS();
-            msAvg += gauge.getRunElapsedMSavg();
-            msMax += gauge.getRunElapsedMSmax();
-            msMin += gauge.getRunElapsedMSmin();
+            ms += gauge.getElapsedMS();
+            msAvg += gauge.getElapsedMSavg();
         }
 
-        runCount.incrementAndGet();
+        runCount++;
 
-        elapsedMS.set(ms);
-        elapsedMSavg.set(msAvg);
-        elapsedMSmax.set(msMax);
-        elapsedMSmin.set(msMin);
+        elapsedMS = ms;
+        elapsedMSavg = msAvg;
+
+        if (ms > elapsedMSmax)
+        {
+            elapsedMSmax = ms;
+            elapsedMSmaxTS = System.currentTimeMillis();
+        }
+        if (ms < elapsedMSmin)
+        {
+            elapsedMSmin = ms;
+            elapsedMSminTS = System.currentTimeMillis();
+        }
 
 //        AOLog4jUtils.ACTOR.debug(
 //                "onAfterRunTasks run:{} ms:{} avg:{} max:{} min:{}",
@@ -364,12 +372,14 @@ public class AOActorContext
     public void dumpStatistics()
     {
         AOLog4jUtils.TEST.debug(
-                "[test] {} : run-count:{} avg.:{} max.:{} min.:{}",
+                "[test] {} : run-count:{} avg.:{} max.:{}({}) min.:{}({})",
                 String.format("%20.20s", actor.getName()),
                 runCount,
-                AODurationUtils.formatMillis(elapsedMSavg.get()),
-                AODurationUtils.formatMillis(elapsedMSmax.get()),
-                AODurationUtils.formatMillis(elapsedMSmin.get())
+                AODurationUtils.formatMillis(elapsedMSavg),
+                AODurationUtils.formatMillis(elapsedMSmax),
+                AOTimestampUtils.formatTimestamp(elapsedMSmaxTS),
+                AODurationUtils.formatMillis(elapsedMSmin),
+                AOTimestampUtils.formatTimestamp(elapsedMSminTS)
         );
 
         final List<AOTask<?>> sortedTasks = taskGauges.keySet().stream()
@@ -384,9 +394,9 @@ public class AOActorContext
                     "[test] {} : run-count:{} avg.:{} max.:{} min.:{}",
                     String.format("%20.20s", task.getName()),
                     gauge.getRunCount(),
-                    AODurationUtils.formatMillis(gauge.getRunElapsedMSavg()),
-                    AODurationUtils.formatMillis(gauge.getRunElapsedMSmax()),
-                    AODurationUtils.formatMillis(gauge.getRunElapsedMSmin())
+                    AODurationUtils.formatMillis(gauge.getElapsedMSavg()),
+                    AODurationUtils.formatMillis(gauge.getElapsedMSmax()),
+                    AODurationUtils.formatMillis(gauge.getElapsedMSmin())
             );
         }
     }

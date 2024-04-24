@@ -14,19 +14,19 @@ public class AOTaskGauge
 
     private int runCount;
 
-    private long runElapsedMS;
+    private long elapsedMS;
 
-    private long runElapsedMStotal;
+    private long elapsedMStotal;
 
-    private long runElapsedMSavg;
+    private long elapsedMSavg;
 
-    private long runElapsedMSmax = Long.MIN_VALUE;
+    private long elapsedMSmax = Long.MIN_VALUE;
 
-    private long runElapsedMSmin = Long.MAX_VALUE;
+    private long elapsedMSmin = Long.MAX_VALUE;
 
-    private long runStartMS;
+    private long startMS;
 
-    private long runPausedMS;
+    private long pausedMS;
 
     public AOTaskGauge(AOTask<?> task)
     {
@@ -37,10 +37,10 @@ public class AOTaskGauge
     {
         synchronized (lock)
         {
-            runStartMS = System.currentTimeMillis();
-            runPausedMS = 0;
+            startMS = System.currentTimeMillis();
+            pausedMS = 0;
 
-            runElapsedMS = 0;
+            elapsedMS = 0;
         }
     }
 
@@ -48,7 +48,7 @@ public class AOTaskGauge
     {
         synchronized (lock)
         {
-            runPausedMS += elapsedMS;
+            pausedMS += elapsedMS;
         }
     }
 
@@ -56,20 +56,21 @@ public class AOTaskGauge
     {
         synchronized (lock)
         {
-            final long totalElapsedMS = System.currentTimeMillis() - runStartMS;
-            final long elapsedMS = totalElapsedMS - runPausedMS;
+            final long nowMS = System.currentTimeMillis();
+            final long ms = nowMS - startMS - pausedMS;
 
-            runStartMS = 0;
-            runPausedMS = 0;
+            startMS = 0;
+            pausedMS = 0;
 
             runCount++;
 
-            runElapsedMS = elapsedMS;
+            elapsedMS = ms;
 
-            runElapsedMStotal += elapsedMS;
-            runElapsedMSavg = runElapsedMStotal / runCount;
-            runElapsedMSmax = Math.max(runElapsedMSmax, elapsedMS);
-            runElapsedMSmin = Math.min(runElapsedMSmin, elapsedMS);
+            elapsedMStotal += elapsedMS;
+            elapsedMSavg = elapsedMStotal / runCount;
+
+            elapsedMSmax = Math.max(elapsedMSmax, elapsedMS);
+            elapsedMSmin = Math.min(elapsedMSmin, elapsedMS);
         }
     }
 
@@ -81,43 +82,43 @@ public class AOTaskGauge
         }
     }
 
-    public long getRunElapsedMS()
+    public long getElapsedMS()
     {
         synchronized (lock)
         {
-            return runElapsedMS;
+            return elapsedMS;
         }
     }
 
-    public long getRunElapsedMStotal()
+    public long getElapsedMStotal()
     {
         synchronized (lock)
         {
-            return runElapsedMStotal;
+            return elapsedMStotal;
         }
     }
 
-    public long getRunElapsedMSavg()
+    public long getElapsedMSavg()
     {
         synchronized (lock)
         {
-            return runElapsedMSavg;
+            return elapsedMSavg;
         }
     }
 
-    public long getRunElapsedMSmax()
+    public long getElapsedMSmax()
     {
         synchronized (lock)
         {
-            return runElapsedMSmax;
+            return elapsedMSmax;
         }
     }
 
-    public long getRunElapsedMSmin()
+    public long getElapsedMSmin()
     {
         synchronized (lock)
         {
-            return runElapsedMSmin;
+            return elapsedMSmin;
         }
     }
 }

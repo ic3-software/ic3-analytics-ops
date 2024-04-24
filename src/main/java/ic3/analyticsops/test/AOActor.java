@@ -186,7 +186,19 @@ public class AOActor extends AOSerializable
     {
         try
         {
-            AOThreadUtils.startNewThread(context.createThreadName(), () -> doRun(context, testStartMS));
+            AOThreadUtils.startNewThread(context.createThreadName(), () ->
+            {
+                try
+                {
+                    final long ms = System.currentTimeMillis() % 1000;
+                    Thread.sleep(1000 - ms);
+                }
+                catch (InterruptedException ignored)
+                {
+                }
+
+                doRun(context, testStartMS);
+            });
         }
         catch (Throwable ex)
         {
@@ -207,18 +219,14 @@ public class AOActor extends AOSerializable
 
         final long endMS = !isOnce ? context.getEndMS(testStartMS) : 0;
 
-        AOLog4jUtils.ACTOR.info("[actor] '{}' run started", name);
+        AOLog4jUtils.ACTOR.info("[actor] '{}' run started ( init. pause : {} )", name, initialPauseMS);
 
         context.onActorStarted();
-
-        int run = 0;
 
         do
         {
             try
             {
-                ++run;
-
                 context.onBeforeRunTasks();
 
                 for (AOTask<?> task : tasks /* validated by now */)

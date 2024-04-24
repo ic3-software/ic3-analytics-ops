@@ -32,7 +32,7 @@ public class AOPerformanceTargets extends AOSerializable
         {
             if (durationMax != null)
             {
-                final long actualMaxMS = gauge.getRunElapsedMSmax();
+                final long actualMaxMS = gauge.getElapsedMSmax();
                 final long expectedMaxMS = durationMax.toMillis();
 
                 AOAssertion.assertTrue("[performance] duration-max " + actualMaxMS + " < " + expectedMaxMS, actualMaxMS <= expectedMaxMS);
@@ -42,7 +42,7 @@ public class AOPerformanceTargets extends AOSerializable
         {
             if (durationAverageEnd != null)
             {
-                final long actualAverageMS = gauge.getRunElapsedMSavg();
+                final long actualAverageMS = gauge.getElapsedMSavg();
                 final long expectedAverageMS = durationAverageEnd.toMillis();
 
                 AOAssertion.assertTrue("[performance] (ending) average " + actualAverageMS + " < " + expectedAverageMS, actualAverageMS <= expectedAverageMS);

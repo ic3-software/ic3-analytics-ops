@@ -1,5 +1,6 @@
-package ic3.analyticsops.stats;
+package ic3.analyticsops.stats.column;
 
+import ic3.analyticsops.stats.AOStatsColumn;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;

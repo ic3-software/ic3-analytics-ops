@@ -262,7 +262,7 @@ public class AOTestContext
         {
             AOLog4jUtils.TEST.debug("[test] -- load-testing statistics -----");
 
-            stats.dump();
+            stats.dump(actorContexts);
         }
     }
 }
