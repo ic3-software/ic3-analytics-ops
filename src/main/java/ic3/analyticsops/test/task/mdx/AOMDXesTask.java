@@ -84,12 +84,17 @@ public class AOMDXesTask extends AOTask
         final File container = data.getParentFile();
         final String pattern = data.getName();
 
-        // Resolved (//ignore + filter) and possibly shuffled.
-        final List<Integer> mdxNBs = mdxNumbers(context);
+        // Resolved (//ignore + filter).
+        final List<Integer> mdxNBs = mdxNumbers(context, this.data, this.filter);
 
         if (mdxNBs.isEmpty())
         {
             throw new AOException("no run for MDX for data " + container.getAbsolutePath() + "/" + pattern);
+        }
+
+        if (shuffle)
+        {
+            Collections.shuffle(mdxNBs);
         }
 
         for (final int mdxNB : mdxNBs)
@@ -190,19 +195,19 @@ public class AOMDXesTask extends AOTask
             }
             catch (Throwable ex)
             {
-                AOLog4jUtils.ACTOR.error("[actor] 'MDXes' unexpected error while processing the MDX[{}]", mdxNB);
+                AOLog4jUtils.ACTOR.error("[actor] 'MDXes' : unexpected error while processing the MDX[{}]", mdxNB);
                 throw ex;
             }
         }
     }
 
-    private List<Integer> mdxNumbers(AOTaskContext context)
+    public static List<Integer> mdxNumbers(AOTaskContext context, String data, @Nullable Integer filter)
             throws AOException
     {
-        final File data = context.getMDXesDataFolder(this.data);
+        final File dataF = context.getMDXesDataFolder(data);
 
-        final File container = data.getParentFile();
-        final String pattern = data.getName();
+        final File container = dataF.getParentFile();
+        final String pattern = dataF.getName();
 
         final List<Integer> mdxNumbers = new ArrayList<>();
 
@@ -246,15 +251,10 @@ public class AOMDXesTask extends AOTask
             }
         }
 
-        if (shuffle)
-        {
-            Collections.shuffle(mdxNumbers);
-        }
-
         return mdxNumbers;
     }
 
-    private static AORestApiTidyTable<?> assertOnlyDataset(AORestApiMdxScriptResult result)
+    public static AORestApiTidyTable<?> assertOnlyDataset(AORestApiMdxScriptResult result)
     {
         if (result.results == null)
         {

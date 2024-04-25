@@ -37,7 +37,14 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
     private final Integer timeoutS;
 
     /**
-     * Similar to the GenerateMDXes task : when present, MDX from the report will be extracted and saved there.
+     * When present, MDX (and their results) from the report will be extracted and saved there.
+     * <pre>
+     * E.g., data/Sales is using the files 'Sales-N.mdx.txt(and .json)' into the 'data' folder.
+     * E.g., data/ is using the files 'ReportName-N.mdx.txt(and .json)' into the 'data' folder.
+     * </pre>
+     *
+     * @see ic3.analyticsops.test.task.mdx.AOGenerateMDXesTask
+     * @see ic3.analyticsops.test.task.mdx.AOMDXesTask
      */
     @Nullable
     private final String data;
@@ -79,7 +86,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
         if (withMdxGeneration)
         {
-            final File data = context.getMDXesDataFolder(this.data);
+            final File data = context.getMDXesDataFolder(fixDataForReportName(this.reportPath, this.data));
 
             final File container = data.getParentFile();
 
@@ -120,7 +127,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         {
             try (Session session = context.createBrowserSession(browserContext))
             {
-                if (withMdxGeneration)
+                if (withMdxGeneration || isWithMdxAssertions())
                 {
                     generateMDXes(context, session, statements, results);
                 }
@@ -193,7 +200,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                 {
                     for (AOOpenReportAssertion assertion : assertions)
                     {
-                        assertion.assertOk(reportPath, nonExisting[0], printReady[0]);
+                        assertion.assertOk(context, reportPath, nonExisting[0], printReady[0], statements, results);
                     }
                 }
                 else
@@ -201,10 +208,6 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                     AOAssertion.assertFalse("report-not-existing:" + reportPath, nonExisting[0]);
                     AOAssertion.assertTrue("open-report:" + reportPath, printReady[0]);
                 }
-
-                // TODO have a new assert w/ data= simimlar to MDXes + .md update
-                //      lookup statement by value to find the MDX-NB and its expected result
-
             }
         }
         finally
@@ -224,7 +227,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                 throw new AOException("unexpected result count [results : " + results.size() + "] [statements : " + statements.size() + "]");
             }
 
-            final File data = context.getMDXesDataFolder(this.data);
+            final File data = context.getMDXesDataFolder(fixDataForReportName(this.reportPath, this.data));
 
             final File container = data.getParentFile();
             final String pattern = data.getName();
@@ -493,6 +496,37 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                 }
             }
         });
+    }
+
+    public static String fixDataForReportName(String reportPath, String data)
+    {
+        if (data.endsWith("/"))
+        {
+            final String[] parts = reportPath.split("/");
+            final String name = parts[parts.length - 1];
+
+            return data + name;
+        }
+
+        return data;
+    }
+
+    protected boolean isWithMdxAssertions()
+    {
+        final List<AOOpenReportAssertion> assertions = getOptionalAssertions();
+
+        if (assertions != null && !assertions.isEmpty())
+        {
+            for (AOOpenReportAssertion assertion : assertions)
+            {
+                if (assertion.isWithMdxAssertion())
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 }

@@ -1,0 +1,41 @@
+{
+  name: "Demo",
+  restApiURL: "https://dev.iccube.com/icCube/api",
+  authenticator: {
+    user: "${analytics.ops.user}",
+    password: "${analytics.ops.password}"
+  },
+  actors: [
+    {
+      name: "Generate Non-Regression Data",
+      active: false,
+      tasks: [
+        {
+          action: "OpenReport",
+          reportPath: "shared:/Live Demo/Overview",
+          data: "livedemo/"
+        }
+      ]
+    },
+    {
+      name: "Non-Regression",
+      active: true,
+      tasks: [
+        {
+          action: "OpenReport",
+          reportPath: "shared:/Live Demo/Overview",
+          assertions: [
+            {
+              data: "livedemo/"
+            }
+          ]
+        },
+        {
+          action: "MDXes",
+          data: "livedemo/Overview",
+          schema: "Sales (LiveDemo)"
+        }
+      ]
+    }
+  ]
+}

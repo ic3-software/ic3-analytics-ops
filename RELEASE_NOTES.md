@@ -29,6 +29,8 @@
 
 - The task can now generate the results of the MDX statements sent to the server.
 
+- The task can now assert the results of the MDX statements sent to the server using expected results.
+
 ## 1.1
 
 `Test`
