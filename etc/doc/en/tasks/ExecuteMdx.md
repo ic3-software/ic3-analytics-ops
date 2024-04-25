@@ -14,7 +14,9 @@ interface ExecuteMdxTask extends Task<ExecuteMdxAssertion> {
 
     schema: string;
 
-    statemnt: string;
+    tidyMaxRowCount?: number;
+    
+    statement: string;
 
 }
 

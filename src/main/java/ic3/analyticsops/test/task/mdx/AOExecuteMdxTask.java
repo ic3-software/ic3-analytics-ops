@@ -8,12 +8,16 @@ import ic3.analyticsops.test.AOTask;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
 import ic3.analyticsops.test.assertion.AOExecuteMdxAssertion;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
 {
     private final String schema;
+
+    @Nullable
+    private final Integer tidyMaxRowCount;
 
     private final String statement;
 
@@ -22,6 +26,7 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
         // JSON deserialization
 
         this.schema = null;
+        this.tidyMaxRowCount = null;
         this.statement = null;
     }
 
@@ -57,6 +62,7 @@ public class AOExecuteMdxTask extends AOTask<AOExecuteMdxAssertion>
 
                 new AORestApiExecuteMdxRequest()
                         .schema(schema)
+                        .tidyMaxRowCount(tidyMaxRowCount)
                         .mdx(statement)
 
         );

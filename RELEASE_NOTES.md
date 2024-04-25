@@ -19,6 +19,16 @@
 
 - Added `shuffle` configuration to randomly permutes the list of MDX statements before executing them.
 
+- Added `tidyMaxRowCount` configuration to limit the number of rows returned.
+
+`Task:ExecuteMdx`
+
+- Added `tidyMaxRowCount` configuration to limit the number of rows returned.
+
+`Task:OpenReport`
+
+- The task can now generate the results of the MDX statements sent to the server.
+
 ## 1.1
 
 `Test`

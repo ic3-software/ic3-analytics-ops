@@ -8,6 +8,7 @@ import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxScriptResult;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTable;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
 import ic3.analyticsops.test.*;
+import ic3.analyticsops.utils.AOLog4jUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -40,7 +41,6 @@ public class AOMDXesTask extends AOTask
      */
     @Nullable
     private final Integer filter;
-
 
     protected AOMDXesTask()
     {
@@ -94,89 +94,104 @@ public class AOMDXesTask extends AOTask
 
         for (final int mdxNB : mdxNBs)
         {
-            if (context.isOnError())
-            {
-                break /* i.e., another actor on error */;
-            }
-
-            double delta = 0;
-
-            String mdx;
-
             try
             {
-                final List<String> lines = getMdx(container, pattern, mdxNB);
-
-                if (lines == null || lines.isEmpty())
+                if (context.isOnError())
                 {
-                    break;
+                    break /* i.e., another actor on error */;
                 }
 
-                for (String line : lines)
+                Integer tidyMaxRowCount = null;
+                double delta = 0;
+
+                String mdx;
+
+                try
                 {
-                    if (line.startsWith("//delta:"))
+                    final List<String> lines = getMdx(container, pattern, mdxNB);
+
+                    if (lines == null || lines.isEmpty())
                     {
-                        final String input = line.substring("//delta:".length());
-                        delta = Double.parseDouble(input);
+                        break;
                     }
+
+                    for (String line : lines)
+                    {
+                        if (line.startsWith("//delta:"))
+                        {
+                            final String input = line.substring("//delta:".length());
+                            delta = Double.parseDouble(input);
+                        }
+                        else if (line.startsWith("//tidyMaxRowCount:"))
+                        {
+                            final String input = line.substring("//tidyMaxRowCount:".length());
+                            tidyMaxRowCount = Integer.parseInt(input);
+                        }
+                    }
+
+                    mdx = String.join("\n", lines);
                 }
-
-                mdx = String.join("\n", lines);
-            }
-            catch (IOException ex)
-            {
-                throw new AOException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB, ex);
-            }
-
-            // Expected Result.
-
-            context.markForExpectedResult();
-
-            AORestApiMdxScriptResult expectedReply;
-
-            try
-            {
-                expectedReply = getResult(container, pattern, mdxNB);
-
-                if (expectedReply == null)
+                catch (IOException ex)
                 {
-                    throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB);
+                    throw new AOException("could not retrieve the MDX file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB, ex);
                 }
 
-                context.prettyPrint(expectedReply);
+                // Expected Result.
+
+                context.markForExpectedResult();
+
+                AORestApiMdxScriptResult expectedReply;
+
+                try
+                {
+                    expectedReply = getResult(container, pattern, mdxNB);
+
+                    if (expectedReply == null)
+                    {
+                        throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB);
+                    }
+
+                    context.prettyPrint(expectedReply);
+                }
+                catch (IOException ex)
+                {
+                    throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB, ex);
+                }
+
+                final AORestApiTidyTable<?> expectedResult = assertOnlyDataset(expectedReply);
+
+                // Single dataset only for now.
+
+                context.markForActualResult();
+
+                final AORestApiMdxScriptResult actualReply = context.sendRequest(
+
+                        new AORestApiExecuteMdxRequest()
+                                .schema(schema)
+                                .tidyMaxRowCount(tidyMaxRowCount)
+                                .mdx(mdx)
+
+                );
+
+                final AORestApiTidyTable<?> actualResult = assertOnlyDataset(actualReply);
+
+                expectedResult.assertEquals(actualResult, delta);
+
+                final Long pauseMS = pauses != null ? pauses.pauseMS() : null;
+
+                if (pauseMS != null)
+                {
+                    final long startPauseMS = System.currentTimeMillis();
+
+                    context.pause(pauseMS);
+
+                    context.onRunPaused(System.currentTimeMillis() - startPauseMS);
+                }
             }
-            catch (IOException ex)
+            catch (Throwable ex)
             {
-                throw new AOException("could not retrieve the MDX result file " + container.getAbsolutePath() + "/" + pattern + ":" + mdxNB, ex);
-            }
-
-            final AORestApiTidyTable<?> expectedResult = assertOnlyDataset(expectedReply);
-
-            // Single dataset only for now.
-
-            context.markForActualResult();
-
-            final AORestApiMdxScriptResult actualReply = context.sendRequest(
-
-                    new AORestApiExecuteMdxRequest()
-                            .schema(schema)
-                            .mdx(mdx)
-
-            );
-
-            final AORestApiTidyTable<?> actualResult = assertOnlyDataset(actualReply);
-
-            expectedResult.assertEquals(actualResult, delta);
-
-            final Long pauseMS = pauses != null ? pauses.pauseMS() : null;
-
-            if (pauseMS != null)
-            {
-                final long startPauseMS = System.currentTimeMillis();
-
-                context.pause(pauseMS);
-
-                context.onRunPaused(System.currentTimeMillis() - startPauseMS);
+                AOLog4jUtils.ACTOR.error("[actor] 'MDXes' unexpected error while processing the MDX[{}]", mdxNB);
+                throw ex;
             }
         }
     }

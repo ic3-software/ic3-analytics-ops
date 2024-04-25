@@ -6,12 +6,16 @@ import ic3.analyticsops.test.assertion.AOOpenReportAssertion;
 import ic3.analyticsops.utils.AOLog4jUtils;
 import ic3.analyticsops.utils.AOStringUtils;
 import io.webfolder.cdp.command.Network;
+import io.webfolder.cdp.event.network.LoadingFinished;
 import io.webfolder.cdp.event.network.RequestWillBeSent;
 import io.webfolder.cdp.exception.CdpException;
 import io.webfolder.cdp.session.Session;
+import io.webfolder.cdp.type.network.GetResponseBodyResult;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 {
@@ -108,6 +114,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
         // Populated from an event-listener.
         final ConcurrentMap<String, String> statements = new ConcurrentHashMap<>();
+        final ConcurrentMap<String, String> results = new ConcurrentHashMap<>();
 
         try
         {
@@ -115,7 +122,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
             {
                 if (withMdxGeneration)
                 {
-                    generateMDXes(context, session, statements);
+                    generateMDXes(context, session, statements, results);
                 }
 
                 final AOAuthenticator authenticator = context.getAuthenticator();
@@ -194,6 +201,10 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                     AOAssertion.assertFalse("report-not-existing:" + reportPath, nonExisting[0]);
                     AOAssertion.assertTrue("open-report:" + reportPath, printReady[0]);
                 }
+
+                // TODO have a new assert w/ data= simimlar to MDXes + .md update
+                //      lookup statement by value to find the MDX-NB and its expected result
+
             }
         }
         finally
@@ -206,6 +217,13 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
             // How to wait for all the events ? But I guess all the 'requestWillBeSent' have been fully processed
             // by now, so it's ok to save them into their respective files.
 
+            // Ensure first statements/results are consistent.
+
+            if (results.size() != statements.size())
+            {
+                throw new AOException("unexpected result count [results : " + results.size() + "] [statements : " + statements.size() + "]");
+            }
+
             final File data = context.getMDXesDataFolder(this.data);
 
             final File container = data.getParentFile();
@@ -213,8 +231,18 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
             int mdxNb = 0;
 
-            for (String statement : statements.values())
+            for (Map.Entry<String, String> entry : statements.entrySet())
             {
+                final String requestId = entry.getKey();
+
+                final String statement = entry.getValue();
+                final String response = results.get(requestId);
+
+                if (response == null)
+                {
+                    throw new AOException("missing result for request [" + requestId + "]");
+                }
+
                 final File mdx = new File(container, pattern + "." + mdxNb + ".mdx.txt");
 
                 try
@@ -224,6 +252,20 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                 catch (IOException ex)
                 {
                     throw new AOException("could not write the MDX[" + mdxNb + "] statement " + mdx.getAbsolutePath());
+                }
+
+                final File result = new File(container, pattern + "." + mdxNb + ".mdx.json.zip");
+
+                try (final ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(result))))
+                {
+                    final String name = result.getName();
+
+                    zip.putNextEntry(new ZipEntry(name.substring(0, name.length() - 4)));
+                    zip.write(response.getBytes(StandardCharsets.UTF_8));
+                }
+                catch (IOException ex)
+                {
+                    throw new AOException("could not write the MDX[" + mdxNb + "] result " + result.getAbsolutePath());
                 }
 
                 mdxNb++;
@@ -343,10 +385,7 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
-    /**
-     * Did not find how to get the response data.
-     */
-    protected void generateMDXes(AOTaskContext context, Session session, ConcurrentMap<String, String> statements)
+    protected void generateMDXes(AOTaskContext context, Session session, ConcurrentMap<String, String> statements, ConcurrentMap<String, String> results)
     {
         final Network network = session.getCommand().getNetwork();
 
@@ -366,10 +405,11 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 //                            request.getRequest().getPostData()
 //                    );
 
-                    final String decoded = URLDecoder.decode(request.getRequest().getPostData(), StandardCharsets.UTF_8);
-                    final String[] parts = decoded.split("&");
+                    final String[] parts = request.getRequest().getPostData().split("&");
 
                     String statement = null;
+                    String widget = null;
+                    String tidyMaxRowCount = null;
                     String initialSelection = null;
 
                     for (String part : parts)
@@ -377,20 +417,78 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
                         if (part.startsWith("mdx="))
                         {
                             statement = part.substring("mdx=".length());
+                            statement = URLDecoder.decode(statement, StandardCharsets.UTF_8);
+                        }
+                        else if (part.startsWith("widgetUId="))
+                        {
+                            widget = part;
+                            widget = URLDecoder.decode(widget, StandardCharsets.UTF_8);
+                        }
+                        else if (part.startsWith("tidyMaxRowCount="))
+                        {
+                            tidyMaxRowCount = part;
+                            tidyMaxRowCount = URLDecoder.decode(tidyMaxRowCount, StandardCharsets.UTF_8);
                         }
                         else if (part.startsWith("initialSelection="))
                         {
                             initialSelection = part;
+                            initialSelection = URLDecoder.decode(initialSelection, StandardCharsets.UTF_8);
                         }
                     }
 
                     if (statement != null)
                     {
+                        String prefix = "";
+
+                        if (widget != null)
+                        {
+                            // Troubleshooting purpose.
+                            prefix += "//" + widget.replace("=", ":") + "\n";
+                        }
+                        if (tidyMaxRowCount != null)
+                        {
+                            // Sent to the TidyExecuteMdxScript as a regular parameter (see MDXes)
+                            prefix += "//" + tidyMaxRowCount.replace("=", ":") + "\n";
+                        }
+
+                        String suffix = "";
+
                         if (initialSelection != null)
                         {
-                            statement += "\n//" + initialSelection;
+                            // Sent to the server that is extracting this info. while parsing the MDX.
+                            suffix += "\n//" + initialSelection;
                         }
+
+                        statement = prefix + statement + suffix;
+
                         statements.put(request.getRequestId(), statement);
+                    }
+                }
+            }
+            else if (event.name.equals("loadingFinished"))
+            {
+                if (value instanceof LoadingFinished loading && statements.containsKey(loading.getRequestId()))
+                {
+                    final GetResponseBodyResult body = network.getResponseBody(loading.getRequestId());
+                    final String json = body.getBody();
+
+                    // Converting from the GVI 'executeMDX' response to a REST API 'TidyExecuteMdxScript' response...
+
+                    final String tablePrefix = """
+                            {"version":1,"status":"ok","table":""";
+
+                    if (json.startsWith(tablePrefix))
+                    {
+                        final String table = json.substring(tablePrefix.length(), json.length() - 1);
+
+                        final String dataSetPrefix = """
+                                {"version":1,"status":"ok","payload":{"results":[{"dataSet":""";
+
+                        results.put(loading.getRequestId(), dataSetPrefix + table + "}]}}");
+                    }
+                    else
+                    {
+                        AOLog4jUtils.CHROME.error("[chrome] unexpected result format : {}", json.substring(0, 64));
                     }
                 }
             }

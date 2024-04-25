@@ -34,7 +34,15 @@ handy when the results are not exactly the same because of rounding errors :
 SELECT ... FROM ...
 ```
 
-Should you want to ignore a statement use the following :
+Should you want to limit the maximum number of rows in the result's tables, use the following :
+
+```
+//tidyMaxRowCount:10000
+
+SELECT ... FROM ...
+```
+
+Should you want to ignore a statement, use the following :
 
 ```
 //ignore
