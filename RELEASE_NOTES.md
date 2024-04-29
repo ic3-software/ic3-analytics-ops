@@ -5,7 +5,9 @@
 `Test`
 
 - Added `timeout` configuration (default:`30s`) related to the REST API requests. Can be overridden both
-  at actor and task levels
+  at actor and task levels.
+
+- Added `load` configuration to perform some [load-testing](./etc/doc/en/LoadTestConfiguration.md).
 
 `Tasks`
 

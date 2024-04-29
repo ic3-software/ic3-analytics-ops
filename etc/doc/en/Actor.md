@@ -36,6 +36,7 @@ interface Actor {
     dumpResult? : boolean;
 
     tasks: Task[];
+
 }
 ```
 

@@ -2,6 +2,7 @@ package ic3.analyticsops.test.load;
 
 import ic3.analyticsops.test.AOSerializable;
 import ic3.analyticsops.test.AOTestValidationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
@@ -20,13 +21,14 @@ public class AOLoadTestActorConfiguration extends AOSerializable
     private final String actor;
 
     /**
-     * The number of actor (threads) in the steady-state stage.
+     * The number of actors (threads) in the steady-state stage.
      */
     private final Integer count;
 
     /**
      * Optional initial delay before the ramp-up stage is starting.
      */
+    @Nullable
     private final Duration delay;
 
     /**

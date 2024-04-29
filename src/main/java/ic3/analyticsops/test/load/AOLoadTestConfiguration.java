@@ -28,8 +28,9 @@ public class AOLoadTestConfiguration extends AOSerializable
     private final Duration statsTick;
 
     /**
-     * Optional max. system load before an error is generated (a value between 0 and 1).
+     * Optional max. (testing) system load before an error is generated (a value between 0 and 1).
      */
+    @Nullable
     private final Double failAtCpuLoad;
 
     /**

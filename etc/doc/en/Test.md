@@ -8,6 +8,9 @@ A test is defined as a `JSON5` file : `JSON5` is an extension of the `JSON` file
 to write and maintain by hand. Please refer to the [`JSON5`](./JSON5.md) page for more details about the extended
 syntax.
 
+A load-test is a special kind of test that applies a simulated workload onto an icCube installation to see how
+it performs. Refer to the [LoadTestConfiguration](./LoadTestConfiguration.md) page for more details.
+
 ## JSON Definition
 
 ```typescript
@@ -30,9 +33,14 @@ interface Test {
     chrome?: ChromeConfiguration;
     
     // Allows for running the test over a period to time.
+    // Cannot be used when 'load' has been defined.
     duration?: Duration;
 
     actors: Actor[];
+
+    // An optional configuration to make this test running as a load-test : stress, ...
+    load?: LoadTestConfiguration;
+
 }
 ```
 
@@ -43,6 +51,7 @@ See also :
 - [`ChromeConfiguration`](./ChromeConfiguration.md)
 - [`Duration`](./Duration.md)
 - [`Actor`](./Actor.md)
+- [`LoadTestConfiguration`](./LoadTestConfiguration.md)
 
 ## Example
 
