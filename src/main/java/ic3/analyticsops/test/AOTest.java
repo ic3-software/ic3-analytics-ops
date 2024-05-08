@@ -42,6 +42,12 @@ public class AOTest extends AOSerializable
     private final AOAuthenticator authenticator;
 
     /**
+     * @see ic3.analyticsops.test.assertion.AOExecuteMdxAssertion
+     */
+    @Nullable
+    private final AOAuthenticator elevatedAuthenticator;
+
+    /**
      * REST API request timeout.
      * Possibly overridden in each actor.
      */
@@ -71,6 +77,7 @@ public class AOTest extends AOSerializable
         this.name = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.elevatedAuthenticator = null;
         this.timeout = null;
         this.chrome = null;
         this.duration = null;
@@ -127,6 +134,11 @@ public class AOTest extends AOSerializable
     public void validate()
             throws AOTestValidationException
     {
+        if (elevatedAuthenticator != null)
+        {
+            elevatedAuthenticator.validate("elevatedAuthenticator.");
+        }
+
         validateNonEmptyField("name", name);
 
         if (duration != null)
@@ -210,6 +222,12 @@ public class AOTest extends AOSerializable
     public AOAuthenticator getAuthenticator()
     {
         return authenticator;
+    }
+
+    @Nullable
+    public AOAuthenticator getElevatedAuthenticator()
+    {
+        return elevatedAuthenticator;
     }
 
     @Nullable

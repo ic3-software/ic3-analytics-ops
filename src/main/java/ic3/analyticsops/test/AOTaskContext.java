@@ -84,6 +84,20 @@ public class AOTaskContext
     /**
      * Blocking call.
      */
+    public <REPLY> REPLY sendRequest(@Nullable AOAuthenticator authenticator, AORestApiRequest<REPLY> request)
+            throws AORestApiException
+    {
+        final AORestApiClientOptions options = new AORestApiClientOptions()
+                .authenticator(authenticator)
+                .timeout(task.getTimeout())
+                .dumpJson(task.isDumpJson());
+
+        return prettyPrint(context.sendRequest(request, options));
+    }
+
+    /**
+     * Blocking call.
+     */
     public <REPLY> REPLY sendRequest(AORestApiRequest<REPLY> request)
             throws AORestApiException
     {

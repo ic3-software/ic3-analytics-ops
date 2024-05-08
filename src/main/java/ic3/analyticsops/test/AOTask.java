@@ -139,6 +139,12 @@ public abstract class AOTask<ASSERTION extends AOAssertion> extends AOSerializab
         return "actors[" + jsonParentActor.jsonActorNb + "].tasks[" + jsonTaskNb + "].";
     }
 
+    @Nullable
+    public AOAuthenticator getElevatedAuthenticator()
+    {
+        return jsonParentActor != null ? jsonParentActor.getElevatedAuthenticator() : null;
+    }
+
     public String getName()
     {
         return name != null ? name : getKind();

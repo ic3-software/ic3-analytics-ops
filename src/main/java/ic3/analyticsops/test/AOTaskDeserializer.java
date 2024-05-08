@@ -31,10 +31,10 @@ public class AOTaskDeserializer implements JsonDeserializer<AOTask>
         classes.put(AOTaskID.ClearOnTheFlyPermsCache, AOClearOnTheFlyPermsCacheTask.class);
         classes.put(AOTaskID.ClearResultCache, AOClearResultCacheTask.class);
         classes.put(AOTaskID.DeleteSchemaBackup, AODeleteSchemaBackupTask.class);
+        classes.put(AOTaskID.ExecuteMDX, AOExecuteMdxTask.class);
         classes.put(AOTaskID.GenerateMDXes, AOGenerateMDXesTask.class);
         classes.put(AOTaskID.LoadedSchemas, AOLoadedSchemasTask.class);
         classes.put(AOTaskID.LoadSchema, AOLoadSchemaTask.class);
-        classes.put(AOTaskID.MDX, AOExecuteMdxTask.class);
         classes.put(AOTaskID.MDXes, AOMDXesTask.class);
         classes.put(AOTaskID.OpenReport, AOOpenReportTask.class);
         classes.put(AOTaskID.PrintReport, AOPrintReportTask.class);

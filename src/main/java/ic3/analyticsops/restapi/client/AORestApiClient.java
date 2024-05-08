@@ -83,7 +83,18 @@ public class AORestApiClient
 
             try (final HttpClient httpClient = httpClientB.build())
             {
-                final HttpRequest.Builder httpRequestBuilder = authenticator.addHeaders(
+                final AOAuthenticator auth;
+
+                if (options != null && options.authenticator != null)
+                {
+                    auth = options.authenticator;
+                }
+                else
+                {
+                    auth = authenticator;
+                }
+
+                final HttpRequest.Builder httpRequestBuilder = auth.addHeaders(
                         HttpRequest.newBuilder(uri)
                                 .timeout(timeout(options))
                                 .header("Accept-Encoding", "gzip")

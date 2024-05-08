@@ -17,7 +17,7 @@ public class AOAssertionDeserializer implements JsonDeserializer<AOAssertion>
 
     static
     {
-        classes.put(AOTaskID.MDX, AOExecuteMdxAssertion.class);
+        classes.put(AOTaskID.ExecuteMDX, AOExecuteMdxAssertion.class);
         classes.put(AOTaskID.OpenReport, AOOpenReportAssertion.class);
         classes.put(AOTaskID.SchemaInfo, AOSchemaInfoAssertion.class);
         classes.put(AOTaskID.ServerStatus, AOServerStatusAssertion.class);

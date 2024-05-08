@@ -4,6 +4,8 @@
 
 `Test`
 
+- Added `elevatedAuthenticator` configuration (see [ExecuteMdx](./etc/doc/en/tasks/ExecuteMdx.md)).
+
 - Added `timeout` configuration (default:`30s`) related to the REST API requests. Can be overridden both
   at actor and task levels.
 
@@ -25,7 +27,11 @@
 
 `Task:ExecuteMdx`
 
+- Renamed its JSON5 action ID from `MDX` to `ExecuteMDX` for consistency purpose.
+
 - Added `tidyMaxRowCount` configuration to limit the number of rows returned.
+
+- The assertions can use the `elevatedAuthenticator` of the test.
 
 `Task:OpenReport`
 

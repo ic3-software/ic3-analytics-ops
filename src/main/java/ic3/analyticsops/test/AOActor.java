@@ -164,6 +164,12 @@ public class AOActor extends AOSerializable
     }
 
     @Nullable
+    public AOAuthenticator getElevatedAuthenticator()
+    {
+        return jsonParentTest != null ? jsonParentTest.getElevatedAuthenticator() : null;
+    }
+
+    @Nullable
     public Duration getTimeout()
     {
         return timeout != null ? timeout : jsonParentTest.getTimeout();

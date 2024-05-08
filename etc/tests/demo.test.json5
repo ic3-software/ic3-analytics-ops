@@ -73,7 +73,7 @@
         {
           // An optional name identifying the task in reports (defaulted to action if none).
           name: "mdx-equals",
-          action: "MDX",
+          action: "ExecuteMDX",
           schema: "Sales",
           statement: "select TopCount( [Customers].[Geography].[Region], 3, [Measures].[Count] ) on 0 from [Sales]",
           assertions: [
@@ -87,7 +87,7 @@
         {
           // An optional name identifying the task in reports (defaulted to action if none).
           name: "mdx-cell-equals",
-          action: "MDX",
+          action: "ExecuteMDX",
           schema: "Sales",
           statement: "select from [Sales] filterby [Customers].[Geography].[Region].[Europe]",
           assertions: [
@@ -101,7 +101,7 @@
         {
           // An optional name identifying the task in reports (defaulted to action if none).
           name: "mdx-statement-on-error",
-          action: "MDX",
+          action: "ExecuteMDX",
           schema: "Sales",
           statement: "select from Sales where x",
           assertions: [
@@ -115,7 +115,7 @@
         {
           // An optional name identifying the task in reports (defaulted to action if none).
           name: "script-on-error",
-          action: "MDX",
+          action: "ExecuteMDX",
           schema: "Sales",
           statement: "with select from Sales where x",
           assertions: [
@@ -129,7 +129,7 @@
         {
           // An optional name identifying the task in reports (defaulted to action if none).
           name: "mdx-cell-on-error",
-          action: "MDX",
+          action: "ExecuteMDX",
           schema: "Sales",
           statement: "with x as Error('ouch') select from Sales where x",
           assertions: [

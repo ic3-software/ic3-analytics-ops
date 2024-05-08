@@ -25,6 +25,9 @@ interface Test {
     // Possibly overridden in each actor.
     authenticator?: Authenticator;
 
+    // See ExecuteMdxAssertion : allows for comparing ExectueMdx results using different security profiles.
+    elevatedAuthenticator?: Authenticator;
+
     // REST API request timeout.
     // Possibly overridden in each actor.
     // Default: 30s.

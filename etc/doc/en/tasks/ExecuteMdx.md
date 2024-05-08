@@ -15,12 +15,15 @@ interface ExecuteMdxTask extends Task<ExecuteMdxAssertion> {
     schema: string;
 
     tidyMaxRowCount?: number;
-    
+
     statement: string;
 
 }
 
 interface ExecuteMdxAssertion extends Assertion {
+
+    // Use the 'elevatedAuthenticator' defined at test level.
+    elevatedAuthenticator?: true;
 
     // The both results are strictly the same.
     equals?: {
@@ -58,7 +61,7 @@ Ensure the both statements are generating exactly the same result :
 
 ```json5
 {
-  action: "MDX",
+  action: "ExecuteMDX",
   schema: "Sales",
   statement: "select TopCount( [Customers].[Geography].[Region], 3, [Measures].[Count] ) on 0 from [Sales]",
   assertions: [
@@ -75,9 +78,9 @@ Ensure the both statements are generating the same cells :
 
 ```json5
 {
-  action: "MDX",
+  action: "ExecuteMDX",
   schema: "Sales",
-  statement: "select from [Sales] filterby [Customers].[Geography].[Region].[Europe]",
+  statement: "select from [Sales] FilterBy [Customers].[Geography].[Region].[Europe]",
   assertions: [
     {
       cellEquals: {
@@ -92,7 +95,7 @@ Ensure the statement is generating an error :
 
 ```json5
 {
-  action: "MDX",
+  action: "ExecuteMDX",
   schema: "Sales",
   statement: "select from Sales where x",
   assertions: [
@@ -109,13 +112,37 @@ Ensure the statement is generating a cell on error :
 
 ```json5
 {
-  action: "MDX",
+  action: "ExecuteMDX",
   schema: "Sales",
   statement: "with x as Error('ouch') select from Sales where x",
   assertions: [
     {
       cellOnError: {
         errorCode: "OLAP_MDX_ERROR_FUNCTION"
+      }
+    }
+  ]
+}
+```
+
+Ensure the both statements are generating the same result.
+
+Note that the task's statement is executed using the task's authenticator (**access to Europe only**) whereas
+the assertion's statement is executed using the `elevatedAuthenticator` defined at test level (**full access**)
+to ensure the security profile is behaving as expected :
+
+```json5
+{
+  action: "ExecuteMDX",
+  schema: "Sales",
+  // executed using the authenticator (Europe only) of the actor/test
+  statement: "select from [Sales]",
+  assertions: [
+    {
+      // executed using the 'elevatedAuthenticator' (full access) of the test 
+      elevatedAuthenticator: true,
+      cellEquals: {
+        statement: "select from [Sales] FilterBy [Customers].[Geography].[Region].[Europe]"
       }
     }
   ]

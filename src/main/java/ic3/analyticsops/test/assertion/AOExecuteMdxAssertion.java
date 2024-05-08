@@ -1,5 +1,6 @@
 package ic3.analyticsops.test.assertion;
 
+import ic3.analyticsops.common.AOException;
 import ic3.analyticsops.restapi.error.AORestApiException;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxError;
 import ic3.analyticsops.restapi.reply.mdx.AORestApiMdxResult;
@@ -9,6 +10,7 @@ import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellColumn;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellError;
 import ic3.analyticsops.restapi.request.AORestApiExecuteMdxRequest;
 import ic3.analyticsops.test.AOAssertion;
+import ic3.analyticsops.test.AOAuthenticator;
 import ic3.analyticsops.test.AOTaskContext;
 import ic3.analyticsops.test.AOTestValidationException;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +19,12 @@ import java.util.List;
 
 public class AOExecuteMdxAssertion extends AOAssertion
 {
+    /**
+     * Use the 'elevatedAuthenticator' defined at test level.
+     */
+    @Nullable
+    private final Boolean elevatedAuthenticator;
+
     @Nullable
     private final Equals equals;
 
@@ -33,6 +41,7 @@ public class AOExecuteMdxAssertion extends AOAssertion
     {
         // JSON deserialization
 
+        this.elevatedAuthenticator = null;
         this.equals = null;
         this.cellEquals = null;
         this.statementOnError = null;
@@ -44,6 +53,11 @@ public class AOExecuteMdxAssertion extends AOAssertion
             throws AOTestValidationException
     {
         super.validate();
+
+        if (elevatedAuthenticator != null && elevatedAuthenticator && jsonParent.getElevatedAuthenticator() == null)
+        {
+            throw new AOTestValidationException("the JSON field '" + validateFieldPathPrefix() + "elevatedAuthenticator" + "' not defined from the test");
+        }
 
         validateNonEmptyFields(validateFieldPathPrefix() + "equals|cellEquals|statementOnError|cellOnError",
                 equals,
@@ -71,15 +85,31 @@ public class AOExecuteMdxAssertion extends AOAssertion
     }
 
     public void assertOk(AOTaskContext context, String schema, AORestApiMdxScriptResult actualResult)
-            throws AORestApiException
+            throws AOException
     {
+        final AOAuthenticator auth;
+
+        if (elevatedAuthenticator != null && elevatedAuthenticator)
+        {
+            auth = jsonParent.getElevatedAuthenticator();
+
+            if (auth == null)
+            {
+                throw new AOException("missing elevatedAuthenticator");
+            }
+        }
+        else
+        {
+            auth = null;
+        }
+
         if (equals != null)
         {
-            equals.assertOk(context, schema, assertOnlyDataset(actualResult));
+            equals.assertOk(context, auth, schema, assertOnlyDataset(actualResult));
         }
         else if (cellEquals != null)
         {
-            cellEquals.assertOk(context, schema, assertOnlyDataset(actualResult));
+            cellEquals.assertOk(context, auth, schema, assertOnlyDataset(actualResult));
         }
         else if (statementOnError != null)
         {
@@ -166,10 +196,12 @@ public class AOExecuteMdxAssertion extends AOAssertion
             this.statement = null;
         }
 
-        public void assertOk(AOTaskContext context, String schema, AORestApiMdxTidyTable actualResult)
+        public void assertOk(AOTaskContext context, @Nullable AOAuthenticator authenticator, String schema, AORestApiMdxTidyTable actualResult)
                 throws AORestApiException
         {
             final AORestApiMdxScriptResult reply = context.sendRequest(
+
+                    authenticator,
 
                     new AORestApiExecuteMdxRequest()
                             .schema(schema)
@@ -195,10 +227,12 @@ public class AOExecuteMdxAssertion extends AOAssertion
             this.statement = null;
         }
 
-        public void assertOk(AOTaskContext context, String schema, AORestApiMdxTidyTable actualResult)
+        public void assertOk(AOTaskContext context, @Nullable AOAuthenticator authenticator, String schema, AORestApiMdxTidyTable actualResult)
                 throws AORestApiException
         {
             final AORestApiMdxScriptResult reply = context.sendRequest(
+
+                    authenticator,
 
                     new AORestApiExecuteMdxRequest()
                             .schema(schema)

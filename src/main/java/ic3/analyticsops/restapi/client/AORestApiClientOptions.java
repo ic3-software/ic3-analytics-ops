@@ -1,5 +1,6 @@
 package ic3.analyticsops.restapi.client;
 
+import ic3.analyticsops.test.AOAuthenticator;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -7,11 +8,20 @@ import java.time.Duration;
 public class AORestApiClientOptions
 {
     @Nullable
+    public AOAuthenticator authenticator;
+
+    @Nullable
     public Duration timeout;
 
     public boolean dumpJson;
 
     public boolean withJson;
+
+    public AORestApiClientOptions authenticator(@Nullable AOAuthenticator authenticator)
+    {
+        this.authenticator = authenticator;
+        return this;
+    }
 
     public AORestApiClientOptions timeout(@Nullable Duration timeout)
     {
