@@ -202,9 +202,13 @@ public class AOOpenReportAssertion extends AOAssertion
     private static AORestApiMdxScriptResult getActualResult(String mdx, Map<String, String> statements, Map<String, String> results)
             throws AOException
     {
+        mdx = mdx.trim();
+
         for (Map.Entry<String, String> entry : statements.entrySet())
         {
-            if (mdx.equals(entry.getValue()))
+            final String actualMdx = entry.getValue().trim();
+
+            if (mdx.equals(actualMdx))
             {
                 final String requestId = entry.getKey();
                 final String result = results.get(requestId);
