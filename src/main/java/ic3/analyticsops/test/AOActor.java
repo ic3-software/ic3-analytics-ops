@@ -37,6 +37,12 @@ public class AOActor extends AOSerializable
     private final AOAuthenticator authenticator;
 
     /**
+     * An optional initial delay before the main loop of the actor is being started.
+     */
+    @Nullable
+    private final Duration initialDelay;
+
+    /**
      * REST API request timeout.
      * Overriding the one defined at test level.
      */
@@ -65,6 +71,7 @@ public class AOActor extends AOSerializable
         this.active = null;
         this.restApiURL = null;
         this.authenticator = null;
+        this.initialDelay = null;
         this.timeout = null;
         this.dumpJson = null;
         this.dumpResult = null;
@@ -225,7 +232,16 @@ public class AOActor extends AOSerializable
 
         final long endMS = !isOnce ? context.getEndMS(testStartMS) : 0;
 
-        AOLog4jUtils.ACTOR.info("[actor] '{}' run started ( init. pause : {} )", name, initialPauseMS);
+        AOLog4jUtils.ACTOR.info("[actor] '{}' run started ( w/ init. pause : {} )", name, initialPauseMS);
+
+        if (initialDelay != null)
+        {
+            final long initialDelayMS = initialDelay.toMillis();
+
+            context.pause(initialDelayMS);
+
+            AOLog4jUtils.ACTOR.info("[actor] '{}' run started ( w/ init. delay : {} )", name, initialDelayMS);
+        }
 
         context.onActorStarted();
 

@@ -11,6 +11,10 @@
 
 - Added `load` configuration to perform some [load-testing](./etc/doc/en/LoadTestConfiguration.md).
 
+`Actor`
+
+- Added `initialDelay` configuration : an optional delay before the main loop of the actor is being started.
+
 `Tasks`
 
 - Added `performanceTargets` configuration defining several targets related to performance.

@@ -24,6 +24,9 @@ interface Actor {
     // Overriding the one defined at test level : handy for testing several security profiles.
     authenticator?: Authenticator;
 
+    // An optional initial delay before the main loop of the actor is being started.
+    initialDelay?: Duration;
+
     // Overriding the one defined at test level.
     timeout?: Duration;
     
