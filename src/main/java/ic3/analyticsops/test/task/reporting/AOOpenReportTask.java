@@ -92,12 +92,20 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
             if (container.exists())
             {
-                throw new AOException("existing data folder (remove first) " + container.getAbsolutePath());
+                // Several OpenReport in the same folder...
+                if (!context.hasCreatedContainerFolder(container))
+                {
+                    throw new AOException("existing data folder (remove first) " + container.getAbsolutePath());
+                }
             }
-
-            if (!container.mkdirs())
+            else
             {
-                throw new AOException("could not created the data folder " + container.getAbsolutePath());
+                if (!container.mkdirs())
+                {
+                    throw new AOException("could not created the data folder " + container.getAbsolutePath());
+                }
+
+                context.onContainerFolderCreated(container);
             }
         }
 

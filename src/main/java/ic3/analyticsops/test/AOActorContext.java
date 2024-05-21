@@ -14,10 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This context is identifying a run for a given actor. The same actor is running several times when in load-testing.
@@ -31,6 +28,8 @@ public class AOActorContext
     private final AOActor actor;
 
     private final AOActorSchedule schedule;
+
+    private final Set<File> createdContainerFolders;
 
     /**
      * Properties that can be produced and consumed by task.
@@ -101,6 +100,8 @@ public class AOActorContext
         this.client = client;
         this.actor = schedule.getActor();
         this.schedule = schedule;
+
+        this.createdContainerFolders = new HashSet<>();
     }
 
     public String createThreadName()
@@ -182,6 +183,16 @@ public class AOActorContext
     public long getElapsedMSminTS()
     {
         return elapsedMSminTS;
+    }
+
+    public void onContainerFolderCreated(File container)
+    {
+        createdContainerFolders.add(container);
+    }
+
+    public boolean hasCreatedContainerFolder(File container)
+    {
+        return createdContainerFolders.contains(container);
     }
 
     public String createBrowserContext()

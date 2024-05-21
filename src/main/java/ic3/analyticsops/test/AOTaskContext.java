@@ -165,6 +165,16 @@ public class AOTaskContext
         context.onRunTaskPaused(task, elapsedMS);
     }
 
+    public void onContainerFolderCreated(File container)
+    {
+        context.onContainerFolderCreated(container);
+    }
+
+    public boolean hasCreatedContainerFolder(File container)
+    {
+        return context.hasCreatedContainerFolder(container);
+    }
+
     enum MarkedResult
     {
         expected, actual
