@@ -2,6 +2,7 @@ package ic3.analyticsops.restapi.reply.tidy;
 
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinterHeader;
 import ic3.analyticsops.test.AOAssertion;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AORestApiTidyTableColumn
 {
@@ -23,6 +24,14 @@ public abstract class AORestApiTidyTableColumn
     {
         return name;
     }
+
+    public String getCaption()
+    {
+        return caption;
+    }
+
+    @Nullable
+    public abstract Object getTabularDatasetValue(int rowIndex);
 
     public abstract int prettyPrintMaxWidth();
 

@@ -1,10 +1,15 @@
 package ic3.analyticsops.restapi.reply.tidy;
 
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDataColumn;
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDataError;
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDataset;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinterHeader;
 import ic3.analyticsops.test.AOAssertion;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +68,26 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
         return columns != null ? columns.size() : 0;
     }
 
+    public List<String> getColumnNames()
+    {
+        if (columns != null)
+        {
+            return columns.stream().map(AORestApiTidyTableColumn::getName).toList();
+        }
+
+        return Collections.emptyList();
+    }
+
+    public List<String> getColumnCaptions()
+    {
+        if (columns != null)
+        {
+            return columns.stream().map(AORestApiTidyTableColumn::getCaption).toList();
+        }
+
+        return Collections.emptyList();
+    }
+
     public COLUMN getColumnByName(String name)
     {
         if (columns != null)
@@ -76,6 +101,46 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
             }
         }
         return null;
+    }
+
+    public AOTabularDataset asTabularDataset()
+    {
+        final List<AOTabularDataColumn> cols = new ArrayList<>();
+
+        if (columns != null)
+        {
+            if (rowCount == 0)
+            {
+                for (COLUMN column : columns)
+                {
+                    cols.add(new AOTabularDataColumn(column.name, column.caption, Collections.emptyList(), false));
+                }
+            }
+            else
+            {
+                for (COLUMN column : columns)
+                {
+                    final List<Object> vals = new ArrayList<>();
+                    boolean hasError = false;
+
+                    for (int rr = 0; rr < rowCount; rr++)
+                    {
+                        final Object val = column.getTabularDatasetValue(rr);
+
+                        if (val instanceof AOTabularDataError)
+                        {
+                            hasError = true;
+                        }
+
+                        vals.add(val);
+                    }
+
+                    cols.add(new AOTabularDataColumn(column.name, column.caption, vals, hasError));
+                }
+            }
+        }
+
+        return new AOTabularDataset(rowCount, tidyMaxRowCount, tidyMaxRowCountReached, cols);
     }
 
     public void prettyPrint(PrintStream out)

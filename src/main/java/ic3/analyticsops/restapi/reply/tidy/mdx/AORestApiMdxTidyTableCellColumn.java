@@ -1,5 +1,6 @@
 package ic3.analyticsops.restapi.reply.tidy.mdx;
 
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDataError;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumn;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumnNaN;
 import ic3.analyticsops.test.AOAssertion;
@@ -154,6 +155,22 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
         return colors != null && rowIndex < colors.length ? colors[rowIndex] : null;
     }
 
+    @Nullable
+    public Object getTabularDatasetValue(int rowIndex)
+    {
+        if (errors != null)
+        {
+            final AORestApiMdxTidyTableCellError error = errors.get(rowIndex);
+
+            if (error != null)
+            {
+                return new AOTabularDataError(error.errorCode);
+            }
+        }
+
+        return getValue(rowIndex);
+    }
+
     @Override
     public int prettyPrintMaxWidth()
     {
@@ -188,6 +205,16 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
 
                 final AORestApiMdxTidyTableCellPage p = pages[page - 1];
                 return p.name + "[" + p.caption + "]";
+            });
+            case CAPTION -> prettyPrintHeader(page ->
+            {
+                if (page == 0)
+                {
+                    return caption;
+                }
+
+                final AORestApiMdxTidyTableCellPage p = pages[page - 1];
+                return p.caption;
             });
             case TYPE -> " T: " + prettyPrintHeader(page ->
             {

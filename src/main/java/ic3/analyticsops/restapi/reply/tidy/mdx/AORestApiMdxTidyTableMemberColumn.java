@@ -135,6 +135,13 @@ public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColu
     }
 
     @Override
+    @Nullable
+    public Object getTabularDatasetValue(int rowIndex)
+    {
+        return getCaption(rowIndex);
+    }
+
+    @Override
     public int prettyPrintMaxWidth()
     {
         final AORestApiMdxTidyTable table = getTable();
@@ -163,6 +170,7 @@ public class AORestApiMdxTidyTableMemberColumn extends AORestApiMdxTidyTableColu
         return switch (header)
         {
             case NAME -> name + "[" + caption + "]";
+            case CAPTION -> caption;
             case TYPE -> "KT: " + (kt != null ? kt : "");
             case SUB_TYPE -> "LT: " + (lt != null ? lt : "");
             case FORMAT_STRING -> "FS: ";

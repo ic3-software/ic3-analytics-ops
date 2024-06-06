@@ -38,6 +38,12 @@ public class AORestApiFlatTidyTableColumn extends AORestApiTidyTableColumn
         return value;
     }
 
+    @Nullable
+    public Object getTabularDatasetValue(int rowIndex)
+    {
+        return getValue(rowIndex);
+    }
+
     @Override
     public int prettyPrintMaxWidth()
     {
