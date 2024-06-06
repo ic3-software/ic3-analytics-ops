@@ -26,6 +26,13 @@ public class AOAuthenticator extends AOSerializable
         this.headers = null;
     }
 
+    public AOAuthenticator(@Nullable String user, @Nullable String password)
+    {
+        this.user = user;
+        this.password = password;
+        this.headers = null;
+    }
+
     /**
      * Called once deserialized (after onFromJson) to ensure the JSON5 is valid.
      */

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "ic3-software"
-version = "1.2"
+version = "1.3"
 
 java {
     toolchain {
