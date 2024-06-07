@@ -1,6 +1,6 @@
 package ic3.analyticsops.restapi.reply.tidy.mdx;
 
-import ic3.analyticsops.restapi.reply.tabular.AOTabularDataError;
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDatasetError;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumn;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumnNaN;
 import ic3.analyticsops.test.AOAssertion;
@@ -89,6 +89,12 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
         }
     }
 
+    @Nullable
+    public AORestApiMdxTidyTableCellPage[] getPages()
+    {
+        return pages;
+    }
+
     public int getRowCount()
     {
         return values != null ? values.size() : 0;
@@ -164,7 +170,7 @@ public class AORestApiMdxTidyTableCellColumn extends AORestApiMdxTidyTableColumn
 
             if (error != null)
             {
-                return new AOTabularDataError(error.errorCode);
+                return new AOTabularDatasetError(error.errorCode);
             }
         }
 

@@ -1,8 +1,10 @@
 package ic3.analyticsops.restapi.reply.tidy;
 
-import ic3.analyticsops.restapi.reply.tabular.AOTabularDataColumn;
-import ic3.analyticsops.restapi.reply.tabular.AOTabularDataError;
 import ic3.analyticsops.restapi.reply.tabular.AOTabularDataset;
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDatasetColumn;
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDatasetError;
+import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellColumn;
+import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTableCellPage;
 import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinterHeader;
 import ic3.analyticsops.test.AOAssertion;
 import org.jetbrains.annotations.Nullable;
@@ -105,7 +107,7 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
 
     public AOTabularDataset asTabularDataset()
     {
-        final List<AOTabularDataColumn> cols = new ArrayList<>();
+        final List<AOTabularDatasetColumn> cols = new ArrayList<>();
 
         if (columns != null)
         {
@@ -113,29 +115,74 @@ public abstract class AORestApiTidyTable<COLUMN extends AORestApiTidyTableColumn
             {
                 for (COLUMN column : columns)
                 {
-                    cols.add(new AOTabularDataColumn(column.name, column.caption, Collections.emptyList(), false));
+                    cols.add(new AOTabularDatasetColumn(column.name, column.caption, Collections.emptyList(), false));
+
+                    // OK: a bit hacky for the time being...
+                    if (column instanceof AORestApiMdxTidyTableCellColumn cColumn)
+                    {
+                        final AORestApiMdxTidyTableCellPage[] pages = cColumn.getPages();
+
+                        if (pages != null)
+                        {
+                            for (AORestApiMdxTidyTableCellPage page : pages)
+                            {
+                                cols.add(new AOTabularDatasetColumn(page.name, page.caption, Collections.emptyList(), false));
+                            }
+                        }
+                    }
                 }
             }
             else
             {
                 for (COLUMN column : columns)
                 {
-                    final List<Object> vals = new ArrayList<>();
-                    boolean hasError = false;
-
-                    for (int rr = 0; rr < rowCount; rr++)
                     {
-                        final Object val = column.getTabularDatasetValue(rr);
+                        final List<Object> vals = new ArrayList<>();
+                        boolean hasError = false;
 
-                        if (val instanceof AOTabularDataError)
+                        for (int rr = 0; rr < rowCount; rr++)
                         {
-                            hasError = true;
+                            final Object val = column.getTabularDatasetValue(rr);
+
+                            if (val instanceof AOTabularDatasetError)
+                            {
+                                hasError = true;
+                            }
+
+                            vals.add(val);
                         }
 
-                        vals.add(val);
+                        cols.add(new AOTabularDatasetColumn(column.name, column.caption, vals, hasError));
                     }
 
-                    cols.add(new AOTabularDataColumn(column.name, column.caption, vals, hasError));
+                    // OK: a bit hacky for the time being...
+                    if (column instanceof AORestApiMdxTidyTableCellColumn cColumn)
+                    {
+                        final AORestApiMdxTidyTableCellPage[] pages = cColumn.getPages();
+
+                        if (pages != null)
+                        {
+                            for (AORestApiMdxTidyTableCellPage page : pages)
+                            {
+                                final List<Object> vals = new ArrayList<>();
+                                boolean hasError = false;
+
+                                for (int rr = 0; rr < rowCount; rr++)
+                                {
+                                    final Object val = page.getTabularDatasetValue(rr);
+
+                                    if (val instanceof AOTabularDatasetError)
+                                    {
+                                        hasError = true;
+                                    }
+
+                                    vals.add(val);
+                                }
+
+                                cols.add(new AOTabularDatasetColumn(page.name, page.caption, vals, hasError));
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -17,11 +17,11 @@ public class AOTabularDataset
 
     public final boolean tidyMaxRowCountReached;
 
-    public final List<AOTabularDataColumn> columns;
+    public final List<AOTabularDatasetColumn> columns;
 
     public final boolean hasError;
 
-    public AOTabularDataset(int rowCount, int tidyMaxRowCount, boolean tidyMaxRowCountReached, List<AOTabularDataColumn> columns)
+    public AOTabularDataset(int rowCount, int tidyMaxRowCount, boolean tidyMaxRowCountReached, List<AOTabularDatasetColumn> columns)
     {
         this.rowCount = rowCount;
         this.tidyMaxRowCount = tidyMaxRowCount;
@@ -30,12 +30,15 @@ public class AOTabularDataset
         this.hasError = columns.stream().anyMatch(c -> c.hasError);
     }
 
-    public void prettyPrint(PrintStream out)
+    public void prettyPrint(PrintStream out, boolean withInfo)
     {
-        out.println("            row count : " + rowCount);
-        out.println("        max row count : " + tidyMaxRowCount);
-        out.println("max row count reached : " + tidyMaxRowCountReached);
-        out.println("         column count : " + columns.size());
+        if (withInfo)
+        {
+            out.println("            row count : " + rowCount);
+            out.println("        max row count : " + tidyMaxRowCount);
+            out.println("max row count reached : " + tidyMaxRowCountReached);
+            out.println("         column count : " + columns.size());
+        }
 
         prettyPrintRows(out);
     }
@@ -46,7 +49,7 @@ public class AOTabularDataset
 
         for (int ii = 0; ii < maxWidths.length; ii++)
         {
-            final AOTabularDataColumn column = columns.get(ii);
+            final AOTabularDatasetColumn column = columns.get(ii);
 
             maxWidths[ii] = column.prettyPrintMaxWidth(rowCount);
         }
@@ -68,7 +71,7 @@ public class AOTabularDataset
 
         for (int cc = 0; cc < columns.size(); cc++)
         {
-            final AOTabularDataColumn column = columns.get(cc);
+            final AOTabularDatasetColumn column = columns.get(cc);
 
             final String value = (header != null) ? column.prettyPrintHeader(header) : column.prettyPrint(rr);
 

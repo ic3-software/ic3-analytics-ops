@@ -4,7 +4,7 @@ import ic3.analyticsops.restapi.reply.tidy.mdx.AORestApiMdxTidyTablePrettyPrinte
 
 import java.util.List;
 
-public class AOTabularDataColumn
+public class AOTabularDatasetColumn
 {
     public final String name;
 
@@ -14,7 +14,7 @@ public class AOTabularDataColumn
 
     public final boolean hasError;
 
-    public AOTabularDataColumn(String name, String caption, List<Object> values, boolean hasError)
+    public AOTabularDatasetColumn(String name, String caption, List<Object> values, boolean hasError)
     {
         this.name = name;
         this.caption = caption;

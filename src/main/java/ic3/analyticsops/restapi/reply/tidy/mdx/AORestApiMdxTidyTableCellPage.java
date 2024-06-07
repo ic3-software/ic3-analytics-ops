@@ -1,5 +1,6 @@
 package ic3.analyticsops.restapi.reply.tidy.mdx;
 
+import ic3.analyticsops.restapi.reply.tabular.AOTabularDatasetError;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableColumnNaN;
 import ic3.analyticsops.restapi.reply.tidy.AORestApiTidyTableEntityType;
 import ic3.analyticsops.test.AOAssertion;
@@ -100,6 +101,22 @@ public class AORestApiMdxTidyTableCellPage
     public AORestApiMdxTidyTableCellError getError(int rowIndex)
     {
         return errors != null ? errors.get(rowIndex) : null;
+    }
+
+    @Nullable
+    public Object getTabularDatasetValue(int rowIndex)
+    {
+        if (errors != null)
+        {
+            final AORestApiMdxTidyTableCellError error = errors.get(rowIndex);
+
+            if (error != null)
+            {
+                return new AOTabularDatasetError(error.errorCode);
+            }
+        }
+
+        return getValue(rowIndex);
     }
 
     public String prettyPrintValueOrError(int rowIndex)
