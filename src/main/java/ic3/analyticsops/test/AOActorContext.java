@@ -119,6 +119,11 @@ public class AOActorContext
         return actor;
     }
 
+    public String getActorName()
+    {
+        return actor.getName();
+    }
+
     public long getStartMS(long testStartMS)
     {
         return testStartMS + schedule.getStartMS();

@@ -137,11 +137,17 @@ public class AOOpenReportAssertion extends AOAssertion
             {
                 final String expectedMdx = getExpectedMdx(context, reportPath, this.data, mdxNB);
 
+                // System.out.println(expectedMdx);
+
                 final AORestApiMdxScriptResult expectedReply = getExpectedReply(context, reportPath, this.data, mdxNB);
                 final AORestApiTidyTable<?> expectedResult = AOMDXesTask.assertOnlyDataset(expectedReply);
 
+                // expectedResult.prettyPrint(System.out);
+
                 final AORestApiMdxScriptResult actualReply = getActualResult(expectedMdx, statements, results);
                 final AORestApiTidyTable<?> actualResult = AOMDXesTask.assertOnlyDataset(actualReply);
+
+                // actualResult.prettyPrint(System.out);
 
                 // Needs more works : wait & see.
                 final double delta = 0;
@@ -150,7 +156,7 @@ public class AOOpenReportAssertion extends AOAssertion
             }
             catch (Throwable ex)
             {
-                AOLog4jUtils.ACTOR.error("[actor] 'OpenReport' : unexpected error while processing the MDX[{}]", mdxNB);
+                AOLog4jUtils.ACTOR.error("[actor] 'OpenReport' : unexpected error while processing the MDX[{}] Report[{}]", mdxNB, reportPath);
                 throw ex;
             }
         }

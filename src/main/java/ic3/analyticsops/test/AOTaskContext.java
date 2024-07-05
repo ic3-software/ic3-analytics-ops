@@ -39,6 +39,11 @@ public class AOTaskContext
         return context.getAuthenticator();
     }
 
+    public String getActorName()
+    {
+        return context.getActorName();
+    }
+
     public File getMDXesDataFolder(String data)
     {
         return context.getMDXesDataFolder(data);
