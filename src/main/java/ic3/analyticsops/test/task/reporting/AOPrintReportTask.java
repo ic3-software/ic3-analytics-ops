@@ -70,7 +70,7 @@ public class AOPrintReportTask extends AOTask
 
         AOAssertion.assertTrue("print-report-status", reply.done);
 
-        if (withPDF)
+        if (withPDF != null && withPDF)
         {
             AOAssertion.assertNotNull("print-report-pdf-name", reply.pdfName);
             AOAssertion.assertNotNull("print-report-pdf-content", reply.pdfContent);
