@@ -47,6 +47,7 @@ See also :
 
 - [`JSON5`](./JSON5.md)
 - [`Authenticator`](./Authenticator.md)
+- [`Duration`](./Duration.md)
 - [`Task`](./Task.md)
 - [`Test`](./Test.md)
 
