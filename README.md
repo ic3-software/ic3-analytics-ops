@@ -17,6 +17,10 @@ errors and fosters greater trust in the analytics infrastructure.
 Here is the link to the introductory post on
 Medium: [AnalyticsOps and Automated Dashboard Tests](https://medium.com/@marc.polizzi/analyticsops-and-automated-dashboard-tests-535e2ab83ead).
 
+## Dashboard testing
+
+To facilitate internal testing of dashboards in icCube, we provide a publicly available test suite: [ic3-dashboard-testing](https://github.com/ic3-software/ic3-dashboard-testing). This suite is implemented using Cypress.
+
 ## Roadmap
 
 The project is still in its **early days** so stay tuned for further updates.
