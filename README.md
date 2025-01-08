@@ -32,6 +32,9 @@ class.
 
 The release notes are available [here](./RELEASE_NOTES.md).
 
-## Dashboard testing
+## Dashboard Testing
 
-To facilitate internal testing of dashboards in icCube, we provide a publicly available test suite: [ic3-dashboard-testing](https://github.com/ic3-software/ic3-dashboard-testing). This suite is implemented using Cypress.
+To facilitate internal testing of dashboards in icCube, we provide a publicly available test suite:
+[ic3-dashboard-testing](https://github.com/ic3-software/ic3-dashboard-testing). This suite is implemented using Cypress.
+As mentioned in the roadmap,
+the shell cannot run them directly.
