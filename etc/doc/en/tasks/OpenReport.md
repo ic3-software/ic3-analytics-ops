@@ -37,6 +37,9 @@ interface OpenReportAssertion extends Assertion {
     // E.g., data/Sales is using the files 'Sales-N.mdx.txt(and .json)' into the 'data' folder.
     // E.g., data/ is using the files 'ReportName-N.mdx.txt(and .json)' into the 'data' folder.
     data?: string;
+    
+    // When present, ignore these MDX requests.
+    ignored: number[];
 
 }
 ```

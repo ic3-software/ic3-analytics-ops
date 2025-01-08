@@ -485,15 +485,27 @@ public class AOOpenReportTask extends AOTask<AOOpenReportAssertion>
 
                     // Converting from the GVI 'executeMDX' response to a REST API 'TidyExecuteMdxScript' response...
 
+                    final String dataSetPrefix = """
+                            {"version":1,"status":"ok","payload":{"results":[{"dataSet":""";
+
                     final String tablePrefix = """
                             {"version":1,"status":"ok","table":""";
+
+                    // icCube 8.6.0 : extra. info field ...
+
+                    final String tablePrefix860 = """
+                            {"version":1,"status":"ok","info":{""";
 
                     if (json.startsWith(tablePrefix))
                     {
                         final String table = json.substring(tablePrefix.length(), json.length() - 1);
 
-                        final String dataSetPrefix = """
-                                {"version":1,"status":"ok","payload":{"results":[{"dataSet":""";
+                        results.put(loading.getRequestId(), dataSetPrefix + table + "}]}}");
+                    }
+                    else if (json.startsWith(tablePrefix860))
+                    {
+                        final int pos = json.indexOf("\"table\":{");
+                        final String table = json.substring(pos + 8, json.length() - 1);
 
                         results.put(loading.getRequestId(), dataSetPrefix + table + "}]}}");
                     }

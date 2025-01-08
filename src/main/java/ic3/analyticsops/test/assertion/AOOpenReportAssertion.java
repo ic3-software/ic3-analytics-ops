@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class AOOpenReportAssertion extends AOAssertion
 {
@@ -42,12 +43,19 @@ public class AOOpenReportAssertion extends AOAssertion
     @Nullable
     private final String data;
 
+    /**
+     * When present, ignore these MDX requests.
+     */
+    @Nullable
+    private final Set<Integer> ignored;
+
     protected AOOpenReportAssertion()
     {
         // JSON deserialization
 
         this.missing = null;
         this.data = null;
+        this.ignored = null;
     }
 
     @Override
@@ -131,6 +139,11 @@ public class AOOpenReportAssertion extends AOAssertion
             if (context.isOnError())
             {
                 break /* i.e., another actor on error */;
+            }
+
+            if (ignored != null && ignored.contains(mdxNB))
+            {
+                continue;
             }
 
             try
